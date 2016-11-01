@@ -16,3 +16,14 @@ TEST(LexersTest, IdentifierTest) {
     ASSERT_STREQ("abs", lex.getIdentifier().c_str());
     ASSERT_EQ(Lexer::TokEOF, lex.getNextTok());
 }
+
+TEST(LexersTest, BraceTest) {
+    lexers::Lexer lex{"(abs 5)"};
+    ASSERT_EQ(Lexer::TokOpenBrace, lex.getTokType());
+    ASSERT_EQ(Lexer::TokIdentifier, lex.getNextTok());
+    ASSERT_STREQ("abs", lex.getIdentifier().c_str());
+    ASSERT_EQ(Lexer::TokNumber, lex.getNextTok());
+    ASSERT_EQ(5, lex.getNum());
+    ASSERT_EQ(Lexer::TokCloseBrace, lex.getNextTok());
+    ASSERT_EQ(Lexer::TokEOF, lex.getNextTok());
+}
