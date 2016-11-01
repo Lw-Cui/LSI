@@ -3,6 +3,7 @@
 
 #include <string>
 #include <stdexcept>
+#include <algorithm>
 #include <sstream>
 
 namespace lexers {
@@ -11,10 +12,25 @@ namespace lexers {
         enum TokenType {
             TokEOF = -1,
             TokNumber = -2,
-            TokIdentifier = -3
+            TokIdentifier = -3,
+            TokOpenBrace = -4,
+            TokCloseBrace = -5
         };
 
-        Lexer(const std::string &exp) : expressionBuf{exp} { getNextTok(); }
+        Lexer(const std::string &exp) {
+            std::string tmp;
+            std::for_each(std::begin(exp), std::end(exp), [&tmp](const char c) {
+                if (c == ')' || c == '(') {
+                    tmp.push_back(' ');
+                    tmp.push_back(c);
+                    tmp.push_back(' ');
+                } else {
+                    tmp.push_back(c);
+                }
+            });
+            expressionBuf << tmp;
+            getNextTok();
+        }
 
         TokenType getTokType() const { return currentType; }
 
@@ -24,12 +40,21 @@ namespace lexers {
 
             if (type == EOF) {
                 currentType = TokEOF;
+            } else if (isspace(type)) {
+                expressionBuf.get();
+                return getNextTok();
             } else if (isdigit(type)) {
                 expressionBuf >> token.number;
                 currentType = TokNumber;
             } else if (isalpha(type)) {
                 expressionBuf >> token.identifier;
                 currentType = TokIdentifier;
+            } else if (type == '(') {
+                expressionBuf.get();
+                currentType = TokOpenBrace;
+            } else if (type == ')') {
+                expressionBuf.get();
+                currentType = TokCloseBrace;
             }
             return currentType;
         }
