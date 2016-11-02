@@ -18,18 +18,27 @@ int main() {
 
     sf::Text text;
     text.setFont(font);
-    text.setCharacterSize(26);
+    text.setCharacterSize(27);
     text.setFillColor(sf::Color::Black);
     text.setStyle(sf::Text::Bold | sf::Text::Underlined);
 
     while (textWindow.isOpen() && drawingBoard.isOpen()) {
         sf::Event event;
+        textWindow.clear(sf::Color::White);
+        drawingBoard.clear(sf::Color::White);
 
         while (textWindow.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
                 textWindow.close();
             } else if (event.type == sf::Event::TextEntered) {
-                s.push_back(static_cast<char>(event.text.unicode));
+                if (isprint(event.text.unicode)) {
+                    s.push_back(static_cast<char>(event.text.unicode));
+                } else if (event.text.unicode == 8) {
+                    // BackSpace
+                    s.pop_back();
+                } else if (event.text.unicode == 10) {
+                    // Line feed
+                }
                 text.setString(s);
             }
         }
@@ -39,8 +48,6 @@ int main() {
             }
         }
 
-        textWindow.clear(sf::Color::White);
-        drawingBoard.clear(sf::Color::White);
         textWindow.draw(text);
 
         textWindow.display();
