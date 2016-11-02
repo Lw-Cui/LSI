@@ -14,7 +14,8 @@ namespace lexers {
             TokNumber = -2,
             TokIdentifier = -3,
             TokOpenBrace = -4,
-            TokCloseBrace = -5
+            TokCloseBrace = -5,
+            TokDefine = -6,
         };
 
         Lexer(const std::string &exp) {
@@ -48,7 +49,10 @@ namespace lexers {
                 currentType = TokNumber;
             } else if (isalpha(type)) {
                 expressionBuf >> token.identifier;
-                currentType = TokIdentifier;
+                if (token.identifier == "define")
+                    currentType = TokDefine;
+                else
+                    currentType = TokIdentifier;
             } else if (type == '(') {
                 expressionBuf.get();
                 currentType = TokOpenBrace;
