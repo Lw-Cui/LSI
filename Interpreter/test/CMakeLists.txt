@@ -1,9 +1,13 @@
-set(LEXERS_TEST_FILES lexersTest.cpp ${TEST_MAIN})
+set(LEXERS_TEST_FILES lexersTest.cpp)
 set(LEXERS_TEST lexersTest)
-add_executable(${LEXERS_TEST} ${LEXERS_TEST_FILES})
+add_executable(${LEXERS_TEST} ${LEXERS_TEST_FILES} ${TEST_MAIN})
 target_link_libraries(${LEXERS_TEST} gtest)
 
-set(PARSER_TEST_FILES parserTest.cpp ${TEST_MAIN})
+set(PARSER_TEST_FILES parserTest.cpp)
 set(PARSER_TEST parserTest)
-add_executable(${PARSER_TEST} ${PARSER_TEST_FILES})
+add_executable(${PARSER_TEST} ${PARSER_TEST_FILES} ${TEST_MAIN})
 target_link_libraries(${PARSER_TEST} ${INTERPRETER_LIB} gtest)
+
+set(INTERPRETER_TEST InterpreterTest)
+add_executable(${INTERPRETER_TEST} ${LEXERS_TEST_FILES} ${PARSER_TEST_FILES} ${TEST_MAIN})
+target_link_libraries(${INTERPRETER_TEST} ${INTERPRETER_LIB} gtest)
