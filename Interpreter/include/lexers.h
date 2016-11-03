@@ -16,6 +16,7 @@ namespace lexers {
             TokOpenBrace = -4,
             TokCloseBrace = -5,
             TokDefine = -6,
+            TokLet = -7,
         };
 
         Lexer(const std::string &exp) {
@@ -51,6 +52,8 @@ namespace lexers {
                 expressionBuf >> token.identifier;
                 if (token.identifier == "define")
                     currentType = TokDefine;
+                else if (token.identifier == "let")
+                    currentType = TokLet;
                 else
                     currentType = TokIdentifier;
             } else if (type == '(') {

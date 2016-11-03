@@ -39,3 +39,15 @@ TEST(LexersTest, DefineTest) {
     ASSERT_EQ(Lexer::TokCloseBrace, lex.getNextTok());
     ASSERT_EQ(Lexer::TokEOF, lex.getNextTok());
 }
+
+TEST(LexersTest, LetTest) {
+    lexers::Lexer lex{"(let n 5)"};
+    ASSERT_EQ(Lexer::TokOpenBrace, lex.getTokType());
+    ASSERT_EQ(Lexer::TokLet, lex.getNextTok());
+    ASSERT_EQ(Lexer::TokIdentifier, lex.getNextTok());
+    ASSERT_STREQ("n", lex.getIdentifier().c_str());
+    ASSERT_EQ(Lexer::TokNumber, lex.getNextTok());
+    ASSERT_EQ(5, lex.getNum());
+    ASSERT_EQ(Lexer::TokCloseBrace, lex.getNextTok());
+    ASSERT_EQ(Lexer::TokEOF, lex.getNextTok());
+}
