@@ -11,3 +11,6 @@ target_link_libraries(${PARSER_TEST} ${INTERPRETER_LIB} gtest)
 set(INTERPRETER_TEST InterpreterTest)
 add_executable(${INTERPRETER_TEST} ${LEXERS_TEST_FILES} ${PARSER_TEST_FILES} ${TEST_MAIN})
 target_link_libraries(${INTERPRETER_TEST} ${INTERPRETER_LIB} gtest)
+
+include(CodeCoverage)
+setup_target_for_coverage(InterpreterCoverageTest ${INTERPRETER_TEST} coverage)
