@@ -34,7 +34,24 @@ namespace parser {
         double value;
     };
 
+    class IdentifierAST : public ExprAST {
+    public:
+        IdentifierAST(const std::string &tid) : id{tid} {}
+
+        std::string getId() const { return id; }
+
+        ASTPtr eval(Scope &) const override {
+            return std::make_shared<IdentifierAST>(getId());
+        }
+
+    private:
+        std::string id;
+    };
+
     ASTPtr parseExpr(lexers::Lexer &lex);
+
     ASTPtr parseNumberExpr(lexers::Lexer &lex);
+
+    ASTPtr parseIdentifierExpr(lexers::Lexer &lex);
 }
 #endif //GI_PARSER_H
