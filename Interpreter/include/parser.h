@@ -40,12 +40,42 @@ namespace parser {
 
         std::string getId() const { return id; }
 
-        ASTPtr eval(Scope &) const override {
-            return std::make_shared<IdentifierAST>(getId());
+        ASTPtr eval(Scope &ss) const override {
+            if (ss.count(getId()))
+                return ss[getId()]->eval(ss);
+            else
+                return std::make_shared<IdentifierAST>(getId());
         }
 
     private:
         std::string id;
+    };
+
+    class FunctionDefine : public ExprAST {
+    public:
+    private:
+    };
+
+    class IdentifierDefine : public ExprAST {
+    public:
+        ASTPtr eval(Scope &ss) const override {
+            auto idPtr = dynamic_cast<parser::IdentifierAST *>(identifier.get());
+            if (idPtr)
+                ss[idPtr->getId()] = value->eval(ss);
+            else
+                throw std::logic_error("Identifier Define error.");
+        }
+
+        IdentifierDefine(ASTPtr id, ASTPtr v) : identifier{id}, value{v} {}
+
+    private:
+        ASTPtr identifier, value;
+    };
+
+    class FunctionCall : public ExprAST {
+    public:
+    private:
+
     };
 
     ASTPtr parseExpr(lexers::Lexer &lex);
@@ -53,5 +83,15 @@ namespace parser {
     ASTPtr parseNumberExpr(lexers::Lexer &lex);
 
     ASTPtr parseIdentifierExpr(lexers::Lexer &lex);
+
+    ASTPtr parseFunctionCallExpr(lexers::Lexer &lex);
+
+    ASTPtr parseLetExpr(lexers::Lexer &lex);
+
+    ASTPtr parseDefinitionExpr(lexers::Lexer &lex);
+
+    ASTPtr parseIdDefinitionExpr(lexers::Lexer &lex);
+
+    ASTPtr parseFunctionDefinitionExpr(lexers::Lexer &lex);
 }
 #endif //GI_PARSER_H
