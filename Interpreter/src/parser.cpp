@@ -17,18 +17,25 @@ std::shared_ptr<ExprAST> parser::parseExpr(lexers::Lexer &lex) {
                 throw logic_error("Cannot parse number/identifier.");
         }
     } else {
+        shared_ptr<ExprAST> res;
         switch (lex.getNextTok()) { // eat open brace
             case Lexer::TokOpenBrace:
-                return parseFunctionCallExpr(lex);
+                res = parseFunctionCallExpr(lex);
+                break;
             case Lexer::TokIdentifier:
-                return parseFunctionCallExpr(lex);
+                res = parseFunctionCallExpr(lex);
+                break;
             case Lexer::TokLet:
-                return parseLetExpr(lex);
+                res = parseLetExpr(lex);
+                break;
             case Lexer::TokDefine:
-                return parseDefinitionExpr(lex);
+                res = parseDefinitionExpr(lex);
+                break;
             default:
                 throw logic_error("Cannot parse token.");
         }
+        lex.getNextTok(); // eat close brace
+        return std::move(res);
     }
 }
 
@@ -47,9 +54,7 @@ shared_ptr<ExprAST> parser::parseLetExpr(lexers::Lexer &lex) {
 }
 
 shared_ptr<ExprAST> parser::parseIdDefinitionExpr(lexers::Lexer &lex) {
-    auto id = lex.getIdentifier();
-    lex.getNextTok();
-    return make_shared<IdentifierDefinitionAST>(make_shared<IdentifierAST>(id), parseExpr(lex));
+    return make_shared<IdentifierDefinitionAST>(make_shared<IdentifierAST>(lex.getIdentifier()), parseExpr(lex));
 }
 
 shared_ptr<ExprAST> parser::parseFunctionDefinitionExpr(lexers::Lexer &lex) {

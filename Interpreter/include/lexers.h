@@ -36,6 +36,26 @@ namespace lexers {
 
         TokenType getTokType() const { return currentType; }
 
+        double getNum() {
+            if (getTokType() == TokNumber) {
+                auto tmp = token.number;
+                getNextTok();
+                return tmp;
+            } else {
+                throw std::logic_error("Current Token type error.");
+            }
+        }
+
+        std::string getIdentifier() {
+            if (getTokType() == TokIdentifier) {
+                std::string tmp = token.identifier;
+                getNextTok();
+                return std::move(tmp);
+            } else {
+                throw std::logic_error("Current Token type error.");
+            }
+        }
+
         TokenType getNextTok() {
             int type{expressionBuf.get()};
             expressionBuf.unget();
@@ -64,20 +84,6 @@ namespace lexers {
                 currentType = TokCloseBrace;
             }
             return currentType;
-        }
-
-        double getNum() const {
-            if (getTokType() == TokNumber)
-                return token.number;
-            else
-                throw std::logic_error("Current Token type error.");
-        }
-
-        std::string getIdentifier() const {
-            if (getTokType() == TokIdentifier)
-                return token.identifier;
-            else
-                throw std::logic_error("Current Token type error.");
         }
 
     private:

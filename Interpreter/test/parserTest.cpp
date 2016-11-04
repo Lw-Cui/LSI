@@ -31,4 +31,5 @@ TEST(ParserTest, IdentifierDefinitionTest) {
     ASSERT_TRUE(dynamic_cast<parser::NumberAST *>(ss["n"].get()));
     auto numPtr = dynamic_cast<parser::NumberAST *>(ss["n"].get());
     ASSERT_EQ(5, numPtr->getValue());
+    ASSERT_EQ(Lexer::TokEOF, lex.getTokType());
 }
