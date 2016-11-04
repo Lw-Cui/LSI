@@ -1,12 +1,12 @@
+#include <memory>
 #include <lexers.h>
 #include <parser.h>
-#include <stdexcept>
 
 using namespace lexers;
 using namespace parser;
 using namespace std;
 
-ASTPtr parser::parseExpr(lexers::Lexer &lex) {
+std::shared_ptr<ExprAST> parser::parseExpr(lexers::Lexer &lex) {
     if (lex.getTokType() != Lexer::TokOpenBrace) {
         switch (lex.getTokType()) {
             case Lexer::TokNumber:
@@ -32,27 +32,27 @@ ASTPtr parser::parseExpr(lexers::Lexer &lex) {
     }
 }
 
-ASTPtr parser::parseNumberExpr(Lexer &lex) {
+shared_ptr<ExprAST> parser::parseNumberExpr(Lexer &lex) {
     return make_shared<NumberAST>(lex.getNum());
 }
 
-ASTPtr parser::parseIdentifierExpr(lexers::Lexer &lex) {
+shared_ptr<ExprAST> parser::parseIdentifierExpr(lexers::Lexer &lex) {
     return make_shared<IdentifierAST>(lex.getIdentifier());
 }
 
-ASTPtr parser::parseFunctionCallExpr(lexers::Lexer &lex) {
+shared_ptr<ExprAST> parser::parseFunctionCallExpr(lexers::Lexer &lex) {
 }
 
-ASTPtr parser::parseLetExpr(lexers::Lexer &lex) {
+shared_ptr<ExprAST> parser::parseLetExpr(lexers::Lexer &lex) {
 }
 
-ASTPtr parser::parseIdDefinitionExpr(lexers::Lexer &lex) {
+shared_ptr<ExprAST> parser::parseIdDefinitionExpr(lexers::Lexer &lex) {
 }
 
-ASTPtr parser::parseFunctionDefinitionExpr(lexers::Lexer &lex) {
+shared_ptr<ExprAST> parser::parseFunctionDefinitionExpr(lexers::Lexer &lex) {
 }
 
-ASTPtr parser::parseDefinitionExpr(lexers::Lexer &lex) {
+shared_ptr<ExprAST> parser::parseDefinitionExpr(lexers::Lexer &lex) {
     switch (lex.getNextTok()) {
         case Lexer::TokIdentifier:
             return parseIdDefinitionExpr(lex);

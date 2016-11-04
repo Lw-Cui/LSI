@@ -10,12 +10,11 @@
 namespace parser {
     class ExprAST;
 
-    typedef std::shared_ptr<ExprAST> ASTPtr;
-    typedef std::map<std::string, ASTPtr> Scope;
+    typedef std::map<std::string, std::shared_ptr<ExprAST>> Scope;
 
     class ExprAST {
     public:
-        virtual ASTPtr eval(Scope &) const = 0;
+        virtual std::shared_ptr<ExprAST> eval(Scope &) const = 0;
 
         virtual ~ExprAST() {}
     };
@@ -26,7 +25,7 @@ namespace parser {
 
         double getValue() const { return value; }
 
-        ASTPtr eval(Scope &) const override {
+        std::shared_ptr<ExprAST> eval(Scope &) const override {
             return std::make_shared<NumberAST>(getValue());
         }
 
@@ -40,7 +39,7 @@ namespace parser {
 
         std::string getId() const { return id; }
 
-        ASTPtr eval(Scope &ss) const override {
+        std::shared_ptr<ExprAST> eval(Scope &ss) const override {
             if (ss.count(getId()))
                 return ss[getId()]->eval(ss);
             else
@@ -51,47 +50,46 @@ namespace parser {
         std::string id;
     };
 
-    class FunctionDefine : public ExprAST {
+    class FunctionDefinitionAST : public ExprAST {
     public:
     private:
     };
 
-    class IdentifierDefine : public ExprAST {
+    class IdentifierDefinitionAST : public ExprAST {
     public:
-        ASTPtr eval(Scope &ss) const override {
-            auto idPtr = dynamic_cast<parser::IdentifierAST *>(identifier.get());
-            if (idPtr)
-                ss[idPtr->getId()] = value->eval(ss);
-            else
-                throw std::logic_error("Identifier Define error.");
+        IdentifierDefinitionAST(std::shared_ptr<IdentifierAST> id,
+                                std::shared_ptr<ExprAST> v) : identifier{id}, value{v} {}
+
+        std::shared_ptr<ExprAST> eval(Scope &ss) const override {
+            ss[identifier->getId()] = value->eval(ss);
+            return nullptr;
         }
 
-        IdentifierDefine(ASTPtr id, ASTPtr v) : identifier{id}, value{v} {}
-
     private:
-        ASTPtr identifier, value;
+        std::shared_ptr<IdentifierAST> identifier;
+        std::shared_ptr<ExprAST> value;
     };
 
     class FunctionCall : public ExprAST {
     public:
     private:
-
     };
 
-    ASTPtr parseExpr(lexers::Lexer &lex);
 
-    ASTPtr parseNumberExpr(lexers::Lexer &lex);
+    std::shared_ptr<ExprAST> parseExpr(lexers::Lexer &lex);
 
-    ASTPtr parseIdentifierExpr(lexers::Lexer &lex);
+    std::shared_ptr<ExprAST> parseNumberExpr(lexers::Lexer &lex);
 
-    ASTPtr parseFunctionCallExpr(lexers::Lexer &lex);
+    std::shared_ptr<ExprAST> parseIdentifierExpr(lexers::Lexer &lex);
 
-    ASTPtr parseLetExpr(lexers::Lexer &lex);
+    std::shared_ptr<ExprAST> parseFunctionCallExpr(lexers::Lexer &lex);
 
-    ASTPtr parseDefinitionExpr(lexers::Lexer &lex);
+    std::shared_ptr<ExprAST> parseLetExpr(lexers::Lexer &lex);
 
-    ASTPtr parseIdDefinitionExpr(lexers::Lexer &lex);
+    std::shared_ptr<ExprAST> parseDefinitionExpr(lexers::Lexer &lex);
 
-    ASTPtr parseFunctionDefinitionExpr(lexers::Lexer &lex);
+    std::shared_ptr<ExprAST> parseIdDefinitionExpr(lexers::Lexer &lex);
+
+    std::shared_ptr<ExprAST> parseFunctionDefinitionExpr(lexers::Lexer &lex);
 }
 #endif //GI_PARSER_H
