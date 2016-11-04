@@ -1,6 +1,7 @@
 #include <memory>
 #include <lexers.h>
 #include <parser.h>
+#include <easylogging++.h>
 
 using namespace lexers;
 using namespace parser;
