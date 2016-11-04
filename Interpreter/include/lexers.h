@@ -38,7 +38,7 @@ namespace lexers {
 
         double getNum() {
             if (getTokType() == TokNumber) {
-                auto tmp = token.number;
+                auto tmp = number;
                 getNextTok();
                 return tmp;
             } else {
@@ -48,7 +48,7 @@ namespace lexers {
 
         std::string getIdentifier() {
             if (getTokType() == TokIdentifier) {
-                std::string tmp = token.identifier;
+                std::string tmp = identifier;
                 getNextTok();
                 return std::move(tmp);
             } else {
@@ -66,13 +66,13 @@ namespace lexers {
                 expressionBuf.get();
                 return getNextTok();
             } else if (isdigit(type)) {
-                expressionBuf >> token.number;
+                expressionBuf >> number;
                 currentType = TokNumber;
             } else if (isalpha(type)) {
-                expressionBuf >> token.identifier;
-                if (token.identifier == "define")
+                expressionBuf >> identifier;
+                if (identifier == "define")
                     currentType = TokDefine;
-                else if (token.identifier == "let")
+                else if (identifier == "let")
                     currentType = TokLet;
                 else
                     currentType = TokIdentifier;
@@ -87,14 +87,8 @@ namespace lexers {
         }
 
     private:
-        union Token {
-            std::string identifier;
-            double number;
-
-            Token() {}
-
-            ~Token() {}
-        } token;
+        std::string identifier;
+        double number;
 
         std::stringstream expressionBuf;
         TokenType currentType = TokEOF;
