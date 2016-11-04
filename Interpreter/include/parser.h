@@ -10,12 +10,11 @@
 namespace parser {
     class ExprAST;
 
-    typedef std::shared_ptr<ExprAST> ASTPtr;
-    typedef std::map<std::string, ASTPtr> Scope;
+    typedef std::map<std::string, std::shared_ptr<ExprAST>> Scope;
 
     class ExprAST {
     public:
-        virtual ASTPtr eval(Scope &) const = 0;
+        virtual std::shared_ptr<ExprAST> eval(Scope &) const = 0;
 
         virtual ~ExprAST() {}
     };
@@ -26,7 +25,7 @@ namespace parser {
 
         double getValue() const { return value; }
 
-        ASTPtr eval(Scope &) const override {
+        std::shared_ptr<ExprAST> eval(Scope &) const override {
             return std::make_shared<NumberAST>(getValue());
         }
 
@@ -40,18 +39,57 @@ namespace parser {
 
         std::string getId() const { return id; }
 
-        ASTPtr eval(Scope &) const override {
-            return std::make_shared<IdentifierAST>(getId());
+        std::shared_ptr<ExprAST> eval(Scope &ss) const override {
+            if (ss.count(getId()))
+                return ss[getId()]->eval(ss);
+            else
+                return std::make_shared<IdentifierAST>(getId());
         }
 
     private:
         std::string id;
     };
 
-    ASTPtr parseExpr(lexers::Lexer &lex);
+    class FunctionDefinitionAST : public ExprAST {
+    public:
+    private:
+    };
 
-    ASTPtr parseNumberExpr(lexers::Lexer &lex);
+    class IdentifierDefinitionAST : public ExprAST {
+    public:
+        IdentifierDefinitionAST(std::shared_ptr<IdentifierAST> id,
+                                std::shared_ptr<ExprAST> v) : identifier{id}, value{v} {}
 
-    ASTPtr parseIdentifierExpr(lexers::Lexer &lex);
+        std::shared_ptr<ExprAST> eval(Scope &ss) const override {
+            ss[identifier->getId()] = value->eval(ss);
+            return nullptr;
+        }
+
+    private:
+        std::shared_ptr<IdentifierAST> identifier;
+        std::shared_ptr<ExprAST> value;
+    };
+
+    class FunctionCall : public ExprAST {
+    public:
+    private:
+    };
+
+
+    std::shared_ptr<ExprAST> parseExpr(lexers::Lexer &lex);
+
+    std::shared_ptr<ExprAST> parseNumberExpr(lexers::Lexer &lex);
+
+    std::shared_ptr<ExprAST> parseIdentifierExpr(lexers::Lexer &lex);
+
+    std::shared_ptr<ExprAST> parseFunctionCallExpr(lexers::Lexer &lex);
+
+    std::shared_ptr<ExprAST> parseLetExpr(lexers::Lexer &lex);
+
+    std::shared_ptr<ExprAST> parseDefinitionExpr(lexers::Lexer &lex);
+
+    std::shared_ptr<ExprAST> parseIdDefinitionExpr(lexers::Lexer &lex);
+
+    std::shared_ptr<ExprAST> parseFunctionDefinitionExpr(lexers::Lexer &lex);
 }
 #endif //GI_PARSER_H
