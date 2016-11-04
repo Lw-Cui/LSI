@@ -46,13 +46,13 @@ namespace lexers {
                 expressionBuf.get();
                 return getNextTok();
             } else if (isdigit(type)) {
-                expressionBuf >> token.number;
+                expressionBuf >> number;
                 currentType = TokNumber;
             } else if (isalpha(type)) {
-                expressionBuf >> token.identifier;
-                if (token.identifier == "define")
+                expressionBuf >> identifier;
+                if (identifier == "define")
                     currentType = TokDefine;
-                else if (token.identifier == "let")
+                else if (identifier == "let")
                     currentType = TokLet;
                 else
                     currentType = TokIdentifier;
@@ -68,27 +68,21 @@ namespace lexers {
 
         double getNum() const {
             if (getTokType() == TokNumber)
-                return token.number;
+                return number;
             else
                 throw std::logic_error("Current Token type error.");
         }
 
         std::string getIdentifier() const {
             if (getTokType() == TokIdentifier)
-                return token.identifier;
+                return identifier;
             else
                 throw std::logic_error("Current Token type error.");
         }
 
     private:
-        union Token {
-            std::string identifier;
-            double number;
-
-            Token() {}
-
-            ~Token() {}
-        } token;
+        std::string identifier;
+        double number;
 
         std::stringstream expressionBuf;
         TokenType currentType = TokEOF;
