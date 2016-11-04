@@ -43,7 +43,7 @@ namespace parser {
             if (ss.count(getId()))
                 return ss[getId()]->eval(ss);
             else
-                return std::make_shared<IdentifierAST>(getId());
+                throw std::logic_error("Unbound identifier.");
         }
 
     private:

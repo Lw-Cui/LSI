@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include <sstream>
+#include <easylogging++.h>
 
 namespace lexers {
     class Lexer {
@@ -31,6 +32,7 @@ namespace lexers {
                 }
             });
             expressionBuf << tmp;
+            LOG(DEBUG) << "String is:" << tmp;
             getNextTok();
         }
 
@@ -39,20 +41,24 @@ namespace lexers {
         double getNum() {
             if (getTokType() == TokNumber) {
                 auto tmp = number;
+                LOG(DEBUG) << "Get Number: " << tmp;
                 getNextTok();
                 return tmp;
             } else {
-                throw std::logic_error("Current Token type error.");
+                LOG(DEBUG) << "Identifier error";
+                throw std::logic_error("Token isn't number");
             }
         }
 
         std::string getIdentifier() {
             if (getTokType() == TokIdentifier) {
                 std::string tmp = identifier;
+                LOG(DEBUG) << "Get identifier: " << tmp;
                 getNextTok();
                 return std::move(tmp);
             } else {
-                throw std::logic_error("Current Token type error.");
+                LOG(DEBUG) << "Identifier error";
+                throw std::logic_error("Token isn't identifier.");
             }
         }
 
@@ -67,9 +73,11 @@ namespace lexers {
                 return getNextTok();
             } else if (isdigit(type)) {
                 expressionBuf >> number;
+                LOG(DEBUG) << "Read a number: " << number;
                 currentType = TokNumber;
             } else if (isalpha(type)) {
                 expressionBuf >> identifier;
+                LOG(DEBUG) << "Read a word: " << identifier;
                 if (identifier == "define")
                     currentType = TokDefine;
                 else if (identifier == "let")

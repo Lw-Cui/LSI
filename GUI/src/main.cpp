@@ -1,6 +1,9 @@
-#include <SFML/Graphics.hpp>
 #include <iostream>
 #include <vector>
+#include <SFML/Graphics.hpp>
+#include <easylogging++.h>
+
+INITIALIZE_EASYLOGGINGPP
 
 using namespace std;
 namespace {
@@ -16,7 +19,8 @@ sf::Text getText(const std::string &res, sf::Color c = sf::Color::Black) {
     return std::move(text);
 }
 
-int main() {
+int main(int argc, char *argv[]) {
+    START_EASYLOGGINGPP(argc, argv);
     sf::RenderWindow drawingBoard(sf::VideoMode(1300, 1300), "Drawing Board"),
             textWindow(sf::VideoMode(1100, 800), "Shell");
     drawingBoard.setPosition(sf::Vector2i{1100, 0});
