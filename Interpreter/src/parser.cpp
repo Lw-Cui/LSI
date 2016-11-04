@@ -47,6 +47,9 @@ shared_ptr<ExprAST> parser::parseLetExpr(lexers::Lexer &lex) {
 }
 
 shared_ptr<ExprAST> parser::parseIdDefinitionExpr(lexers::Lexer &lex) {
+    auto id = lex.getIdentifier();
+    lex.getNextTok();
+    return make_shared<IdentifierDefinitionAST>(make_shared<IdentifierAST>(id), parseExpr(lex));
 }
 
 shared_ptr<ExprAST> parser::parseFunctionDefinitionExpr(lexers::Lexer &lex) {
