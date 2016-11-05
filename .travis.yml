@@ -12,15 +12,6 @@ matrix:
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test']
-          packages: ['g++-4.8']
-      env:
-        COMPILER=g++-4.8
-
-    - os: linux
-      compiler: gcc
-      addons:
-        apt:
-          sources: ['ubuntu-toolchain-r-test']
           packages: ['g++-4.9']
       env:
         COMPILER=g++-4.9
@@ -79,39 +70,15 @@ matrix:
       env:
         COMPILER=clang++-3.8
 
-# Not yet available
-#    - os: linux
-#      compiler: clang
-#      addons:
-#        apt:
-#          sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-precise']
-#          packages: ['clang-3.9']
-#      env:
-#        COMPILER=clang++-3.9
-
-# Activate when we are allowed to use MacOS X
-#    - os: osx
-#      compiler: clang
-#      env:
-#        COMPILER=clang++
-
-# Activate when we are allowed to use MacOS X
-#    - os: osx
-#      compiler: clang
-#      env:
-#        COMPILER=clang++
-
-# Activate when we are allowed to use MacOS X
-#    - os: osx
-#      compiler: clang
-#      env:
-#        COMPILER=clang++
-
 addons:
-  apt:
+  apt: 
+    sources:
+      - george-edison55-precise-backports
     packages:
-    - bash
-    - coreutils
+      - bash
+      - coreutils
+      - cmake
+      - cmake-data
 
 before_script:
   - lsb_release -a
