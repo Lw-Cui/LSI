@@ -83,14 +83,6 @@ FIND_PROGRAM( GCOVR_PATH gcovr PATHS ${CMAKE_SOURCE_DIR}/tests)
 #   Pass them in list form, e.g.: "-j;2" for -j 2
 FUNCTION(SETUP_TARGET_FOR_COVERAGE _targetname _testrunner _outputname)
 
-	IF(NOT LCOV_PATH)
-		MESSAGE(FATAL_ERROR "lcov not found! Aborting...")
-	ENDIF() # NOT LCOV_PATH
-
-	IF(NOT GENHTML_PATH)
-		MESSAGE(FATAL_ERROR "genhtml not found! Aborting...")
-	ENDIF() # NOT GENHTML_PATH
-
 	SET(coverage_info "${CMAKE_BINARY_DIR}/${_outputname}.info")
 	SET(coverage_cleaned "${coverage_info}.cleaned")
 
@@ -129,14 +121,6 @@ ENDFUNCTION() # SETUP_TARGET_FOR_COVERAGE
 # Optional fourth parameter is passed as arguments to _testrunner
 #   Pass them in list form, e.g.: "-j;2" for -j 2
 FUNCTION(SETUP_TARGET_FOR_COVERAGE_COBERTURA _targetname _testrunner _outputname)
-
-	IF(NOT PYTHON_EXECUTABLE)
-		MESSAGE(FATAL_ERROR "Python not found! Aborting...")
-	ENDIF() # NOT PYTHON_EXECUTABLE
-
-	IF(NOT GCOVR_PATH)
-		MESSAGE(FATAL_ERROR "gcovr not found! Aborting...")
-	ENDIF() # NOT GCOVR_PATH
 
 	ADD_CUSTOM_TARGET(${_targetname}
 

@@ -16,5 +16,5 @@ include_directories(${gmock_SOURCE_FILE}/include)
 
 add_subdirectory(test)
 add_subdirectory(Interpreter)
-add_subdirectory(GUI)
+#add_subdirectory(GUI)
 

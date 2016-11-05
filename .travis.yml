@@ -81,8 +81,6 @@ matrix:
       addons: *gcc6
 
 install:
-  - sudo apt-get install libsfml-dev
-  - sudo apt-get install lcov
   - if [[ -n "$CLANG_VERSION" ]]; then export CXX=clang++-$CLANG_VERSION CC=clang-$CLANG_VERSION; fi
   - if [[ -n "$GCC_VERSION" ]]; then export CXX=g++-$GCC_VERSION CC=gcc-$GCC_VERSION; fi
   - JOBS=2
