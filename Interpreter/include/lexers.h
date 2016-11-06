@@ -45,8 +45,13 @@ namespace lexers {
                 getNextTok();
                 return tmp;
             } else {
+<<<<<<< HEAD
                 CLOG(DEBUG, "exception");
                 throw std::logic_error("Token isn't number.");
+=======
+                LOG(ERROR) << "Identifier error";
+                throw std::logic_error("Token isn't number");
+>>>>>>> origin/funcDefinition
             }
         }
 
@@ -57,7 +62,11 @@ namespace lexers {
                 getNextTok();
                 return std::move(tmp);
             } else {
+<<<<<<< HEAD
                 CLOG(DEBUG, "exception");
+=======
+                LOG(ERROR) << "Identifier error";
+>>>>>>> origin/funcDefinition
                 throw std::logic_error("Token isn't identifier.");
             }
         }
