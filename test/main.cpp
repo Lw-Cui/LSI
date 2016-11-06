@@ -9,7 +9,7 @@ int main(int argc, char *argv[]) {
     el::Logger* parserLogger = el::Loggers::getLogger("parser");
     el::Logger* exceptionLogger = el::Loggers::getLogger("exception");
     el::Loggers::reconfigureAllLoggers(el::ConfigurationType::Format,
-                                       "[%logger][%func] %msg [%file:%line]");
+                                       "[%logger][%func] %msg [%fbase:%line]");
 
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
