@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <map>
+#include <vector>
 #include <lexers.h>
 
 namespace parser {
@@ -50,10 +51,6 @@ namespace parser {
         std::string id;
     };
 
-    class FunctionDefinitionAST : public ExprAST {
-    public:
-    private:
-    };
 
     class IdentifierDefinitionAST : public ExprAST {
     public:
@@ -68,6 +65,32 @@ namespace parser {
     private:
         std::shared_ptr<IdentifierAST> identifier;
         std::shared_ptr<ExprAST> value;
+    };
+
+    class FunctionDefinitionAST : public ExprAST {
+    public:
+        FunctionDefinitionAST(std::string id,
+                              std::vector<std::shared_ptr<IdentifierAST>> v,
+                              std::shared_ptr<ExprAST> expr) :
+                identifier{std::move(id)}, arguments{std::move(v)}, expression{expr} {}
+
+        FunctionDefinitionAST(std::string id,
+                              std::vector<std::shared_ptr<IdentifierAST>> v,
+                              std::shared_ptr<ExprAST> expr, Scope ss) :
+                identifier{std::move(id)}, arguments{std::move(v)},
+                expression{expr}, context{std::move(ss)} {}
+
+        std::shared_ptr<ExprAST> eval(Scope &ss) const override {
+            return (ss[identifier] =
+                    std::make_shared<FunctionDefinitionAST>(identifier, arguments, expression, ss));
+        }
+
+    private:
+
+        std::string identifier;
+        std::vector<std::shared_ptr<IdentifierAST>> arguments;
+        std::shared_ptr<ExprAST> expression;
+        Scope context;
     };
 
     class FunctionCall : public ExprAST {

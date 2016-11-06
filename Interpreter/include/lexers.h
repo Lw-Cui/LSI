@@ -45,7 +45,7 @@ namespace lexers {
                 getNextTok();
                 return tmp;
             } else {
-                LOG(DEBUG) << "Identifier error";
+                LOG(ERROR) << "Identifier error";
                 throw std::logic_error("Token isn't number");
             }
         }
@@ -57,7 +57,7 @@ namespace lexers {
                 getNextTok();
                 return std::move(tmp);
             } else {
-                LOG(DEBUG) << "Identifier error";
+                LOG(ERROR) << "Identifier error";
                 throw std::logic_error("Token isn't identifier.");
             }
         }
