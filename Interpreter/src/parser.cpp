@@ -6,7 +6,7 @@ using namespace lexers;
 using namespace parser;
 using namespace std;
 
-std::shared_ptr<ExprAST> parser::parseExpr(lexers::Lexer &lex) {
+shared_ptr<ExprAST> parser::parseExpr(lexers::Lexer &lex) {
     if (lex.getTokType() != Lexer::TokOpenBrace) {
         switch (lex.getTokType()) {
             case Lexer::TokNumber:
@@ -39,7 +39,9 @@ std::shared_ptr<ExprAST> parser::parseExpr(lexers::Lexer &lex) {
                 CLOG(DEBUG, "exception");
                 throw logic_error("Cannot parse token.");
         }
-        lex.getNextTok(); // eat close brace
+        // eat close brace
+        LOG_IF(lex.getNextTok() == Lexer::TokCloseBrace, ERROR)
+            << "Format error: Token isn't close brace during parsing expression.";
         return std::move(res);
     }
 }
@@ -67,6 +69,38 @@ shared_ptr<ExprAST> parser::parseIdDefinitionExpr(lexers::Lexer &lex) {
 }
 
 shared_ptr<ExprAST> parser::parseFunctionDefinitionExpr(lexers::Lexer &lex) {
+    if (lex.getNextTok() != Lexer::TokIdentifier) {
+        LOG(ERROR) << "Token isn't open brace during parsing function definition.";
+        // throw
+    }
+
+    auto identifier = lex.getIdentifier();
+    LOG(DEBUG) << "Define function: " << identifier;
+
+    vector<shared_ptr<IdentifierAST>> args;
+    while (lex.getNextTok() == Lexer::TokIdentifier) {
+        shared_ptr<ExprAST> arg{parseExpr(lex)};
+        auto idPtr = dynamic_cast<IdentifierAST *>(arg.get());
+        if (!idPtr) {
+            LOG(ERROR) << "Cannot convert to identifier.";
+            // throw
+        }
+        args.push_back(make_shared<IdentifierAST>(idPtr->getId()));
+    }
+
+    if (lex.getTokType() != Lexer::TokCloseBrace) {
+        LOG(ERROR) << "Token isn't close brace during parsing function definition.";
+        // throw
+    }
+    lex.getNextTok();
+
+    auto expr = parseExpr(lex);
+    if (lex.getNextTok() != Lexer::TokCloseBrace) {
+        LOG(ERROR) << "Token cannot end function parsing";
+        // throw
+    }
+
+    return make_shared<FunctionDefinitionAST>(identifier, args, expr);
 }
 
 shared_ptr<ExprAST> parser::parseDefinitionExpr(lexers::Lexer &lex) {

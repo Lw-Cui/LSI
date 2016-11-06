@@ -50,3 +50,12 @@ TEST(ParserTest, IdentifierDefinitionTest) {
     ASSERT_EQ(5, numPtr->getValue());
     ASSERT_EQ(Lexer::TokEOF, lex.getTokType());
 }
+
+TEST(ParserTest, FunctionDefinitionTest) {
+    lexers::Lexer lex{"(define (foo x) x)"};
+    Scope ss;
+
+    std::shared_ptr<ExprAST> exprPtr = parser::parseExpr(lex);
+    exprPtr->eval(ss);
+    ASSERT_TRUE(ss.count("foo"));
+}
