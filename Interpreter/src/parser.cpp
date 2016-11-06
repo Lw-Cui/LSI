@@ -64,11 +64,7 @@ shared_ptr<ExprAST> parser::parseLetExpr(lexers::Lexer &lex) {
 
 shared_ptr<ExprAST> parser::parseIdDefinitionExpr(lexers::Lexer &lex) {
     auto identifier = lex.getIdentifier();
-<<<<<<< HEAD
     CLOG(DEBUG, "parser") << "define identifier: " << identifier;
-=======
-    LOG(DEBUG) << "Define identifier: " << identifier;
->>>>>>> origin/funcDefinition
     return make_shared<IdentifierDefinitionAST>(make_shared<IdentifierAST>(identifier), parseExpr(lex));
 }
 
@@ -110,11 +106,7 @@ shared_ptr<ExprAST> parser::parseFunctionDefinitionExpr(lexers::Lexer &lex) {
 shared_ptr<ExprAST> parser::parseDefinitionExpr(lexers::Lexer &lex) {
     switch (lex.getNextTok()) {
         case Lexer::TokIdentifier:
-<<<<<<< HEAD
                 CLOG(DEBUG, "parser") << "Parse identifier Definition";
-=======
-            LOG(DEBUG) << "Parse identifier Definition";
->>>>>>> origin/funcDefinition
             return parseIdDefinitionExpr(lex);
         case Lexer::TokOpenBrace:
             return parseFunctionDefinitionExpr(lex);
