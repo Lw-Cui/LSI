@@ -40,10 +40,12 @@ namespace parser {
         std::string getId() const { return id; }
 
         std::shared_ptr<ExprAST> eval(Scope &ss) const override {
-            if (ss.count(getId()))
+            if (ss.count(getId())) {
                 return ss[getId()]->eval(ss);
-            else
+            } else {
+                CLOG(DEBUG, "exception");
                 throw std::logic_error("Unbound identifier.");
+            }
         }
 
     private:
