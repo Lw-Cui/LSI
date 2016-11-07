@@ -32,7 +32,7 @@ namespace lexers {
                 }
             });
             expressionBuf << tmp;
-            LOG(DEBUG) << "String is:" << tmp;
+            CLOG(DEBUG, "lexer") << "String is:" << tmp;
             getNextTok();
         }
 
@@ -41,23 +41,23 @@ namespace lexers {
         double getNum() {
             if (getTokType() == TokNumber) {
                 auto tmp = number;
-                LOG(DEBUG) << "Get Number: " << tmp;
+                CLOG(DEBUG, "lexer") << "Get number: " << tmp;
                 getNextTok();
                 return tmp;
             } else {
-                LOG(ERROR) << "Identifier error";
-                throw std::logic_error("Token isn't number");
+                CLOG(DEBUG, "exception");
+                throw std::logic_error("Token isn't number.");
             }
         }
 
         std::string getIdentifier() {
             if (getTokType() == TokIdentifier) {
                 std::string tmp = identifier;
-                LOG(DEBUG) << "Get identifier: " << tmp;
+                CLOG(DEBUG, "lexer") << "Get identifier: " << tmp;
                 getNextTok();
                 return std::move(tmp);
             } else {
-                LOG(ERROR) << "Identifier error";
+                CLOG(DEBUG, "exception");
                 throw std::logic_error("Token isn't identifier.");
             }
         }
@@ -73,11 +73,11 @@ namespace lexers {
                 return getNextTok();
             } else if (isdigit(type)) {
                 expressionBuf >> number;
-                LOG(DEBUG) << "Read a number: " << number;
+                CLOG(DEBUG, "lexer") << "Read number: " << number;
                 currentType = TokNumber;
             } else if (isalpha(type)) {
                 expressionBuf >> identifier;
-                LOG(DEBUG) << "Read a word: " << identifier;
+                CLOG(DEBUG, "lexer") << "Read identifier: " << identifier;
                 if (identifier == "define")
                     currentType = TokDefine;
                 else if (identifier == "let")
