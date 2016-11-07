@@ -7,6 +7,7 @@ using namespace parser;
 using namespace std;
 
 shared_ptr<ExprAST> parser::parseExpr(lexers::Lexer &lex) {
+    CLOG(DEBUG, "parser") << "Parse expression";
     if (lex.getTokType() != Lexer::TokOpenBrace) {
         switch (lex.getTokType()) {
             case Lexer::TokNumber:
@@ -39,9 +40,12 @@ shared_ptr<ExprAST> parser::parseExpr(lexers::Lexer &lex) {
                 CLOG(DEBUG, "exception");
                 throw logic_error("Cannot parse token.");
         }
-        // eat close brace
-        LOG_IF(lex.getNextTok() == Lexer::TokCloseBrace, ERROR)
-            << "Format error: Token isn't close brace during parsing expression.";
+        if (lex.getTokType() != Lexer::TokCloseBrace) {
+            CLOG(DEBUG, "exception");
+            throw ("Format error: Token isn't close brace during parsing expression.");
+        } else {
+            lex.getNextTok(); // eat close brace
+        }
         return std::move(res);
     }
 }
@@ -70,34 +74,35 @@ shared_ptr<ExprAST> parser::parseIdDefinitionExpr(lexers::Lexer &lex) {
 
 shared_ptr<ExprAST> parser::parseFunctionDefinitionExpr(lexers::Lexer &lex) {
     if (lex.getNextTok() != Lexer::TokIdentifier) {
-        LOG(ERROR) << "Token isn't open brace during parsing function definition.";
-        // throw
+        CLOG(DEBUG, "exception");
+        throw logic_error("Token isn't open brace during parsing function definition.");
     }
 
     auto identifier = lex.getIdentifier();
-    LOG(DEBUG) << "Define function: " << identifier;
+    CLOG(DEBUG, "parser") << "Define function: " << identifier;
 
     vector<shared_ptr<IdentifierAST>> args;
     while (lex.getNextTok() == Lexer::TokIdentifier) {
         shared_ptr<ExprAST> arg{parseExpr(lex)};
         auto idPtr = dynamic_cast<IdentifierAST *>(arg.get());
         if (!idPtr) {
-            LOG(ERROR) << "Cannot convert to identifier.";
-            // throw
+            CLOG(DEBUG, "exception");
+            throw logic_error("Cannot convert to identifier.");
         }
         args.push_back(make_shared<IdentifierAST>(idPtr->getId()));
     }
 
     if (lex.getTokType() != Lexer::TokCloseBrace) {
-        LOG(ERROR) << "Token isn't close brace during parsing function definition.";
-        // throw
+        CLOG(DEBUG, "exception");
+        throw logic_error("Token cannot end arguments parsing.");
+    } else {
+        lex.getNextTok();
     }
-    lex.getNextTok();
 
     auto expr = parseExpr(lex);
-    if (lex.getNextTok() != Lexer::TokCloseBrace) {
-        LOG(ERROR) << "Token cannot end function parsing";
-        // throw
+    if (lex.getTokType() != Lexer::TokCloseBrace) {
+        CLOG(DEBUG, "exception");
+        throw logic_error("Token cannot end function parsing");
     }
 
     return make_shared<FunctionDefinitionAST>(identifier, args, expr);
@@ -106,7 +111,7 @@ shared_ptr<ExprAST> parser::parseFunctionDefinitionExpr(lexers::Lexer &lex) {
 shared_ptr<ExprAST> parser::parseDefinitionExpr(lexers::Lexer &lex) {
     switch (lex.getNextTok()) {
         case Lexer::TokIdentifier:
-                CLOG(DEBUG, "parser") << "Parse identifier Definition";
+            CLOG(DEBUG, "parser") << "Parse identifier Definition";
             return parseIdDefinitionExpr(lex);
         case Lexer::TokOpenBrace:
             return parseFunctionDefinitionExpr(lex);
