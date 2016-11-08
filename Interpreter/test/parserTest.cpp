@@ -25,7 +25,6 @@ TEST(ParserTest, IdentifierTest) {
 TEST(ParserTest, IdentifierDefinitionTest) {
     lexers::Lexer lex{"(define n 5)"};
     std::shared_ptr<ExprAST> exprPtr;
-    std::shared_ptr<IdentifierAST> idPtr;
     Scope ss;
 
     exprPtr = parser::parseExpr(lex);
@@ -58,4 +57,11 @@ TEST(ParserTest, FunctionDefinitionTest) {
     std::shared_ptr<ExprAST> exprPtr = parser::parseExpr(lex);
     exprPtr->eval(ss);
     ASSERT_TRUE(ss.count("foo"));
+}
+
+TEST(ParserTest, ConditionTest) {
+    Scope ss;
+    lexers::Lexer lex2{"(define n 0)"};
+    parseExpr(lex2)->eval(ss);
+    ASSERT_FALSE(ss["n"]->toBool());
 }
