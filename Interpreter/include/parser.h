@@ -2,10 +2,12 @@
 #ifndef GI_PARSER_H
 #define GI_PARSER_H
 
+#include <exception>
 #include <memory>
 #include <string>
 #include <map>
 #include <vector>
+#include <easylogging++.h>
 #include <lexers.h>
 
 namespace parser {
@@ -15,7 +17,15 @@ namespace parser {
 
     class ExprAST {
     public:
-        virtual std::shared_ptr<ExprAST> eval(Scope &) const = 0;
+        virtual std::shared_ptr<ExprAST> eval(Scope &) const {
+            CLOG(DEBUG, "exception");
+            throw std::logic_error("Expression cannot be evaluated.");
+        };
+
+        virtual std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &) const {
+            CLOG(DEBUG, "exception");
+            throw std::logic_error("Expression cannot be applied.");
+        };
 
         virtual bool toBool() const { return true; }
 
@@ -57,51 +67,75 @@ namespace parser {
         std::string id;
     };
 
-
-    class IdentifierDefinitionAST : public ExprAST {
+    class LambdaAST : public ExprAST {
     public:
-        IdentifierDefinitionAST(std::shared_ptr<IdentifierAST> id,
-                                std::shared_ptr<ExprAST> v) : identifier{id}, value{v} {}
+        LambdaAST(const std::vector<std::shared_ptr<IdentifierAST>> &v,
+                  std::shared_ptr<ExprAST> expr) : arguments{v}, expression{expr} {}
 
-        std::shared_ptr<ExprAST> eval(Scope &ss) const override {
-            ss[identifier->getId()] = value->eval(ss);
-            return nullptr;
+        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &) const override {
+            //TODO
         }
 
-    private:
-        std::shared_ptr<IdentifierAST> identifier;
-        std::shared_ptr<ExprAST> value;
-    };
-
-    class FunctionDefinitionAST : public ExprAST {
-    public:
-        FunctionDefinitionAST(std::string id,
-                              std::vector<std::shared_ptr<IdentifierAST>> v,
-                              std::shared_ptr<ExprAST> expr) :
-                identifier{std::move(id)}, arguments{std::move(v)}, expression{expr} {}
-
-        FunctionDefinitionAST(std::string id,
-                              std::vector<std::shared_ptr<IdentifierAST>> v,
-                              std::shared_ptr<ExprAST> expr, Scope ss) :
-                identifier{std::move(id)}, arguments{std::move(v)},
-                expression{expr}, context{std::move(ss)} {}
-
-        std::shared_ptr<ExprAST> eval(Scope &ss) const override {
-            ss[identifier] = nullptr; //TODO: need FunctionAST
-            return nullptr;
-        }
-
-    private:
-
-        std::string identifier;
+    protected:
         std::vector<std::shared_ptr<IdentifierAST>> arguments;
         std::shared_ptr<ExprAST> expression;
+    };
+
+    class FunctionAST : public LambdaAST {
+    public:
+        FunctionAST(const std::vector<std::shared_ptr<IdentifierAST>> &v,
+                    std::shared_ptr<ExprAST> expr) : LambdaAST{v, expr} {}
+
+        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &) const override {
+            //TODO
+        }
+
+    private:
         Scope context;
     };
 
-    class FunctionCall : public ExprAST {
+    class IdentifierBindingAST : public ExprAST {
     public:
+        IdentifierBindingAST(const std::string &id) : identifier{id} {}
+
+        const std::string &getIdentifier() const {
+            return identifier;
+        }
+
     private:
+        std::string identifier;
+    };
+
+    class ValueBindingAST : public IdentifierBindingAST {
+    public:
+        ValueBindingAST(const std::string &id, std::shared_ptr<ExprAST> v)
+                : IdentifierBindingAST(id), value{v} {}
+
+        std::shared_ptr<ExprAST> eval(Scope &ss) const override {
+            ss[getIdentifier()] = value->eval(ss);
+            return nullptr;
+        }
+
+    private:
+        std::shared_ptr<ExprAST> value;
+    };
+
+
+    class FunctionBindingAST : public IdentifierBindingAST {
+    public:
+        FunctionBindingAST(const std::string &id,
+                           const std::vector<std::shared_ptr<IdentifierAST>> &v,
+                           std::shared_ptr<ExprAST> expr) :
+                IdentifierBindingAST(id), func{std::make_shared<FunctionAST>(v, expr)} {}
+
+        std::shared_ptr<ExprAST> eval(Scope &ss) const override {
+            //TODO: need FunctionAST
+            ss[getIdentifier()] = func;
+            return nullptr;
+        }
+
+    private:
+        std::shared_ptr<FunctionAST> func;
     };
 
 
