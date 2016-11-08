@@ -17,6 +17,8 @@ namespace parser {
     public:
         virtual std::shared_ptr<ExprAST> eval(Scope &) const = 0;
 
+        virtual bool toBool() const { return true; }
+
         virtual ~ExprAST() {}
     };
 
@@ -25,6 +27,8 @@ namespace parser {
         NumberAST(double n) : value{n} {}
 
         double getValue() const { return value; }
+
+        virtual bool toBool() const override { return getValue() != 0; }
 
         std::shared_ptr<ExprAST> eval(Scope &) const override {
             return std::make_shared<NumberAST>(getValue());
@@ -83,8 +87,8 @@ namespace parser {
                 expression{expr}, context{std::move(ss)} {}
 
         std::shared_ptr<ExprAST> eval(Scope &ss) const override {
-            return (ss[identifier] =
-                    std::make_shared<FunctionDefinitionAST>(identifier, arguments, expression, ss));
+            ss[identifier] = nullptr; //TODO: need FunctionAST
+            return nullptr;
         }
 
     private:
