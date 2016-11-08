@@ -20,20 +20,15 @@ namespace lexers {
             TokLet = -7,
         };
 
+        void appendExp(const std::string &exp) {
+            expressionBuf.clear();
+            expressionBuf << processExp(exp);
+            CLOG(DEBUG, "lexer") << "String is:" << exp;
+            if (getTokType() == TokEOF) getNextTok();
+        }
+
         Lexer(const std::string &exp) {
-            std::string tmp;
-            std::for_each(std::begin(exp), std::end(exp), [&tmp](const char c) {
-                if (c == ')' || c == '(') {
-                    tmp.push_back(' ');
-                    tmp.push_back(c);
-                    tmp.push_back(' ');
-                } else {
-                    tmp.push_back(c);
-                }
-            });
-            expressionBuf << tmp;
-            CLOG(DEBUG, "lexer") << "String is:" << tmp;
-            getNextTok();
+            appendExp(exp);
         }
 
         TokenType getTokType() const { return currentType; }
@@ -95,6 +90,20 @@ namespace lexers {
         }
 
     private:
+        std::string processExp(const std::string exp) const {
+            std::string tmp;
+            std::for_each(std::begin(exp), std::end(exp), [&tmp](const char c) {
+                if (c == ')' || c == '(') {
+                    tmp.push_back(' ');
+                    tmp.push_back(c);
+                    tmp.push_back(' ');
+                } else {
+                    tmp.push_back(c);
+                }
+            });
+            return std::move(tmp);
+        }
+
         std::string identifier;
         double number;
 

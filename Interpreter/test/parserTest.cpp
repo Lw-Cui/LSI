@@ -37,8 +37,8 @@ TEST(ParserTest, IdentifierDefinitionTest) {
     ASSERT_EQ(5, numPtr->getValue());
     ASSERT_EQ(Lexer::TokEOF, lex.getTokType());
 
-    lexers::Lexer lex2{"(define a n)"};
-    auto ptr = parser::parseExpr(lex2);
+    lex.appendExp("(define a n)");
+    auto ptr = parseExpr(lex);
     ptr->eval(ss);
 
     ASSERT_TRUE(ss.count("a"));
@@ -61,7 +61,7 @@ TEST(ParserTest, FunctionDefinitionTest) {
 
 TEST(ParserTest, ConditionTest) {
     Scope ss;
-    lexers::Lexer lex2{"(define n 0)"};
-    parseExpr(lex2)->eval(ss);
+    lexers::Lexer lex{"(define n 0)"};
+    parseExpr(lex)->eval(ss);
     ASSERT_FALSE(ss["n"]->toBool());
 }

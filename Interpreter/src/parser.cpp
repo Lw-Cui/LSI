@@ -9,6 +9,7 @@ using namespace std;
 shared_ptr<ExprAST> parser::parseExpr(lexers::Lexer &lex) {
     CLOG(DEBUG, "parser") << "Parse expression";
     if (lex.getTokType() != Lexer::TokOpenBrace) {
+        CLOG(DEBUG, "parser") << "Current token: " << lex.getTokType();
         switch (lex.getTokType()) {
             case Lexer::TokNumber:
                 CLOG(DEBUG, "parser") << "Parse number";
