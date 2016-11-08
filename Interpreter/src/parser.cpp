@@ -69,7 +69,7 @@ shared_ptr<ExprAST> parser::parseLetExpr(lexers::Lexer &lex) {
 shared_ptr<ExprAST> parser::parseIdDefinitionExpr(lexers::Lexer &lex) {
     auto identifier = lex.getIdentifier();
     CLOG(DEBUG, "parser") << "define identifier: " << identifier;
-    return make_shared<IdentifierDefinitionAST>(make_shared<IdentifierAST>(identifier), parseExpr(lex));
+    return make_shared<ValueBindingAST>(identifier, parseExpr(lex));
 }
 
 shared_ptr<ExprAST> parser::parseFunctionDefinitionExpr(lexers::Lexer &lex) {
@@ -105,7 +105,7 @@ shared_ptr<ExprAST> parser::parseFunctionDefinitionExpr(lexers::Lexer &lex) {
         throw logic_error("Token cannot end function parsing");
     }
 
-    return make_shared<FunctionDefinitionAST>(identifier, args, expr);
+    return make_shared<FunctionBindingAST>(identifier, args, expr);
 }
 
 shared_ptr<ExprAST> parser::parseDefinitionExpr(lexers::Lexer &lex) {
