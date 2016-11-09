@@ -57,6 +57,13 @@ TEST(ParserTest, FunctionDefinitionTest) {
     std::shared_ptr<ExprAST> exprPtr = parser::parseExpr(lex);
     exprPtr->eval(ss);
     ASSERT_TRUE(ss.count("foo"));
+
+    lex.appendExp("(foo 5)");
+    exprPtr = parseExpr(lex);
+    auto ans = exprPtr->eval(ss);
+    ASSERT_TRUE(dynamic_cast<parser::NumberAST *>(ans.get()));
+    auto numPtr = dynamic_cast<parser::NumberAST *>(ans.get());
+    ASSERT_EQ(5, numPtr->getValue());
 }
 
 TEST(ParserTest, ConditionTest) {

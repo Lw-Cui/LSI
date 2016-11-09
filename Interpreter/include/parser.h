@@ -22,7 +22,7 @@ namespace parser {
             throw std::logic_error("Expression cannot be evaluated.");
         };
 
-        virtual std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &) const {
+        virtual std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &) {
             CLOG(DEBUG, "exception");
             throw std::logic_error("Expression cannot be applied.");
         };
@@ -55,6 +55,7 @@ namespace parser {
         std::string getId() const { return id; }
 
         std::shared_ptr<ExprAST> eval(Scope &ss) const override {
+            CLOG(DEBUG, "parser") << "Evaluate identifier: " << getId();
             if (ss.count(getId())) {
                 return ss[getId()]->eval(ss);
             } else {
@@ -69,25 +70,37 @@ namespace parser {
 
     class LambdaAST : public ExprAST {
     public:
-        LambdaAST(const std::vector<std::shared_ptr<IdentifierAST>> &v,
-                  std::shared_ptr<ExprAST> expr) : arguments{v}, expression{expr} {}
+        LambdaAST(const std::vector<std::string> &v,
+                  std::shared_ptr<ExprAST> expr) : formalArgs{v}, expression{expr} {}
 
-        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &) const override {
-            //TODO
+        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs) override {
+            Scope s;
+            for (size_t i = 0; i < actualArgs.size(); i++)
+                s[formalArgs[i]] = actualArgs[i]->eval(s);
+            return expression->eval(s);
         }
 
     protected:
-        std::vector<std::shared_ptr<IdentifierAST>> arguments;
+        std::vector<std::string> formalArgs;
         std::shared_ptr<ExprAST> expression;
     };
 
     class FunctionAST : public LambdaAST {
     public:
-        FunctionAST(const std::vector<std::shared_ptr<IdentifierAST>> &v,
+        FunctionAST(const std::vector<std::string> &v,
                     std::shared_ptr<ExprAST> expr) : LambdaAST{v, expr} {}
 
-        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &) const override {
-            //TODO
+        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs) override {
+            CLOG(DEBUG, "parser") << "Apply function now. Number of formal arguments is " << formalArgs.size();
+            for (size_t i = 0; i < actualArgs.size(); i++) {
+                CLOG(DEBUG, "parser") << "Set formal argument: " << formalArgs[i];
+                context[formalArgs[i]] = actualArgs[i]->eval(context);
+            }
+            return expression->eval(context);
+        }
+
+        void setContext(const Scope &s) {
+            context = s;
         }
 
     private:
@@ -124,12 +137,12 @@ namespace parser {
     class FunctionBindingAST : public IdentifierBindingAST {
     public:
         FunctionBindingAST(const std::string &id,
-                           const std::vector<std::shared_ptr<IdentifierAST>> &v,
+                           const std::vector<std::string> &v,
                            std::shared_ptr<ExprAST> expr) :
                 IdentifierBindingAST(id), func{std::make_shared<FunctionAST>(v, expr)} {}
 
         std::shared_ptr<ExprAST> eval(Scope &ss) const override {
-            //TODO: need FunctionAST
+            func->setContext(ss);
             ss[getIdentifier()] = func;
             return nullptr;
         }
@@ -138,12 +151,49 @@ namespace parser {
         std::shared_ptr<FunctionAST> func;
     };
 
+    class LambdaCallAST : public ExprAST {
+    public:
+        LambdaCallAST(const std::shared_ptr<ExprAST> &lam, const std::vector<std::shared_ptr<ExprAST>> &args)
+                : lambda{lam}, actualArgs{args} {
+        }
+
+        std::shared_ptr<ExprAST> eval(Scope &ss) const override {
+            return lambda->apply(actualArgs);
+        }
+
+    private:
+        std::shared_ptr<ExprAST> lambda;
+        std::vector<std::shared_ptr<ExprAST>> actualArgs;
+    };
+
+    class FunctionCallAST : public ExprAST {
+    public:
+        FunctionCallAST(std::string id, const std::vector<std::shared_ptr<ExprAST>> &args)
+                : identifier{id}, actualArgs{args} {
+        }
+
+        std::shared_ptr<ExprAST> eval(Scope &ss) const override {
+            CLOG(DEBUG, "parser") << "Apply function call. Number of actual arguments: " << actualArgs.size();
+            if (ss.count(identifier)) {
+                return ss[identifier]->apply(actualArgs);
+            } else {
+                CLOG(DEBUG, "exception");
+                throw std::logic_error("Unbound function identifier.");
+            }
+        }
+
+    private:
+        std::string identifier;
+        std::vector<std::shared_ptr<ExprAST>> actualArgs;
+    };
 
     std::shared_ptr<ExprAST> parseExpr(lexers::Lexer &lex);
 
     std::shared_ptr<ExprAST> parseNumberExpr(lexers::Lexer &lex);
 
     std::shared_ptr<ExprAST> parseIdentifierExpr(lexers::Lexer &lex);
+
+    std::shared_ptr<ExprAST> parseLambdaCallExpr(lexers::Lexer &lex);
 
     std::shared_ptr<ExprAST> parseFunctionCallExpr(lexers::Lexer &lex);
 

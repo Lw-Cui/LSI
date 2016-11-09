@@ -9,7 +9,6 @@ using namespace std;
 shared_ptr<ExprAST> parser::parseExpr(lexers::Lexer &lex) {
     CLOG(DEBUG, "parser") << "Parse expression";
     if (lex.getTokType() != Lexer::TokOpenBrace) {
-        CLOG(DEBUG, "parser") << "Current token: " << lex.getTokType();
         switch (lex.getTokType()) {
             case Lexer::TokNumber:
                 CLOG(DEBUG, "parser") << "Parse number";
@@ -25,10 +24,12 @@ shared_ptr<ExprAST> parser::parseExpr(lexers::Lexer &lex) {
         shared_ptr<ExprAST> res;
         switch (lex.getNextTok()) { // eat open brace
             case Lexer::TokOpenBrace:
-                res = parseFunctionCallExpr(lex);
+                res = parseLambdaCallExpr(lex);
                 break;
             case Lexer::TokIdentifier:
+                CLOG(DEBUG, "parser") << "Parse function Call";
                 res = parseFunctionCallExpr(lex);
+                CLOG(DEBUG, "parser") << "End parsing function Call";
                 break;
             case Lexer::TokLet:
                 res = parseLetExpr(lex);
@@ -62,6 +63,18 @@ shared_ptr<ExprAST> parser::parseIdentifierExpr(lexers::Lexer &lex) {
 }
 
 shared_ptr<ExprAST> parser::parseFunctionCallExpr(lexers::Lexer &lex) {
+    string identifier = lex.getIdentifier();
+    CLOG(DEBUG, "parser") << "Parse function: " << identifier;
+    vector<shared_ptr<ExprAST>> arguments;
+    while (lex.getTokType() != Lexer::TokCloseBrace) {
+        CLOG(DEBUG, "parser") << "Parse arguments: " << lex.getTokType();
+        arguments.push_back(parseExpr(lex));
+    }
+    CLOG(DEBUG, "parser") << "End parsing arguments";
+    return make_shared<FunctionCallAST>(identifier, arguments);
+}
+
+shared_ptr<ExprAST> parser::parseLambdaCallExpr(lexers::Lexer &lex) {
 }
 
 shared_ptr<ExprAST> parser::parseLetExpr(lexers::Lexer &lex) {
@@ -82,15 +95,10 @@ shared_ptr<ExprAST> parser::parseFunctionDefinitionExpr(lexers::Lexer &lex) {
     auto identifier = lex.getIdentifier();
     CLOG(DEBUG, "parser") << "Define function: " << identifier;
 
-    vector<shared_ptr<IdentifierAST>> args;
-    while (lex.getNextTok() == Lexer::TokIdentifier) {
-        shared_ptr<ExprAST> arg{parseExpr(lex)};
-        auto idPtr = dynamic_cast<IdentifierAST *>(arg.get());
-        if (!idPtr) {
-            CLOG(DEBUG, "exception");
-            throw logic_error("Cannot convert to identifier.");
-        }
-        args.push_back(make_shared<IdentifierAST>(idPtr->getId()));
+    vector<string> args;
+    while (lex.getTokType() == Lexer::TokIdentifier) {
+        CLOG(DEBUG, "parser") << "Read formal argument";
+        args.push_back(lex.getIdentifier());
     }
 
     if (lex.getTokType() != Lexer::TokCloseBrace) {
