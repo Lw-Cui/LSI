@@ -9,11 +9,10 @@
 #include <vector>
 #include <easylogging++.h>
 #include <lexers.h>
+#include <context.h>
 
 namespace parser {
-    class ExprAST;
-
-    typedef std::map<std::string, std::shared_ptr<ExprAST>> Scope;
+    using context::Scope;
 
     class ExprAST {
     public:
