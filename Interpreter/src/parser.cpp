@@ -71,7 +71,7 @@ shared_ptr<ExprAST> parser::parseFunctionCallExpr(lexers::Lexer &lex) {
         arguments.push_back(parseExpr(lex));
     }
     CLOG(DEBUG, "parser") << "End parsing arguments";
-    return make_shared<FunctionCallAST>(identifier, arguments);
+    return make_shared<FunctionApplicationAST>(identifier, arguments);
 }
 
 shared_ptr<ExprAST> parser::parseLambdaCallExpr(lexers::Lexer &lex) {
@@ -114,7 +114,7 @@ shared_ptr<ExprAST> parser::parseFunctionDefinitionExpr(lexers::Lexer &lex) {
         throw logic_error("Token cannot end function parsing");
     }
 
-    return make_shared<FunctionBindingAST>(identifier, args, expr);
+    return make_shared<LambdaBindingAST>(identifier, args, expr);
 }
 
 shared_ptr<ExprAST> parser::parseDefinitionExpr(lexers::Lexer &lex) {

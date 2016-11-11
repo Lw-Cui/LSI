@@ -67,34 +67,29 @@ namespace parser {
         std::string id;
     };
 
-    class LambdaAST : public ExprAST {
+    class ArgumentsAST : public ExprAST {
     public:
-        LambdaAST(const std::vector<std::string> &v,
-                  std::shared_ptr<ExprAST> expr) : formalArgs{v}, expression{expr} {}
+        ArgumentsAST(const std::vector<std::string> &v) : formalArgs{v} {}
 
-        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs) override {
-            Scope s;
-            for (size_t i = 0; i < actualArgs.size(); i++)
+        void bindArguments(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
+            CLOG(DEBUG, "parser") << "Number of formal arguments is " << formalArgs.size();
+            for (size_t i = 0; i < actualArgs.size(); i++) {
+                CLOG(DEBUG, "parser") << "Set formal argument: " << formalArgs[i];
                 s[formalArgs[i]] = actualArgs[i]->eval(s);
-            return expression->eval(s);
+            }
         }
 
     protected:
         std::vector<std::string> formalArgs;
-        std::shared_ptr<ExprAST> expression;
     };
 
-    class FunctionAST : public LambdaAST {
+    class LambdaAST : public ArgumentsAST {
     public:
-        FunctionAST(const std::vector<std::string> &v,
-                    std::shared_ptr<ExprAST> expr) : LambdaAST{v, expr} {}
+        LambdaAST(const std::vector<std::string> &v,
+                  std::shared_ptr<ExprAST> expr) : ArgumentsAST{v}, expression{expr} {}
 
         std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs) override {
-            CLOG(DEBUG, "parser") << "Apply function now. Number of formal arguments is " << formalArgs.size();
-            for (size_t i = 0; i < actualArgs.size(); i++) {
-                CLOG(DEBUG, "parser") << "Set formal argument: " << formalArgs[i];
-                context[formalArgs[i]] = actualArgs[i]->eval(context);
-            }
+            bindArguments(actualArgs, context);
             return expression->eval(context);
         }
 
@@ -102,13 +97,27 @@ namespace parser {
             context = s;
         }
 
-    private:
+    protected:
+        std::shared_ptr<ExprAST> expression;
         Scope context;
     };
 
-    class IdentifierBindingAST : public ExprAST {
+    class OperatorAST : public ArgumentsAST {
     public:
-        IdentifierBindingAST(const std::string &id) : identifier{id} {}
+        OperatorAST(const std::vector<std::string> &v) : ArgumentsAST{v} {}
+    };
+
+    class AddOperatorAST : public OperatorAST {
+    public:
+        AddOperatorAST(const std::vector<std::string> &v) : OperatorAST{v} {}
+
+        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs) override {
+        }
+    };
+
+    class BindingAST : public ExprAST {
+    public:
+        BindingAST(const std::string &id) : identifier{id} {}
 
         const std::string &getIdentifier() const {
             return identifier;
@@ -118,10 +127,10 @@ namespace parser {
         std::string identifier;
     };
 
-    class ValueBindingAST : public IdentifierBindingAST {
+    class ValueBindingAST : public BindingAST {
     public:
         ValueBindingAST(const std::string &id, std::shared_ptr<ExprAST> v)
-                : IdentifierBindingAST(id), value{v} {}
+                : BindingAST(id), value{v} {}
 
         std::shared_ptr<ExprAST> eval(Scope &ss) const override {
             ss[getIdentifier()] = value->eval(ss);
@@ -133,27 +142,35 @@ namespace parser {
     };
 
 
-    class FunctionBindingAST : public IdentifierBindingAST {
+    class LambdaBindingAST : public BindingAST {
     public:
-        FunctionBindingAST(const std::string &id,
-                           const std::vector<std::string> &v,
-                           std::shared_ptr<ExprAST> expr) :
-                IdentifierBindingAST(id), func{std::make_shared<FunctionAST>(v, expr)} {}
+        LambdaBindingAST(const std::string &id,
+                         const std::vector<std::string> &v,
+                         std::shared_ptr<ExprAST> expr) :
+                BindingAST(id), lambda{std::make_shared<LambdaAST>(v, expr)} {}
 
         std::shared_ptr<ExprAST> eval(Scope &ss) const override {
-            func->setContext(ss);
-            ss[getIdentifier()] = func;
+            lambda->setContext(ss);
+            ss[getIdentifier()] = lambda;
             return nullptr;
         }
 
     private:
-        std::shared_ptr<FunctionAST> func;
+        std::shared_ptr<LambdaAST> lambda;
     };
 
-    class LambdaCallAST : public ExprAST {
+    class ApplicationAST : public ExprAST {
     public:
-        LambdaCallAST(const std::shared_ptr<ExprAST> &lam, const std::vector<std::shared_ptr<ExprAST>> &args)
-                : lambda{lam}, actualArgs{args} {
+        ApplicationAST(const std::vector<std::shared_ptr<ExprAST>> &v) : actualArgs{v} {}
+
+    protected:
+        std::vector<std::shared_ptr<ExprAST>> actualArgs;
+    };
+
+    class LambdaApplicationAST : public ApplicationAST {
+    public:
+        LambdaApplicationAST(const std::shared_ptr<ExprAST> &lam, const std::vector<std::shared_ptr<ExprAST>> &args)
+                : lambda{lam}, ApplicationAST{args} {
         }
 
         std::shared_ptr<ExprAST> eval(Scope &ss) const override {
@@ -162,13 +179,12 @@ namespace parser {
 
     private:
         std::shared_ptr<ExprAST> lambda;
-        std::vector<std::shared_ptr<ExprAST>> actualArgs;
     };
 
-    class FunctionCallAST : public ExprAST {
+    class FunctionApplicationAST : public ApplicationAST {
     public:
-        FunctionCallAST(std::string id, const std::vector<std::shared_ptr<ExprAST>> &args)
-                : identifier{id}, actualArgs{args} {
+        FunctionApplicationAST(std::string id, const std::vector<std::shared_ptr<ExprAST>> &args)
+                : identifier{id}, ApplicationAST{args} {
         }
 
         std::shared_ptr<ExprAST> eval(Scope &ss) const override {
@@ -183,7 +199,6 @@ namespace parser {
 
     private:
         std::string identifier;
-        std::vector<std::shared_ptr<ExprAST>> actualArgs;
     };
 
     std::shared_ptr<ExprAST> parseExpr(lexers::Lexer &lex);

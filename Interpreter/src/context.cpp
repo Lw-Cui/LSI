@@ -1,6 +1,5 @@
-// Important: The order of context.h & parser matters.
-#include <context.h>
 #include <parser.h>
+#include <context.h>
 
 using namespace std;
 
