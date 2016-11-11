@@ -85,3 +85,14 @@ TEST(LexerTest, AppendTest) {
     ASSERT_EQ(Lexer::TokEOF, lex.getNextTok());
 }
 
+TEST(LexersTest, OperatorTest) {
+    lexers::Lexer lex{"(+ n 5)"};
+    ASSERT_EQ(Lexer::TokOpenBrace, lex.getTokType());
+    ASSERT_EQ(Lexer::TokOperator, lex.getNextTok());
+    ASSERT_EQ(Lexer::TokIdentifier, lex.getNextTok());
+    ASSERT_STREQ("n", lex.getIdentifier().c_str());
+    ASSERT_EQ(Lexer::TokNumber, lex.getTokType());
+    ASSERT_EQ(5, lex.getNum());
+    ASSERT_EQ(Lexer::TokCloseBrace, lex.getTokType());
+    ASSERT_EQ(Lexer::TokEOF, lex.getNextTok());
+}

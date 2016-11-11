@@ -18,6 +18,7 @@ namespace lexers {
             TokCloseBrace = -5,
             TokDefine = -6,
             TokLet = -7,
+            TokOperator = -8,
         };
 
         void appendExp(const std::string &exp) {
@@ -79,6 +80,10 @@ namespace lexers {
                     currentType = TokLet;
                 else
                     currentType = TokIdentifier;
+            } else if (isOperator(type)) {
+                CLOG(DEBUG, "lexer") << "Read operator: " << identifier;
+                expressionBuf >> identifier;
+                currentType = TokOperator;
             } else if (type == '(') {
                 expressionBuf.get();
                 currentType = TokOpenBrace;
@@ -90,6 +95,18 @@ namespace lexers {
         }
 
     private:
+        bool isOperator(int type) const {
+            switch (type) {
+                case '+':
+                case '-':
+                case '>':
+                case '<':
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
         std::string processExp(const std::string exp) const {
             std::string tmp;
             std::for_each(std::begin(exp), std::end(exp), [&tmp](const char c) {
