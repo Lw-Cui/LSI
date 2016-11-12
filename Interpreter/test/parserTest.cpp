@@ -72,3 +72,12 @@ TEST(ParserTest, ConditionTest) {
     parseExpr(lex)->eval(ss);
     ASSERT_FALSE(ss["n"]->toBool());
 }
+
+TEST(ParserTest, AddOperatorTest) {
+    Scope ss;
+    lexers::Lexer lex{"(+ 5 6 7)"};
+    auto ptr = parseExpr(lex)->eval(ss);
+    ASSERT_TRUE(dynamic_cast<parser::NumberAST *>(ptr.get()));
+    auto numPtr = dynamic_cast<parser::NumberAST *>(ptr.get());
+    ASSERT_EQ(18, numPtr->getValue());
+}
