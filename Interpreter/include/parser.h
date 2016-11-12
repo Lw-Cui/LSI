@@ -119,7 +119,7 @@ namespace parser {
             double num = 0;
             for (auto element: actualArgs) {
                 std::shared_ptr<ExprAST> res = element->eval(s);
-                if (NumberAST *p = dynamic_cast<NumberAST *>(res.get())) {
+                if (auto p = std::dynamic_pointer_cast<NumberAST>(res)) {
                     CLOG(DEBUG, "parser") << "Add number: " << p->getValue();
                     num += p->getValue();
                 } else {
