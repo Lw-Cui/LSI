@@ -21,7 +21,7 @@ namespace parser {
             throw std::logic_error("Expression cannot be evaluated.");
         };
 
-        virtual std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &) {
+        virtual std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &, const Scope &) {
             CLOG(DEBUG, "exception");
             throw std::logic_error("Expression cannot be applied.");
         };
@@ -88,7 +88,8 @@ namespace parser {
         LambdaAST(const std::vector<std::string> &v,
                   std::shared_ptr<ExprAST> expr) : ArgumentsAST{v}, expression{expr} {}
 
-        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs) override {
+        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs,
+                                       const Scope &) override {
             bindArguments(actualArgs, context);
             return expression->eval(context);
         }
@@ -102,17 +103,34 @@ namespace parser {
         Scope context;
     };
 
-    class OperatorAST : public ArgumentsAST {
+    class OperatorAST : public ExprAST {
     public:
-        OperatorAST(const std::vector<std::string> &v) : ArgumentsAST{v} {}
+        OperatorAST(const std::vector<std::shared_ptr<ExprAST>> &v) : actualArgs{v} {}
+
+    protected:
+        std::vector<std::shared_ptr<ExprAST>> actualArgs;
     };
 
     class AddOperatorAST : public OperatorAST {
     public:
-        AddOperatorAST(const std::vector<std::string> &v) : OperatorAST{v} {}
+        AddOperatorAST(const std::vector<std::shared_ptr<ExprAST>> &v) : OperatorAST{v} {}
 
-        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs) override {
+        std::shared_ptr<ExprAST> eval(Scope &s) const override {
+            double num = 0;
+            for (auto element: actualArgs) {
+                std::shared_ptr<ExprAST> res = element->eval(s);
+                if (NumberAST *p = dynamic_cast<NumberAST *>(res.get())) {
+                    CLOG(DEBUG, "parser") << "Add number: " << p->getValue();
+                    num += p->getValue();
+                } else {
+                    CLOG(DEBUG, "exception");
+                    throw std::logic_error("The operands cannot be converted to number");
+                }
+            }
+            return std::make_shared<NumberAST>(num);
+
         }
+
     };
 
     class BindingAST : public ExprAST {
@@ -174,7 +192,7 @@ namespace parser {
         }
 
         std::shared_ptr<ExprAST> eval(Scope &ss) const override {
-            return lambda->apply(actualArgs);
+            return lambda->apply(actualArgs, ss);
         }
 
     private:
@@ -190,7 +208,7 @@ namespace parser {
         std::shared_ptr<ExprAST> eval(Scope &ss) const override {
             CLOG(DEBUG, "parser") << "Apply function call. Number of actual arguments: " << actualArgs.size();
             if (ss.count(identifier)) {
-                return ss[identifier]->apply(actualArgs);
+                return ss[identifier]->apply(actualArgs, ss);
             } else {
                 CLOG(DEBUG, "exception");
                 throw std::logic_error("Unbound function identifier.");
@@ -204,6 +222,10 @@ namespace parser {
     std::shared_ptr<ExprAST> parseExpr(lexers::Lexer &lex);
 
     std::shared_ptr<ExprAST> parseNumberExpr(lexers::Lexer &lex);
+
+    std::shared_ptr<ExprAST> parseOperatorExpr(lexers::Lexer &lex);
+
+    std::shared_ptr<ExprAST> parseAddOperatorExpr(lexers::Lexer &lex);
 
     std::shared_ptr<ExprAST> parseIdentifierExpr(lexers::Lexer &lex);
 

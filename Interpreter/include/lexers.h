@@ -46,6 +46,18 @@ namespace lexers {
             }
         }
 
+        std::string getOperator() {
+            if (getTokType() == TokOperator) {
+                std::string tmp = identifier;
+                CLOG(DEBUG, "lexer") << "Get Operator: " << tmp;
+                getNextTok();
+                return std::move(tmp);
+            } else {
+                CLOG(DEBUG, "exception");
+                throw std::logic_error("Token isn't Operator.");
+            }
+        }
+
         std::string getIdentifier() {
             if (getTokType() == TokIdentifier) {
                 std::string tmp = identifier;
@@ -81,8 +93,8 @@ namespace lexers {
                 else
                     currentType = TokIdentifier;
             } else if (isOperator(type)) {
-                CLOG(DEBUG, "lexer") << "Read operator: " << identifier;
                 expressionBuf >> identifier;
+                CLOG(DEBUG, "lexer") << "Read operator: " << identifier;
                 currentType = TokOperator;
             } else if (type == '(') {
                 expressionBuf.get();
