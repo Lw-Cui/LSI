@@ -22,7 +22,7 @@ shared_ptr<ExprAST> parser::parseExpr(lexers::Lexer &lex) {
         }
     } else {
         shared_ptr<ExprAST> res;
-        switch (lex.getNextTok()) { // eat open brace
+        switch (lex.stepForward()) { // eat open brace
             case Lexer::TokOpenBrace:
                 res = parseLambdaCallExpr(lex);
                 break;
@@ -50,7 +50,7 @@ shared_ptr<ExprAST> parser::parseExpr(lexers::Lexer &lex) {
             CLOG(DEBUG, "exception");
             throw ("Format error: Token isn't close brace during parsing expression.");
         } else {
-            lex.getNextTok(); // eat close brace
+            lex.stepForward(); // eat close brace
         }
         return std::move(res);
     }
@@ -110,7 +110,7 @@ shared_ptr<ExprAST> parser::parseIdDefinitionExpr(lexers::Lexer &lex) {
 }
 
 shared_ptr<ExprAST> parser::parseFunctionDefinitionExpr(lexers::Lexer &lex) {
-    if (lex.getNextTok() != Lexer::TokIdentifier) {
+    if (lex.stepForward() != Lexer::TokIdentifier) {
         CLOG(DEBUG, "exception");
         throw logic_error("Token isn't open brace during parsing function definition.");
     }
@@ -128,7 +128,7 @@ shared_ptr<ExprAST> parser::parseFunctionDefinitionExpr(lexers::Lexer &lex) {
         CLOG(DEBUG, "exception");
         throw logic_error("Token cannot end arguments parsing.");
     } else {
-        lex.getNextTok();
+        lex.stepForward();
     }
 
     auto expr = parseExpr(lex);
@@ -141,7 +141,7 @@ shared_ptr<ExprAST> parser::parseFunctionDefinitionExpr(lexers::Lexer &lex) {
 }
 
 shared_ptr<ExprAST> parser::parseDefinitionExpr(lexers::Lexer &lex) {
-    switch (lex.getNextTok()) {
+    switch (lex.stepForward()) {
         case Lexer::TokIdentifier:
             CLOG(DEBUG, "parser") << "Parse identifier Definition";
             return parseIdDefinitionExpr(lex);

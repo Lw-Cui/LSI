@@ -1,6 +1,7 @@
 #ifndef GI_LEXERS_H
 #define GI_LEXERS_H
 
+#include <set>
 #include <string>
 #include <stdexcept>
 #include <algorithm>
@@ -19,7 +20,9 @@ namespace lexers {
             TokDefine = -6,
             TokLet = -7,
             TokOperator = -8,
+            TokIf = -9,
         };
+
 
         void appendExp(const std::string &exp);
 
@@ -35,12 +38,18 @@ namespace lexers {
 
         std::string getIdentifier();
 
-        TokenType getNextTok();
+        TokenType stepForward();
 
     private:
         bool isOperator(int type) const;
 
         std::string processExp(const std::string exp) const;
+
+        std::map<std::string, TokenType> keyWord = {
+                {"define", TokDefine},
+                {"let", TokLet},
+                {"if", TokIf},
+        };
 
         std::string identifier;
         double number;
