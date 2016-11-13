@@ -127,3 +127,25 @@ TEST(ParserTest, FunctionWithMultipleArgumentsTest) {
     ASSERT_EQ(10, numPtr->getValue());
 }
 
+TEST(ParserTest, IfStatementTest) {
+    Scope ss;
+    lexers::Lexer lex("(if (+ 5 6) 5 6)");
+    auto exprPtr = parseExpr(lex)->eval(ss);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
+    auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
+    ASSERT_EQ(5, numPtr->getValue());
+
+    lex.appendExp("(define (add x y) (+ x y))");
+    parseExpr(lex)->eval(ss);
+    lex.appendExp("(define (bar x) (+ x 1))");
+    parseExpr(lex)->eval(ss);
+    lex.appendExp("(define (foo x) (+ x 2))");
+    parseExpr(lex)->eval(ss);
+    ASSERT_TRUE(ss.count("foo"));
+
+    lex.appendExp("((if (add 0 0) bar foo) 0)");
+    exprPtr = parseExpr(lex)->eval(ss);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
+    numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
+    ASSERT_EQ(2, numPtr->getValue());
+}

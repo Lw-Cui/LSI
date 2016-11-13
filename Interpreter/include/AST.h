@@ -75,6 +75,18 @@ namespace parser {
         Scope context;
     };
 
+    class IfStatementAST : public ExprAST {
+    public:
+        IfStatementAST(std::shared_ptr<ExprAST> c, std::shared_ptr<ExprAST> t, std::shared_ptr<ExprAST> f) :
+                condition{c}, trueClause{t}, falseClause{f} {}
+
+        std::shared_ptr<ExprAST> eval(Scope &) const override;
+
+    private:
+        std::shared_ptr<ExprAST> condition;
+        std::shared_ptr<ExprAST> trueClause, falseClause;
+    };
+
     class OperatorAST : public ExprAST {
     public:
         OperatorAST(const std::vector<std::shared_ptr<ExprAST>> &v) : actualArgs{v} {}
@@ -82,6 +94,7 @@ namespace parser {
     protected:
         std::vector<std::shared_ptr<ExprAST>> actualArgs;
     };
+
 
     class AddOperatorAST : public OperatorAST {
     public:

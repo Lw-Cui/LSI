@@ -12,6 +12,15 @@ std::shared_ptr<ExprAST> ExprAST::apply(const std::vector<std::shared_ptr<ExprAS
     throw std::logic_error("Expression cannot be applied.");
 };
 
+std::shared_ptr<ExprAST> IfStatementAST::eval(Scope &ss) const {
+    if (condition->eval(ss)->toBool()) {
+        CLOG(DEBUG, "parser") << "Evaluate true clause.";
+        return trueClause->eval(ss);
+    } else {
+        CLOG(DEBUG, "parser") << "Evaluate false clause.";
+        return falseClause->eval(ss);
+    }
+}
 
 std::shared_ptr<ExprAST> NumberAST::eval(Scope &) const {
     return std::make_shared<NumberAST>(getValue());
@@ -21,7 +30,7 @@ std::shared_ptr<ExprAST> NumberAST::eval(Scope &) const {
 std::shared_ptr<ExprAST> IdentifierAST::eval(Scope &ss) const {
     CLOG(DEBUG, "parser") << "Evaluate identifier: " << getId();
     if (ss.count(getId())) {
-        return ss[getId()]->eval(ss);
+        return ss[getId()];
     } else {
         CLOG(DEBUG, "exception");
         throw std::logic_error("Unbound identifier.");
@@ -38,13 +47,13 @@ void ArgumentsAST::bindArguments(const std::vector<std::shared_ptr<ExprAST>> &ac
 
 
 std::shared_ptr<ExprAST> LambdaAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs,
-                                          const Scope &)  {
+                                          const Scope &) {
     bindArguments(actualArgs, context);
     return expression->eval(context);
 }
 
 
-std::shared_ptr<ExprAST> AddOperatorAST::eval(Scope &s) const  {
+std::shared_ptr<ExprAST> AddOperatorAST::eval(Scope &s) const {
     double num = 0;
     for (auto element: actualArgs) {
         std::shared_ptr<ExprAST> res = element->eval(s);
@@ -60,23 +69,27 @@ std::shared_ptr<ExprAST> AddOperatorAST::eval(Scope &s) const  {
 }
 
 
-std::shared_ptr<ExprAST> ValueBindingAST::eval(Scope &ss) const  {
+std::shared_ptr<ExprAST> ValueBindingAST::eval(Scope &ss) const {
     ss[getIdentifier()] = value->eval(ss);
     return nullptr;
 }
 
 
-std::shared_ptr<ExprAST> LambdaBindingAST::eval(Scope &ss) const  {
+std::shared_ptr<ExprAST> LambdaBindingAST::eval(Scope &ss) const {
     lambda->setContext(ss);
     ss[getIdentifier()] = lambda;
     return nullptr;
 }
 
-std::shared_ptr<ExprAST> LambdaApplicationAST::eval(Scope &ss) const  {
-    return lambda->apply(actualArgs, ss);
+std::shared_ptr<ExprAST> LambdaApplicationAST::eval(Scope &ss) const {
+    if (std::dynamic_pointer_cast<LambdaAST>(lambda)) {
+        return lambda->apply(actualArgs, ss);
+    } else {
+        return lambda->eval(ss)->apply(actualArgs, ss);
+    }
 }
 
-std::shared_ptr<ExprAST> FunctionApplicationAST::eval(Scope &ss) const  {
+std::shared_ptr<ExprAST> FunctionApplicationAST::eval(Scope &ss) const {
     CLOG(DEBUG, "parser") << "Apply function call. Number of actual arguments: " << actualArgs.size();
     if (ss.count(identifier)) {
         return ss[identifier]->apply(actualArgs, ss);
