@@ -22,22 +22,6 @@ TEST(ParserTest, IdentifierTest) {
 
 }
 
-TEST(ParserTest, ConditionTest) {
-    Scope ss;
-    lexers::Lexer lex{"(define n 0)"};
-    parseExpr(lex)->eval(ss);
-    ASSERT_FALSE(ss["n"]->toBool());
-}
-
-TEST(ParserTest, AddOperatorTest) {
-    Scope ss;
-    lexers::Lexer lex{"(+ 5 6 7)"};
-    auto exprPtr = parseExpr(lex)->eval(ss);
-    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
-    auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
-    ASSERT_EQ(18, numPtr->getValue());
-}
-
 TEST(ParserTest, IdentifierDefinitionTest) {
     Scope ss;
     lexers::Lexer lex{"(define n 5)"};
@@ -63,89 +47,21 @@ TEST(ParserTest, IdentifierDefinitionTest) {
     ASSERT_EQ(Lexer::TokEOF, lex.getTokType());
 }
 
-TEST(ParserTest, FunctionDefinitionTest) {
+
+TEST(ParserTest, ConditionTest) {
     Scope ss;
-    lexers::Lexer lex{"(define (foo x) x)"};
-    auto exprPtr = parser::parseExpr(lex)->eval(ss);
-    ASSERT_TRUE(ss.count("foo"));
+    lexers::Lexer lex{"(define n 0)"};
+    parseExpr(lex)->eval(ss);
+    ASSERT_FALSE(ss["n"]->toBool());
 }
 
-TEST(ParserTest, FunctionApplicationTest) {
+TEST(ParserTest, AddOperatorTest) {
     Scope ss;
-    lexers::Lexer lex{"(define (foo x) x)"};
-    auto exprPtr = parser::parseExpr(lex)->eval(ss);
-    ASSERT_TRUE(ss.count("foo"));
-
-    lex.appendExp("(foo 5)");
-    exprPtr = parseExpr(lex)->eval(ss);
-    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
-    auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
-    ASSERT_EQ(5, numPtr->getValue());
-
-    lex.appendExp("(define (bar x) (+ x 1))");
-    exprPtr = parseExpr(lex)->eval(ss);
-    ASSERT_TRUE(ss.count("bar"));
-
-    lex.appendExp("(bar 4)");
-    exprPtr = parseExpr(lex)->eval(ss);
-    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
-    numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
-    ASSERT_EQ(5, numPtr->getValue());
-
-    lex.appendExp("(define n 4)");
-    exprPtr = parseExpr(lex)->eval(ss);
-    ASSERT_TRUE(ss.count("n"));
-
-    lex.appendExp("(bar n)");
-    exprPtr = parseExpr(lex)->eval(ss);
-    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
-    numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
-    ASSERT_EQ(5, numPtr->getValue());
-
-    lex.appendExp("(define b (foo (bar n)))");
-    exprPtr = parseExpr(lex)->eval(ss);
-    ASSERT_TRUE(ss.count("b"));
-    exprPtr = ss["b"];
-    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
-    numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
-    ASSERT_EQ(5, numPtr->getValue());
-}
-
-TEST(ParserTest, FunctionWithMultipleArgumentsTest) {
-    Scope ss;
-    lexers::Lexer lex("(define (bar x y) (+ x y 1))");
-    auto exprPtr = parseExpr(lex)->eval(ss);
-    ASSERT_TRUE(ss.count("bar"));
-
-    lex.appendExp("(define n 5)");
-    parseExpr(lex)->eval(ss);
-
-    lex.appendExp("(bar n 4)");
-    exprPtr = parseExpr(lex)->eval(ss);
-    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
-    auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
-    ASSERT_EQ(10, numPtr->getValue());
-}
-
-TEST(ParserTest, HighOrderFunctionTEST) {
-    Scope ss;
-    lexers::Lexer lex("(define (bar f x) (+ (f x) 1))");
-    parseExpr(lex)->eval(ss);
-    ASSERT_TRUE(ss.count("bar"));
-
-    lex.appendExp("(define (foo x) (+ x 1))");
-    parseExpr(lex)->eval(ss);
-    ASSERT_TRUE(ss.count("foo"));
-
-    lex.appendExp("(define n 4)");
-    parseExpr(lex)->eval(ss);
-    ASSERT_TRUE(ss.count("n"));
-
-    lex.appendExp("(bar foo n)");
+    lexers::Lexer lex{"(+ 5 6 7)"};
     auto exprPtr = parseExpr(lex)->eval(ss);
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
     auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
-    ASSERT_EQ(6, numPtr->getValue());
+    ASSERT_EQ(18, numPtr->getValue());
 }
 
 

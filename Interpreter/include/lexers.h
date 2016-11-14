@@ -24,7 +24,9 @@ namespace lexers {
         };
 
 
-        void appendExp(const std::string &exp);
+        Lexer &appendExp(const std::string &exp);
+
+        Lexer() {}
 
         Lexer(const std::string &exp) {
             appendExp(exp);
@@ -47,8 +49,8 @@ namespace lexers {
 
         std::map<std::string, TokenType> keyWord = {
                 {"define", TokDefine},
-                {"let", TokLet},
-                {"if", TokIf},
+                {"let",    TokLet},
+                {"if",     TokIf},
         };
 
         std::string identifier;

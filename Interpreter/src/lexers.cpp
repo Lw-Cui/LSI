@@ -2,11 +2,12 @@
 
 using namespace lexers;
 
-void Lexer::appendExp(const std::string &exp) {
+Lexer &Lexer::appendExp(const std::string &exp) {
     expressionBuf.clear();
     expressionBuf << processExp(exp);
     CLOG(DEBUG, "lexer") << "String is:" << exp;
     if (getTokType() == TokEOF) stepForward();
+    return *this;
 }
 
 double Lexer::getNum() {
