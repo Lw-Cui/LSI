@@ -127,6 +127,28 @@ TEST(ParserTest, FunctionWithMultipleArgumentsTest) {
     ASSERT_EQ(10, numPtr->getValue());
 }
 
+TEST(ParserTest, HighOrderFunctionTEST) {
+    Scope ss;
+    lexers::Lexer lex("(define (bar f x) (+ (f x) 1))");
+    parseExpr(lex)->eval(ss);
+    ASSERT_TRUE(ss.count("bar"));
+
+    lex.appendExp("(define (foo x) (+ x 1))");
+    parseExpr(lex)->eval(ss);
+    ASSERT_TRUE(ss.count("foo"));
+
+    lex.appendExp("(define n 4)");
+    parseExpr(lex)->eval(ss);
+    ASSERT_TRUE(ss.count("n"));
+
+    lex.appendExp("(bar foo n)");
+    auto exprPtr = parseExpr(lex)->eval(ss);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
+    auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
+    ASSERT_EQ(6, numPtr->getValue());
+}
+
+
 TEST(ParserTest, IfStatementTest) {
     Scope ss;
     lexers::Lexer lex("(if (+ 5 6) 5 6)");
