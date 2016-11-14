@@ -2,18 +2,19 @@
 
 using namespace lexers;
 
-void Lexer::appendExp(const std::string &exp) {
+Lexer &Lexer::appendExp(const std::string &exp) {
     expressionBuf.clear();
     expressionBuf << processExp(exp);
     CLOG(DEBUG, "lexer") << "String is:" << exp;
-    if (getTokType() == TokEOF) getNextTok();
+    if (getTokType() == TokEOF) stepForward();
+    return *this;
 }
 
 double Lexer::getNum() {
     if (getTokType() == TokNumber) {
         auto tmp = number;
         CLOG(DEBUG, "lexer") << "Get number: " << tmp;
-        getNextTok();
+        stepForward();
         return tmp;
     } else {
         CLOG(DEBUG, "exception");
@@ -25,7 +26,7 @@ std::string Lexer::getOperator() {
     if (getTokType() == TokOperator) {
         std::string tmp = identifier;
         CLOG(DEBUG, "lexer") << "Get Operator: " << tmp;
-        getNextTok();
+        stepForward();
         return std::move(tmp);
     } else {
         CLOG(DEBUG, "exception");
@@ -37,7 +38,7 @@ std::string Lexer::getIdentifier() {
     if (getTokType() == TokIdentifier) {
         std::string tmp = identifier;
         CLOG(DEBUG, "lexer") << "Get identifier: " << tmp;
-        getNextTok();
+        stepForward();
         return std::move(tmp);
     } else {
         CLOG(DEBUG, "exception");
@@ -45,7 +46,7 @@ std::string Lexer::getIdentifier() {
     }
 }
 
-Lexer::TokenType Lexer::getNextTok() {
+Lexer::TokenType Lexer::stepForward() {
     int type{expressionBuf.get()};
     expressionBuf.unget();
 
@@ -53,7 +54,7 @@ Lexer::TokenType Lexer::getNextTok() {
         currentType = TokEOF;
     } else if (isspace(type)) {
         expressionBuf.get();
-        return getNextTok();
+        return stepForward();
     } else if (isdigit(type)) {
         expressionBuf >> number;
         CLOG(DEBUG, "lexer") << "Read number: " << number;
@@ -61,12 +62,7 @@ Lexer::TokenType Lexer::getNextTok() {
     } else if (isalpha(type)) {
         expressionBuf >> identifier;
         CLOG(DEBUG, "lexer") << "Read identifier: " << identifier;
-        if (identifier == "define")
-            currentType = TokDefine;
-        else if (identifier == "let")
-            currentType = TokLet;
-        else
-            currentType = TokIdentifier;
+        currentType = (keyWord.count(identifier) ? keyWord[identifier] : TokIdentifier);
     } else if (isOperator(type)) {
         expressionBuf >> identifier;
         CLOG(DEBUG, "lexer") << "Read operator: " << identifier;
