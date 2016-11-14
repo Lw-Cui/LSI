@@ -14,10 +14,10 @@ std::shared_ptr<ExprAST> ExprAST::apply(const std::vector<std::shared_ptr<ExprAS
 
 std::shared_ptr<ExprAST> IfStatementAST::eval(Scope &ss) const {
     if (condition->eval(ss)->toBool()) {
-        CLOG(DEBUG, "parser") << "Evaluate true clause.";
+        CLOG(DEBUG, "AST") << "Evaluate true clause.";
         return trueClause->eval(ss);
     } else {
-        CLOG(DEBUG, "parser") << "Evaluate false clause.";
+        CLOG(DEBUG, "AST") << "Evaluate false clause.";
         return falseClause->eval(ss);
     }
 }
@@ -28,7 +28,7 @@ std::shared_ptr<ExprAST> NumberAST::eval(Scope &) const {
 
 
 std::shared_ptr<ExprAST> IdentifierAST::eval(Scope &ss) const {
-    CLOG(DEBUG, "parser") << "Evaluate identifier: " << getId();
+    CLOG(DEBUG, "AST") << "Evaluate identifier: " << getId();
     if (ss.count(getId())) {
         return ss[getId()];
     } else {
@@ -38,9 +38,9 @@ std::shared_ptr<ExprAST> IdentifierAST::eval(Scope &ss) const {
 }
 
 void ArgumentsAST::bindArguments(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
-    CLOG(DEBUG, "parser") << "Number of formal arguments is " << formalArgs.size();
+    CLOG(DEBUG, "AST") << "Number of formal arguments is " << formalArgs.size();
     for (size_t i = 0; i < actualArgs.size(); i++) {
-        CLOG(DEBUG, "parser") << "Set formal argument: " << formalArgs[i];
+        CLOG(DEBUG, "AST") << "Set formal argument: " << formalArgs[i];
         s[formalArgs[i]] = actualArgs[i]->eval(s);
     }
 }
@@ -58,7 +58,7 @@ std::shared_ptr<ExprAST> AddOperatorAST::eval(Scope &s) const {
     for (auto element: actualArgs) {
         std::shared_ptr<ExprAST> res = element->eval(s);
         if (auto p = std::dynamic_pointer_cast<NumberAST>(res)) {
-            CLOG(DEBUG, "parser") << "Add number: " << p->getValue();
+            CLOG(DEBUG, "AST") << "Add number: " << p->getValue();
             num += p->getValue();
         } else {
             CLOG(DEBUG, "exception");
@@ -90,7 +90,7 @@ std::shared_ptr<ExprAST> LambdaApplicationAST::eval(Scope &ss) const {
 }
 
 std::shared_ptr<ExprAST> FunctionApplicationAST::eval(Scope &ss) const {
-    CLOG(DEBUG, "parser") << "Apply function call. Number of actual arguments: " << actualArgs.size();
+    CLOG(DEBUG, "AST") << "Apply function call. Number of actual arguments: " << actualArgs.size();
     if (ss.count(identifier)) {
         return ss[identifier]->apply(actualArgs, ss);
     } else {
