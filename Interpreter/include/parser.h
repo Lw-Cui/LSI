@@ -15,6 +15,8 @@ namespace parser {
 
     std::shared_ptr<ExprAST> parseAddOperatorExpr(lexers::Lexer &lex);
 
+    std::shared_ptr<ExprAST> parseLessThanOperatorExpr(lexers::Lexer &lex);
+
     std::shared_ptr<ExprAST> parseIdentifierExpr(lexers::Lexer &lex);
 
     std::shared_ptr<ExprAST> parseIfStatementExpr(lexers::Lexer &lex);

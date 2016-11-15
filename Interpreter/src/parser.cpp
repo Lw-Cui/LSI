@@ -65,6 +65,9 @@ std::shared_ptr<ExprAST> parser::parseOperatorExpr(lexers::Lexer &lex) {
         case '+':
             CLOG(DEBUG, "parser") << "parsing add operator";
             return parseAddOperatorExpr(lex);
+        case '<':
+            CLOG(DEBUG, "parser") << "parsing less than operator";
+            return parseLessThanOperatorExpr(lex);
         default:
             CLOG(DEBUG, "exception");
             throw logic_error("Cannot parse operator.");
@@ -77,6 +80,14 @@ std::shared_ptr<ExprAST> parser::parseAddOperatorExpr(lexers::Lexer &lex) {
         arguments.push_back(parseExpr(lex));
     CLOG(DEBUG, "parser") << "Number of add operands are: " << arguments.size();
     return make_shared<AddOperatorAST>(arguments);
+}
+
+std::shared_ptr<ExprAST> parser::parseLessThanOperatorExpr(lexers::Lexer &lex) {
+    std::vector<std::shared_ptr<ExprAST>> arguments;
+    while (lex.getTokType() != Lexer::TokCloseBrace)
+        arguments.push_back(parseExpr(lex));
+    CLOG(DEBUG, "parser") << "Number of less than operands are: " << arguments.size();
+    return make_shared<LessThanOperatorAST>(arguments);
 }
 
 shared_ptr<ExprAST> parser::parseNumberExpr(Lexer &lex) {
@@ -178,3 +189,4 @@ std::shared_ptr<ExprAST> parser::parseIfStatementExpr(lexers::Lexer &lex) {
     return make_shared<IfStatementAST>(condition, trueClause, falseClause);
 
 }
+

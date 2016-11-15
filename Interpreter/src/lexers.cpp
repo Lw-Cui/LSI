@@ -82,7 +82,6 @@ bool Lexer::isOperator(int type) const {
     switch (type) {
         case '+':
         case '-':
-        case '>':
         case '<':
             return true;
         default:

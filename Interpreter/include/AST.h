@@ -95,13 +95,18 @@ namespace parser {
         std::vector<std::shared_ptr<ExprAST>> actualArgs;
     };
 
+    class LessThanOperatorAST : public OperatorAST {
+    public:
+        LessThanOperatorAST(const std::vector<std::shared_ptr<ExprAST>> &v) : OperatorAST{v} {}
+
+        std::shared_ptr<ExprAST> eval(Scope &s) const override;
+    };
 
     class AddOperatorAST : public OperatorAST {
     public:
         AddOperatorAST(const std::vector<std::shared_ptr<ExprAST>> &v) : OperatorAST{v} {}
 
         std::shared_ptr<ExprAST> eval(Scope &s) const override;
-
     };
 
     class BindingAST : public ExprAST {
