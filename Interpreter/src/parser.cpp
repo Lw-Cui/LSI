@@ -9,6 +9,7 @@ using namespace std;
 shared_ptr<ExprAST> parser::parseExpr(lexers::Lexer &lex) {
     CLOG(DEBUG, "parser") << "Parse expression";
     if (lex.getTokType() != Lexer::TokOpenBrace) {
+        CLOG(DEBUG, "parser") << "Lexer Token type" << lex.getTokType();
         switch (lex.getTokType()) {
             case Lexer::TokNumber:
                 CLOG(DEBUG, "parser") << "Parse number";
@@ -16,6 +17,12 @@ shared_ptr<ExprAST> parser::parseExpr(lexers::Lexer &lex) {
             case Lexer::TokIdentifier:
                 CLOG(DEBUG, "parser") << "Parse identifier";
                 return parseIdentifierExpr(lex);
+            case Lexer::TokTrue:
+                CLOG(DEBUG, "parser") << "Parse #t";
+                return parseTrueExpr(lex);
+            case Lexer::TokFalse:
+                CLOG(DEBUG, "parser") << "Parse #f";
+                return parseFalseExpr(lex);
             default:
                 CLOG(DEBUG, "exception");
                 throw logic_error("Cannot parse number/identifier.");
@@ -30,9 +37,6 @@ shared_ptr<ExprAST> parser::parseExpr(lexers::Lexer &lex) {
                 CLOG(DEBUG, "parser") << "Parse function Call";
                 res = parseFunctionApplicationExpr(lex);
                 CLOG(DEBUG, "parser") << "End parsing function Call";
-                break;
-            case Lexer::TokLet:
-                res = parseLetExpr(lex);
                 break;
             case Lexer::TokDefine:
                 CLOG(DEBUG, "parser") << "Parse Definition";
@@ -124,9 +128,6 @@ shared_ptr<ExprAST> parser::parseLambdaApplicationExpr(lexers::Lexer &lex) {
     return make_shared<LambdaApplicationAST>(lambda, arguments);
 }
 
-shared_ptr<ExprAST> parser::parseLetExpr(lexers::Lexer &lex) {
-}
-
 shared_ptr<ExprAST> parser::parseIdDefinitionExpr(lexers::Lexer &lex) {
     auto identifier = lex.getIdentifier();
     CLOG(DEBUG, "parser") << "define identifier: " << identifier;
@@ -187,6 +188,14 @@ std::shared_ptr<ExprAST> parser::parseIfStatementExpr(lexers::Lexer &lex) {
     auto falseClause = parseExpr(lex);
     CLOG(DEBUG, "parser") << "Finished if statement parsing";
     return make_shared<IfStatementAST>(condition, trueClause, falseClause);
-
 }
 
+std::shared_ptr<ExprAST> parser::parseTrueExpr(lexers::Lexer &lex) {
+    lex.stepForward();
+    return make_shared<BooleansAST>(true);
+}
+
+std::shared_ptr<ExprAST> parser::parseFalseExpr(lexers::Lexer &lex) {
+    lex.stepForward();
+    return make_shared<BooleansAST>(false);
+}

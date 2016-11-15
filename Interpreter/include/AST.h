@@ -18,7 +18,7 @@ namespace parser {
 
         virtual std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &, const Scope &);
 
-        virtual std::shared_ptr<ExprAST> toBool() const;
+        virtual std::shared_ptr<ExprAST> toBool(Scope &) const;
 
         virtual ~ExprAST() {}
     };
@@ -39,7 +39,7 @@ namespace parser {
 
         double getValue() const { return value; }
 
-        virtual std::shared_ptr<ExprAST> toBool() const override;
+        virtual std::shared_ptr<ExprAST> toBool(Scope &) const override;
 
         std::shared_ptr<ExprAST> eval(Scope &) const override;
 

@@ -59,7 +59,7 @@ Lexer::TokenType Lexer::stepForward() {
         expressionBuf >> numToken;
         CLOG(DEBUG, "lexer") << "Read number: " << strToken;
         currentType = TokNumber;
-    } else if (isalpha(type)) {
+    } else if (isalpha(type) || type == '#') {
         expressionBuf >> strToken;
         CLOG(DEBUG, "lexer") << "Read string token: " << strToken;
         currentType = (keyWord.count(strToken) ? keyWord[strToken] : TokIdentifier);

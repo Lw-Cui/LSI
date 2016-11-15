@@ -9,6 +9,10 @@ namespace parser {
 
     std::shared_ptr<ExprAST> parseExpr(lexers::Lexer &lex);
 
+    std::shared_ptr<ExprAST> parseTrueExpr(lexers::Lexer &lex);
+
+    std::shared_ptr<ExprAST> parseFalseExpr(lexers::Lexer &lex);
+
     std::shared_ptr<ExprAST> parseNumberExpr(lexers::Lexer &lex);
 
     std::shared_ptr<ExprAST> parseOperatorExpr(lexers::Lexer &lex);
@@ -24,8 +28,6 @@ namespace parser {
     std::shared_ptr<ExprAST> parseLambdaApplicationExpr(lexers::Lexer &lex);
 
     std::shared_ptr<ExprAST> parseFunctionApplicationExpr(lexers::Lexer &lex);
-
-    std::shared_ptr<ExprAST> parseLetExpr(lexers::Lexer &lex);
 
     std::shared_ptr<ExprAST> parseDefinitionExpr(lexers::Lexer &lex);
 
