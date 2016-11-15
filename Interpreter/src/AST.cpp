@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <AST.h>
 
 using namespace parser;
@@ -22,6 +23,25 @@ std::shared_ptr<ExprAST> IfStatementAST::eval(Scope &ss) const {
     }
 }
 
+std::shared_ptr<ExprAST> LessThanOperatorAST::eval(Scope &s) const {
+    bool res = std::is_sorted(
+            std::begin(actualArgs), std::end(actualArgs),
+            [&](std::shared_ptr<ExprAST> p1, std::shared_ptr<ExprAST> p2) {
+                //[&](decltype(actualArgs)::value_type p1, decltype(actualArgs)::value_type p2) {
+                auto np1 = std::dynamic_pointer_cast<NumberAST>(p1->eval(s));
+                auto np2 = std::dynamic_pointer_cast<NumberAST>(p2->eval(s));
+                if (np1 && np2) {
+                    return np1->getValue() < np2->getValue();
+                } else {
+                    CLOG(DEBUG, "exception");
+                    throw std::logic_error(
+                            "The operands in less than operator cannot be converted to number");
+                }
+            });
+    if (res) return std::make_shared<NumberAST>(1);
+    else return std::make_shared<NumberAST>(0);
+}
+
 std::shared_ptr<ExprAST> NumberAST::eval(Scope &) const {
     return std::make_shared<NumberAST>(getValue());
 }
@@ -44,7 +64,6 @@ void ArgumentsAST::bindArguments(const std::vector<std::shared_ptr<ExprAST>> &ac
         s[formalArgs[i]] = actualArgs[i]->eval(s);
     }
 }
-
 
 std::shared_ptr<ExprAST> LambdaAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs,
                                           const Scope &) {
