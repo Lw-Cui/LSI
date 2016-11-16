@@ -8,54 +8,46 @@ using namespace parser;
 TEST(ParserTest, NumberTest) {
     lexers::Lexer lex{"5"};
     auto exprPtr = parser::parseExpr(lex);
-    ASSERT_TRUE(dynamic_cast<parser::NumberAST *>(exprPtr.get()));
-    auto numPtr = dynamic_cast<parser::NumberAST *>(exprPtr.get());
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
+    auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
     ASSERT_EQ(5, numPtr->getValue());
 }
 
 TEST(ParserTest, IdentifierTest) {
     lexers::Lexer lex{"abs"};
     auto exprPtr = parser::parseExpr(lex);
-    ASSERT_TRUE(dynamic_cast<parser::IdentifierAST *>(exprPtr.get()));
-    auto idPtr = dynamic_cast<parser::IdentifierAST *>(exprPtr.get());
+    ASSERT_TRUE(std::dynamic_pointer_cast<IdentifierAST>(exprPtr));
+    auto idPtr = std::dynamic_pointer_cast<IdentifierAST>(exprPtr);
     ASSERT_STREQ("abs", idPtr->getId().c_str());
 
 }
 
-TEST(ParserTest, IdentifierDefinitionTest) {
-    lexers::Lexer lex{"(define n 5)"};
-    std::shared_ptr<ExprAST> exprPtr;
-    std::shared_ptr<IdentifierAST> idPtr;
+TEST(ParserTest, ConditionTest) {
     Scope ss;
+    lexers::Lexer lex{"(define n 0)"};
+    parseExpr(lex)->eval(ss);
+    ASSERT_FALSE(ss["n"]->toBool(ss));
 
-    exprPtr = parser::parseExpr(lex);
-    exprPtr->eval(ss);
-    ASSERT_TRUE(ss.count("n"));
-    exprPtr = ss["n"]->eval(ss);
-
-    ASSERT_TRUE(dynamic_cast<parser::NumberAST *>(exprPtr.get()));
-    auto numPtr = dynamic_cast<parser::NumberAST *>(exprPtr.get());
-    ASSERT_EQ(5, numPtr->getValue());
-    ASSERT_EQ(Lexer::TokEOF, lex.getTokType());
-
-    lexers::Lexer lex2{"(define a n)"};
-    auto ptr = parser::parseExpr(lex2);
-    ptr->eval(ss);
-
-    ASSERT_TRUE(ss.count("a"));
-    ptr = ss["a"]->eval(ss);
-
-    ASSERT_TRUE(dynamic_cast<parser::NumberAST *>(exprPtr.get()));
-    numPtr = dynamic_cast<parser::NumberAST *>(exprPtr.get());
-    ASSERT_EQ(5, numPtr->getValue());
-    ASSERT_EQ(Lexer::TokEOF, lex.getTokType());
 }
 
-TEST(ParserTest, FunctionDefinitionTest) {
-    lexers::Lexer lex{"(define (foo x) x)"};
+TEST(ParserTest, AddOperatorTest) {
     Scope ss;
-
-    std::shared_ptr<ExprAST> exprPtr = parser::parseExpr(lex);
-    exprPtr->eval(ss);
-    ASSERT_TRUE(ss.count("foo"));
+    lexers::Lexer lex{"(+ 5 6 7)"};
+    auto exprPtr = parseExpr(lex)->eval(ss);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
+    auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
+    ASSERT_EQ(18, numPtr->getValue());
 }
+
+TEST(ParserTest, LessThanOperatorTest) {
+    Scope ss;
+    lexers::Lexer lex("(< 5 6 7)");
+    ASSERT_TRUE(parseExpr(lex)->eval(ss)->toBool(ss));
+
+    lex.appendExp("(define n 6)");
+    parseExpr(lex)->eval(ss);
+
+    lex.appendExp("(< n 5)");
+    ASSERT_FALSE(parseExpr(lex)->eval(ss)->toBool(ss));
+}
+
