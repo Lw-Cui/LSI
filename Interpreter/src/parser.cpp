@@ -8,7 +8,7 @@ using namespace std;
 
 shared_ptr<ExprAST> parser::parseExpr(lexers::Lexer &lex) {
     CLOG(DEBUG, "parser") << "Parse expression";
-    if (lex.getTokType() != Lexer::TokOpenBrace) {
+    if (lex.getTokType() != Lexer::TokOpeningBracket) {
         CLOG(DEBUG, "parser") << "Lexer Token type" << lex.getTokType();
         switch (lex.getTokType()) {
             case Lexer::TokNumber:
@@ -30,7 +30,7 @@ shared_ptr<ExprAST> parser::parseExpr(lexers::Lexer &lex) {
     } else {
         shared_ptr<ExprAST> res;
         switch (lex.stepForward()) { // eat open brace
-            case Lexer::TokOpenBrace:
+            case Lexer::TokOpeningBracket:
                 res = parseLambdaApplicationExpr(lex);
                 break;
             case Lexer::TokIdentifier:
@@ -50,11 +50,15 @@ shared_ptr<ExprAST> parser::parseExpr(lexers::Lexer &lex) {
                 CLOG(DEBUG, "parser") << "Parse If statement";
                 res = parseIfStatementExpr(lex);
                 break;
+            case Lexer::TokLoad:
+                CLOG(DEBUG, "parser") << "Parse loading statement";
+                res = parseLoadingFileExpr(lex);
+                break;
             default:
                 CLOG(DEBUG, "exception");
                 throw logic_error("Cannot parse token.");
         }
-        if (lex.getTokType() != Lexer::TokCloseBrace) {
+        if (lex.getTokType() != Lexer::TokClosingBracket) {
             CLOG(DEBUG, "exception");
             throw ("Format error: Token isn't close brace during parsing expression.");
         } else {
@@ -80,7 +84,7 @@ std::shared_ptr<ExprAST> parser::parseOperatorExpr(lexers::Lexer &lex) {
 
 std::shared_ptr<ExprAST> parser::parseAddOperatorExpr(lexers::Lexer &lex) {
     std::vector<std::shared_ptr<ExprAST>> arguments;
-    while (lex.getTokType() != Lexer::TokCloseBrace)
+    while (lex.getTokType() != Lexer::TokClosingBracket)
         arguments.push_back(parseExpr(lex));
     CLOG(DEBUG, "parser") << "Number of add operands are: " << arguments.size();
     return make_shared<AddOperatorAST>(arguments);
@@ -88,7 +92,7 @@ std::shared_ptr<ExprAST> parser::parseAddOperatorExpr(lexers::Lexer &lex) {
 
 std::shared_ptr<ExprAST> parser::parseLessThanOperatorExpr(lexers::Lexer &lex) {
     std::vector<std::shared_ptr<ExprAST>> arguments;
-    while (lex.getTokType() != Lexer::TokCloseBrace)
+    while (lex.getTokType() != Lexer::TokClosingBracket)
         arguments.push_back(parseExpr(lex));
     CLOG(DEBUG, "parser") << "Number of less than operands are: " << arguments.size();
     return make_shared<LessThanOperatorAST>(arguments);
@@ -108,7 +112,7 @@ shared_ptr<ExprAST> parser::parseFunctionApplicationExpr(lexers::Lexer &lex) {
     string identifier = lex.getIdentifier();
     CLOG(DEBUG, "parser") << "Parse function: " << identifier;
     vector<shared_ptr<ExprAST>> arguments;
-    while (lex.getTokType() != Lexer::TokCloseBrace) {
+    while (lex.getTokType() != Lexer::TokClosingBracket) {
         CLOG(DEBUG, "parser") << "Parse arguments: " << lex.getTokType();
         arguments.push_back(parseExpr(lex));
     }
@@ -121,7 +125,7 @@ shared_ptr<ExprAST> parser::parseLambdaApplicationExpr(lexers::Lexer &lex) {
     CLOG(DEBUG, "parser") << "After parsing lambda, the token is " << lex.getTokType();
     vector<shared_ptr<ExprAST>> arguments;
     CLOG(DEBUG, "parser") << "Parsing lambda application arguments";
-    while (lex.getTokType() != Lexer::TokCloseBrace) {
+    while (lex.getTokType() != Lexer::TokClosingBracket) {
         CLOG(DEBUG, "parser") << "Parse arguments: " << lex.getTokType();
         arguments.push_back(parseExpr(lex));
     }
@@ -149,7 +153,7 @@ shared_ptr<ExprAST> parser::parseFunctionDefinitionExpr(lexers::Lexer &lex) {
         args.push_back(lex.getIdentifier());
     }
 
-    if (lex.getTokType() != Lexer::TokCloseBrace) {
+    if (lex.getTokType() != Lexer::TokClosingBracket) {
         CLOG(DEBUG, "exception");
         throw logic_error("Token cannot end arguments parsing.");
     } else {
@@ -157,7 +161,7 @@ shared_ptr<ExprAST> parser::parseFunctionDefinitionExpr(lexers::Lexer &lex) {
     }
 
     auto expr = parseExpr(lex);
-    if (lex.getTokType() != Lexer::TokCloseBrace) {
+    if (lex.getTokType() != Lexer::TokClosingBracket) {
         CLOG(DEBUG, "exception");
         throw logic_error("Token cannot end function parsing");
     }
@@ -170,7 +174,7 @@ shared_ptr<ExprAST> parser::parseDefinitionExpr(lexers::Lexer &lex) {
         case Lexer::TokIdentifier:
             CLOG(DEBUG, "parser") << "Parse identifier Definition";
             return parseIdDefinitionExpr(lex);
-        case Lexer::TokOpenBrace:
+        case Lexer::TokOpeningBracket:
             return parseFunctionDefinitionExpr(lex);
         default:
             CLOG(DEBUG, "exception");
@@ -198,4 +202,7 @@ std::shared_ptr<ExprAST> parser::parseTrueExpr(lexers::Lexer &lex) {
 std::shared_ptr<ExprAST> parser::parseFalseExpr(lexers::Lexer &lex) {
     lex.stepForward();
     return make_shared<BooleansAST>(false);
+}
+
+std::shared_ptr<ExprAST> parser::parseLoadingFileExpr(lexers::Lexer &lex) {
 }

@@ -69,10 +69,10 @@ Lexer::TokenType Lexer::stepForward() {
         currentType = TokOperator;
     } else if (type == '(') {
         expressionBuf.get();
-        currentType = TokOpenBrace;
+        currentType = TokOpeningBracket;
     } else if (type == ')') {
         expressionBuf.get();
-        currentType = TokCloseBrace;
+        currentType = TokClosingBracket;
     }
     return currentType;
 }
