@@ -76,9 +76,7 @@ TEST(KeywordParsingTest, LoadingFileTest) {
     ASSERT_EQ(6, numPtr->getValue());
 
     lex.appendExp("(define n 5)").appendExp("(add n 6)");
-
-    while (lex.getTokType() != lexers::Lexer::TokEOF)
-        res = parseExpr(lex)->eval(s);
+    res = parseAllExpr(lex)->eval(s);
 
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
     numPtr = std::dynamic_pointer_cast<NumberAST>(res);

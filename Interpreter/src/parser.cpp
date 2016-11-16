@@ -8,6 +8,13 @@ using namespace lexers;
 using namespace parser;
 using namespace std;
 
+std::shared_ptr<ExprAST> parser::parseAllExpr(lexers::Lexer &lex) {
+    vector<shared_ptr<ExprAST>> vec;
+    while (lex.getTokType() != Lexer::TokEOF)
+        vec.push_back(parseExpr(lex));
+    return make_shared<AllExprAST>(vec);
+}
+
 shared_ptr<ExprAST> parser::parseExpr(lexers::Lexer &lex) {
     if (lex.getTokType() != Lexer::TokOpeningBracket) {
         return parseRawExpr(lex);

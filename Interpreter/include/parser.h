@@ -10,6 +10,8 @@ namespace parser {
 
     std::shared_ptr<ExprAST> parseExpr(lexers::Lexer &lex);
 
+    std::shared_ptr<ExprAST> parseAllExpr(lexers::Lexer &lex);
+
     std::shared_ptr<ExprAST> parseRawExpr(lexers::Lexer &lex);
 
     std::shared_ptr<ExprAST> parseBracketExpr(lexers::Lexer &lex);

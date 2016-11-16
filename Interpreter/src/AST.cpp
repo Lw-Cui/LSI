@@ -24,8 +24,7 @@ std::shared_ptr<ExprAST> LoadingFileAST::eval(Scope &s) const {
     std::ifstream fin{filename};
     std::string str{std::istreambuf_iterator<char>(fin), std::istreambuf_iterator<char>()};
     lexers::Lexer lex{str};
-    while (lex.getTokType() != lexers::Lexer::TokEOF)
-        parseExpr(lex)->eval(s);
+    parseAllExpr(lex)->eval(s);
     return nullptr;
 }
 
@@ -142,4 +141,11 @@ std::shared_ptr<ExprAST> BooleansAST::eval(Scope &) const {
         return std::make_shared<BooleansAST>(*this);
     else
         return nullptr;
+}
+
+std::shared_ptr<ExprAST> AllExprAST::eval(Scope &s) const {
+    std::shared_ptr<ExprAST> res;
+    for (auto ptr : exprVec)
+        res = ptr->eval(s);
+    return res;
 }

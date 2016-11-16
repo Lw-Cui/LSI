@@ -24,6 +24,16 @@ namespace ast {
         virtual ~ExprAST() {}
     };
 
+    class AllExprAST : public ExprAST {
+    public:
+        AllExprAST(const std::vector<std::shared_ptr<ExprAST>> &v) : exprVec{v} {}
+
+        virtual std::shared_ptr<ExprAST> eval(Scope &) const;
+
+    private:
+        std::vector<std::shared_ptr<ExprAST>> exprVec;
+    };
+
     class BooleansAST : public ExprAST {
     public:
         BooleansAST(bool c) : booleans{c} {}
@@ -101,7 +111,9 @@ namespace ast {
     class LoadingFileAST : public ExprAST {
     public:
         LoadingFileAST(const std::string &f) : filename{f} {}
+
         std::shared_ptr<ExprAST> eval(Scope &) const override;
+
     private:
         std::string filename;
     };
