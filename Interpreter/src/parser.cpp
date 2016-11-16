@@ -1,13 +1,14 @@
 #include <memory>
+#include <fstream>
 #include <lexers.h>
 #include <parser.h>
+
 
 using namespace lexers;
 using namespace parser;
 using namespace std;
 
 shared_ptr<ExprAST> parser::parseExpr(lexers::Lexer &lex) {
-    CLOG(DEBUG, "parser") << "Parse expression";
     if (lex.getTokType() != Lexer::TokOpeningBracket) {
         return parseRawExpr(lex);
     } else {
@@ -107,12 +108,10 @@ std::shared_ptr<ExprAST> parser::parseLessThanOperatorExpr(lexers::Lexer &lex) {
 }
 
 shared_ptr<ExprAST> parser::parseNumberExpr(Lexer &lex) {
-    CLOG(DEBUG, "parser");
     return make_shared<NumberAST>(lex.getNum());
 }
 
 shared_ptr<ExprAST> parser::parseIdentifierExpr(lexers::Lexer &lex) {
-    CLOG(DEBUG, "parser");
     return make_shared<IdentifierAST>(lex.getIdentifier());
 }
 
@@ -213,4 +212,9 @@ std::shared_ptr<ExprAST> parser::parseFalseExpr(lexers::Lexer &lex) {
 }
 
 std::shared_ptr<ExprAST> parser::parseLoadingFileExpr(lexers::Lexer &lex) {
+    lex.stepForward();
+    auto filename = lex.getIdentifier().substr(1);
+    filename.pop_back();
+    CLOG(DEBUG, "parser") << "Get filename: " << filename;
+    return make_shared<LoadingFileAST>(filename);
 }

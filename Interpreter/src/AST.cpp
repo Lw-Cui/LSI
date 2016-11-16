@@ -1,4 +1,6 @@
-#include <algorithm>
+#include <fstream>
+#include <parser.h>
+#include <lexers.h>
 #include <AST.h>
 
 using namespace parser;
@@ -16,6 +18,15 @@ std::shared_ptr<ExprAST> ExprAST::apply(const std::vector<std::shared_ptr<ExprAS
 std::shared_ptr<ExprAST> ExprAST::toBool(Scope &s) const {
     return std::make_shared<BooleansAST>(true)->eval(s);
 };
+
+std::shared_ptr<ExprAST> LoadingFileAST::eval(Scope &s) const {
+    std::ifstream fin{filename};
+    std::string str{std::istreambuf_iterator<char>(fin), std::istreambuf_iterator<char>()};
+    lexers::Lexer lex{str};
+    while (lex.getTokType() != lexers::Lexer::TokEOF)
+        parseExpr(lex)->eval(s);
+    return nullptr;
+}
 
 std::shared_ptr<ExprAST> IfStatementAST::eval(Scope &ss) const {
     if (condition->eval(ss)->toBool(ss)) {
