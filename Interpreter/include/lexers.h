@@ -21,6 +21,8 @@ namespace lexers {
             TokLet = -7,
             TokOperator = -8,
             TokIf = -9,
+            TokTrue = -10,
+            TokFalse = -11,
         };
 
 
@@ -51,10 +53,12 @@ namespace lexers {
                 {"define", TokDefine},
                 {"let",    TokLet},
                 {"if",     TokIf},
+                {"#t",     TokTrue},
+                {"#f",     TokFalse},
         };
 
-        std::string identifier;
-        double number;
+        std::string strToken;
+        double numToken;
 
         std::stringstream expressionBuf;
         TokenType currentType = TokEOF;

@@ -6,7 +6,7 @@
 using namespace lexers;
 using namespace parser;
 
-TEST(ParserTest, IdentifierDefinitionTest) {
+TEST(KeywordParsingTest, IdentifierDefinitionTest) {
     Scope ss;
     lexers::Lexer lex{"(define n 5)"};
 
@@ -32,7 +32,7 @@ TEST(ParserTest, IdentifierDefinitionTest) {
 }
 
 
-TEST(ParserTest, IfStatementTest) {
+TEST(KeywordParsingTest, IfStatementTest) {
     Scope ss;
     lexers::Lexer lex("(if (+ 5 6) 5 6)");
     auto exprPtr = parseExpr(lex)->eval(ss);
@@ -55,3 +55,10 @@ TEST(ParserTest, IfStatementTest) {
     ASSERT_EQ(2, numPtr->getValue());
 }
 
+TEST(KeywordParsingTest, BooleansTest) {
+    Scope ss;
+    lexers::Lexer lex("#t");
+    ASSERT_TRUE(parseExpr(lex)->eval(ss));
+    lex.appendExp("#f");
+    ASSERT_FALSE(parseExpr(lex)->eval(ss));
+}

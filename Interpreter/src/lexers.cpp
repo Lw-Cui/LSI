@@ -12,7 +12,7 @@ Lexer &Lexer::appendExp(const std::string &exp) {
 
 double Lexer::getNum() {
     if (getTokType() == TokNumber) {
-        auto tmp = number;
+        auto tmp = numToken;
         CLOG(DEBUG, "lexer") << "Get number: " << tmp;
         stepForward();
         return tmp;
@@ -24,7 +24,7 @@ double Lexer::getNum() {
 
 std::string Lexer::getOperator() {
     if (getTokType() == TokOperator) {
-        std::string tmp = identifier;
+        std::string tmp = strToken;
         CLOG(DEBUG, "lexer") << "Get Operator: " << tmp;
         stepForward();
         return std::move(tmp);
@@ -36,7 +36,7 @@ std::string Lexer::getOperator() {
 
 std::string Lexer::getIdentifier() {
     if (getTokType() == TokIdentifier) {
-        std::string tmp = identifier;
+        std::string tmp = strToken;
         CLOG(DEBUG, "lexer") << "Get identifier: " << tmp;
         stepForward();
         return std::move(tmp);
@@ -56,16 +56,16 @@ Lexer::TokenType Lexer::stepForward() {
         expressionBuf.get();
         return stepForward();
     } else if (isdigit(type)) {
-        expressionBuf >> number;
-        CLOG(DEBUG, "lexer") << "Read number: " << number;
+        expressionBuf >> numToken;
+        CLOG(DEBUG, "lexer") << "Read number: " << strToken;
         currentType = TokNumber;
-    } else if (isalpha(type)) {
-        expressionBuf >> identifier;
-        CLOG(DEBUG, "lexer") << "Read identifier: " << identifier;
-        currentType = (keyWord.count(identifier) ? keyWord[identifier] : TokIdentifier);
+    } else if (isalpha(type) || type == '#') {
+        expressionBuf >> strToken;
+        CLOG(DEBUG, "lexer") << "Read string token: " << strToken;
+        currentType = (keyWord.count(strToken) ? keyWord[strToken] : TokIdentifier);
     } else if (isOperator(type)) {
-        expressionBuf >> identifier;
-        CLOG(DEBUG, "lexer") << "Read operator: " << identifier;
+        expressionBuf >> strToken;
+        CLOG(DEBUG, "lexer") << "Read operator: " << strToken;
         currentType = TokOperator;
     } else if (type == '(') {
         expressionBuf.get();

@@ -18,9 +18,19 @@ namespace parser {
 
         virtual std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &, const Scope &);
 
-        virtual bool toBool() const { return true; }
+        virtual std::shared_ptr<ExprAST> toBool(Scope &) const;
 
         virtual ~ExprAST() {}
+    };
+
+    class BooleansAST : public ExprAST {
+    public:
+        BooleansAST(bool c) : booleans{c} {}
+
+        virtual std::shared_ptr<ExprAST> eval(Scope &) const;
+
+    private:
+        bool booleans;
     };
 
     class NumberAST : public ExprAST {
@@ -29,7 +39,7 @@ namespace parser {
 
         double getValue() const { return value; }
 
-        virtual bool toBool() const override { return getValue() != 0; }
+        virtual std::shared_ptr<ExprAST> toBool(Scope &) const override;
 
         std::shared_ptr<ExprAST> eval(Scope &) const override;
 

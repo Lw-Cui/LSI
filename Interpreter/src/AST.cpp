@@ -11,10 +11,14 @@ std::shared_ptr<ExprAST> ExprAST::eval(Scope &) const {
 std::shared_ptr<ExprAST> ExprAST::apply(const std::vector<std::shared_ptr<ExprAST>> &, const Scope &) {
     CLOG(DEBUG, "exception");
     throw std::logic_error("Expression cannot be applied.");
+}
+
+std::shared_ptr<ExprAST> ExprAST::toBool(Scope &s) const {
+    return std::make_shared<BooleansAST>(true)->eval(s);
 };
 
 std::shared_ptr<ExprAST> IfStatementAST::eval(Scope &ss) const {
-    if (condition->eval(ss)->toBool()) {
+    if (condition->eval(ss)->toBool(ss)) {
         CLOG(DEBUG, "AST") << "Evaluate true clause.";
         return trueClause->eval(ss);
     } else {
@@ -46,6 +50,9 @@ std::shared_ptr<ExprAST> NumberAST::eval(Scope &) const {
     return std::make_shared<NumberAST>(getValue());
 }
 
+std::shared_ptr<ExprAST> NumberAST::toBool(Scope &s) const {
+    return std::make_shared<BooleansAST>(getValue() != 0)->eval(s);
+}
 
 std::shared_ptr<ExprAST> IdentifierAST::eval(Scope &ss) const {
     CLOG(DEBUG, "AST") << "Evaluate identifier: " << getId();
@@ -116,4 +123,11 @@ std::shared_ptr<ExprAST> FunctionApplicationAST::eval(Scope &ss) const {
         CLOG(DEBUG, "exception");
         throw std::logic_error("Unbound function identifier.");
     }
+}
+
+std::shared_ptr<ExprAST> BooleansAST::eval(Scope &) const {
+    if (booleans)
+        return std::make_shared<BooleansAST>(*this);
+    else
+        return nullptr;
 }

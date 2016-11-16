@@ -26,7 +26,7 @@ TEST(ParserTest, ConditionTest) {
     Scope ss;
     lexers::Lexer lex{"(define n 0)"};
     parseExpr(lex)->eval(ss);
-    ASSERT_FALSE(ss["n"]->toBool());
+    ASSERT_FALSE(ss["n"]->toBool(ss));
 
 }
 
@@ -42,12 +42,12 @@ TEST(ParserTest, AddOperatorTest) {
 TEST(ParserTest, LessThanOperatorTest) {
     Scope ss;
     lexers::Lexer lex("(< 5 6 7)");
-    ASSERT_TRUE(parseExpr(lex)->eval(ss)->toBool());
+    ASSERT_TRUE(parseExpr(lex)->eval(ss)->toBool(ss));
 
     lex.appendExp("(define n 6)");
     parseExpr(lex)->eval(ss);
 
     lex.appendExp("(< n 5)");
-    ASSERT_FALSE(parseExpr(lex)->eval(ss)->toBool());
+    ASSERT_FALSE(parseExpr(lex)->eval(ss)->toBool(ss));
 }
 
