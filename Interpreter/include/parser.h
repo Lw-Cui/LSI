@@ -6,6 +6,7 @@
 #include <AST.h>
 
 namespace parser {
+    using namespace ast;
 
     std::shared_ptr<ExprAST> parseExpr(lexers::Lexer &lex);
 

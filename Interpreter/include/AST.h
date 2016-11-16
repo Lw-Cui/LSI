@@ -10,7 +10,7 @@
 #include <easylogging++.h>
 #include <context.h>
 
-namespace parser {
+namespace ast {
     using context::Scope;
 
     class ExprAST {

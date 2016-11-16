@@ -4,6 +4,7 @@
 #include <AST.h>
 
 using namespace parser;
+using namespace ast;
 
 std::shared_ptr<ExprAST> ExprAST::eval(Scope &) const {
     CLOG(DEBUG, "exception");
