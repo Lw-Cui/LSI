@@ -82,3 +82,4 @@ TEST(KeywordParsingTest, LoadingFileTest) {
     numPtr = std::dynamic_pointer_cast<NumberAST>(res);
     ASSERT_EQ(11, numPtr->getValue());
 }
+

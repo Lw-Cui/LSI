@@ -83,3 +83,28 @@ TEST(FunctionParsingTest, HighOrderFunctionTEST) {
     auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
     ASSERT_EQ(6, numPtr->getValue());
 }
+
+TEST(KeywordParsingTest, LambdaDefintionTest) {
+    Scope ss;
+    lexers::Lexer lex;
+    lex.appendExp("((lambda (x) (+ x 1)) 5)");
+    auto exprPtr = parseAllExpr(lex)->eval(ss);
+
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
+    auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
+    ASSERT_EQ(6, numPtr->getValue());
+}
+
+TEST(KeywordParsingTest, LambdaApplicationTest) {
+    Scope ss;
+    lexers::Lexer lex;
+    lex.appendExp("(define (bar f y) (+ (f y) 1))")
+            .appendExp("(define n 4)")
+            .appendExp("(bar (lambda (x) (+ x 2 1)) n)");
+
+    auto exprPtr = parseAllExpr(lex)->eval(ss);
+
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
+    auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
+    ASSERT_EQ(8, numPtr->getValue());
+}

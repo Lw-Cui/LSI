@@ -17,7 +17,7 @@ namespace ast {
     public:
         virtual std::shared_ptr<ExprAST> eval(Scope &) const;
 
-        virtual std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &, const Scope &);
+        virtual std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &, Scope &);
 
         virtual std::shared_ptr<ExprAST> toBool(Scope &) const;
 
@@ -68,32 +68,6 @@ namespace ast {
 
     private:
         std::string id;
-    };
-
-    class ArgumentsAST : public ExprAST {
-    public:
-        ArgumentsAST(const std::vector<std::string> &v) : formalArgs{v} {}
-
-        void bindArguments(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s);
-
-    protected:
-        std::vector<std::string> formalArgs;
-    };
-
-    class LambdaAST : public ArgumentsAST {
-    public:
-        LambdaAST(const std::vector<std::string> &v,
-                  std::shared_ptr<ExprAST> expr) : ArgumentsAST{v}, expression{expr} {}
-
-        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, const Scope &) override;
-
-        void setContext(const Scope &s) {
-            context = s;
-        }
-
-    protected:
-        std::shared_ptr<ExprAST> expression;
-        Scope context;
     };
 
     class IfStatementAST : public ExprAST {
@@ -163,6 +137,25 @@ namespace ast {
         std::shared_ptr<ExprAST> value;
     };
 
+    class LambdaAST : public ExprAST {
+    public:
+        LambdaAST(const std::vector<std::string> &v,
+                  std::shared_ptr<ExprAST> expr) : formalArgs{v}, expression{expr} {}
+
+        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &) override;
+
+        std::shared_ptr<ExprAST> eval(Scope &ss) const override;
+
+        void setContext(const Scope &s) {
+            context = s;
+        }
+
+    private:
+        std::vector<std::string> formalArgs;
+        std::shared_ptr<ExprAST> expression;
+        Scope context;
+    };
+
 
     class LambdaBindingAST : public BindingAST {
     public:
@@ -177,37 +170,20 @@ namespace ast {
         std::shared_ptr<LambdaAST> lambda;
     };
 
-    class ApplicationAST : public ExprAST {
-    public:
-        ApplicationAST(const std::vector<std::shared_ptr<ExprAST>> &v) : actualArgs{v} {}
 
-    protected:
+    class LambdaApplicationAST : public ExprAST {
+    public:
+        LambdaApplicationAST(const std::shared_ptr<ExprAST> &lam, const std::vector<std::shared_ptr<ExprAST>> &args)
+                : lambdaOrIdentifier{lam}, actualArgs{args} {
+        }
+
+        std::shared_ptr<ExprAST> eval(Scope &ss) const override;
+
+    private:
+        std::shared_ptr<ExprAST> lambdaOrIdentifier;
         std::vector<std::shared_ptr<ExprAST>> actualArgs;
     };
 
-    class LambdaApplicationAST : public ApplicationAST {
-    public:
-        LambdaApplicationAST(const std::shared_ptr<ExprAST> &lam, const std::vector<std::shared_ptr<ExprAST>> &args)
-                : lambda{lam}, ApplicationAST{args} {
-        }
-
-        std::shared_ptr<ExprAST> eval(Scope &ss) const override;
-
-    private:
-        std::shared_ptr<ExprAST> lambda;
-    };
-
-    class FunctionApplicationAST : public ApplicationAST {
-    public:
-        FunctionApplicationAST(std::string id, const std::vector<std::shared_ptr<ExprAST>> &args)
-                : identifier{id}, ApplicationAST{args} {
-        }
-
-        std::shared_ptr<ExprAST> eval(Scope &ss) const override;
-
-    private:
-        std::string identifier;
-    };
 }
 
 #endif //GI_AST_H
