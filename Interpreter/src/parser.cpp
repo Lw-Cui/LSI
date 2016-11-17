@@ -93,6 +93,9 @@ std::shared_ptr<ExprAST> parser::parseOperatorExpr(lexers::Lexer &lex) {
         case '+':
             CLOG(DEBUG, "parser") << "parsing add operator";
             return parseAddOperatorExpr(lex);
+        case '-':
+            CLOG(DEBUG, "parser") << "parsing minus operator";
+            return parseMinusOperatorExpr(lex);
         case '<':
             CLOG(DEBUG, "parser") << "parsing less than operator";
             return parseLessThanOperatorExpr(lex);
@@ -108,6 +111,14 @@ std::shared_ptr<ExprAST> parser::parseAddOperatorExpr(lexers::Lexer &lex) {
         arguments.push_back(parseExpr(lex));
     CLOG(DEBUG, "parser") << "Number of add operands are: " << arguments.size();
     return make_shared<AddOperatorAST>(arguments);
+}
+
+std::shared_ptr<ExprAST> parser::parseMinusOperatorExpr(lexers::Lexer &lex) {
+    std::vector<std::shared_ptr<ExprAST>> arguments;
+    while (lex.getTokType() != Lexer::TokClosingBracket)
+        arguments.push_back(parseExpr(lex));
+    CLOG(DEBUG, "parser") << "Number of minus operands are: " << arguments.size();
+    return make_shared<MinusOperatorAST>(arguments);
 }
 
 std::shared_ptr<ExprAST> parser::parseLessThanOperatorExpr(lexers::Lexer &lex) {
