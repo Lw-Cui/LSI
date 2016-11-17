@@ -106,6 +106,30 @@ std::shared_ptr<ExprAST> AddOperatorAST::eval(Scope &s) const {
     return std::make_shared<NumberAST>(num);
 }
 
+std::shared_ptr<ExprAST> MinusOperatorAST::eval(Scope &s) const {
+    double front = 0;
+    if (auto p = std::dynamic_pointer_cast<NumberAST>(actualArgs.front()->eval(s))) {
+        front = p->getValue();
+    } else {
+        CLOG(DEBUG, "exception");
+        throw std::logic_error("The operands cannot be converted to number");
+    }
+
+    if (actualArgs.size() == 1) return std::make_shared<NumberAST>(-front);
+
+    for (int i = 1; i < actualArgs.size(); i++) {
+        auto res = actualArgs[i]->eval(s);
+        if (auto p = std::dynamic_pointer_cast<NumberAST>(res)) {
+            CLOG(DEBUG, "AST") << "Add number: " << p->getValue();
+            front -= p->getValue();
+        } else {
+            CLOG(DEBUG, "exception");
+            throw std::logic_error("The operands cannot be converted to number");
+        }
+    }
+    return std::make_shared<NumberAST>(front);
+}
+
 
 std::shared_ptr<ExprAST> ValueBindingAST::eval(Scope &ss) const {
     ss[getIdentifier()] = value->eval(ss);

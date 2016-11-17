@@ -107,6 +107,15 @@ namespace ast {
         std::shared_ptr<ExprAST> eval(Scope &s) const override;
     };
 
+    class MinusOperatorAST : public OperatorAST {
+    public:
+        MinusOperatorAST(const std::vector<std::shared_ptr<ExprAST>> &v) : OperatorAST(v) {}
+
+        std::shared_ptr<ExprAST> eval(Scope &s) const override;
+
+    private:
+    };
+
     class AddOperatorAST : public OperatorAST {
     public:
         AddOperatorAST(const std::vector<std::shared_ptr<ExprAST>> &v) : OperatorAST{v} {}
