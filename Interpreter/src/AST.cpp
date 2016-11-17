@@ -11,7 +11,7 @@ std::shared_ptr<ExprAST> ExprAST::eval(Scope &) const {
     throw std::logic_error("Expression cannot be evaluated.");
 };
 
-std::shared_ptr<ExprAST> ExprAST::apply(const std::vector<std::shared_ptr<ExprAST>> &, const Scope &) {
+std::shared_ptr<ExprAST> ExprAST::apply(const std::vector<std::shared_ptr<ExprAST>> &, Scope &) {
     CLOG(DEBUG, "exception");
     throw std::logic_error("Expression cannot be applied.");
 }
@@ -75,23 +75,24 @@ std::shared_ptr<ExprAST> IdentifierAST::eval(Scope &ss) const {
     }
 }
 
-void ArgumentsAST::bindArguments(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
+std::shared_ptr<ExprAST> LambdaAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs,
+                                          Scope &ss) {
     CLOG(DEBUG, "AST") << "Number of formal arguments is " << formalArgs.size();
     for (size_t i = 0; i < actualArgs.size(); i++) {
         CLOG(DEBUG, "AST") << "Set formal argument: " << formalArgs[i];
-        s[formalArgs[i]] = actualArgs[i]->eval(s);
+        context[formalArgs[i]] = actualArgs[i]->eval(ss);
     }
+    return expression->eval(context);
 }
 
-std::shared_ptr<ExprAST> LambdaAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs,
-                                          const Scope &) {
-    bindArguments(actualArgs, context);
-    return expression->eval(context);
+std::shared_ptr<ExprAST> LambdaAST::eval(Scope &ss) const {
+    return std::make_shared<LambdaAST>(*this);
 }
 
 
 std::shared_ptr<ExprAST> AddOperatorAST::eval(Scope &s) const {
     double num = 0;
+    CLOG(DEBUG, "parser") << "Number of add operands are: " << actualArgs.size();
     for (auto element: actualArgs) {
         std::shared_ptr<ExprAST> res = element->eval(s);
         if (auto p = std::dynamic_pointer_cast<NumberAST>(res)) {
@@ -119,22 +120,13 @@ std::shared_ptr<ExprAST> LambdaBindingAST::eval(Scope &ss) const {
 }
 
 std::shared_ptr<ExprAST> LambdaApplicationAST::eval(Scope &ss) const {
-    if (std::dynamic_pointer_cast<LambdaAST>(lambda)) {
-        return lambda->apply(actualArgs, ss);
+    if (std::dynamic_pointer_cast<LambdaAST>(lambdaOrIdentifier)) {
+        return lambdaOrIdentifier->apply(actualArgs, ss);
     } else {
-        return lambda->eval(ss)->apply(actualArgs, ss);
+        return lambdaOrIdentifier->eval(ss)->apply(actualArgs, ss);
     }
 }
 
-std::shared_ptr<ExprAST> FunctionApplicationAST::eval(Scope &ss) const {
-    CLOG(DEBUG, "AST") << "Apply function call. Number of actual arguments: " << actualArgs.size();
-    if (ss.count(identifier)) {
-        return ss[identifier]->apply(actualArgs, ss);
-    } else {
-        CLOG(DEBUG, "exception");
-        throw std::logic_error("Unbound function identifier.");
-    }
-}
 
 std::shared_ptr<ExprAST> BooleansAST::eval(Scope &) const {
     if (booleans)

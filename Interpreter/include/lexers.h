@@ -24,6 +24,7 @@ namespace lexers {
             TokTrue = -10,
             TokFalse = -11,
             TokLoad = -12,
+            TokLambda = -13,
         };
 
 
@@ -57,6 +58,7 @@ namespace lexers {
                 {"#t",     TokTrue},
                 {"#f",     TokFalse},
                 {"load",   TokLoad},
+                {"lambda", TokLambda},
         };
 
         std::string strToken;
