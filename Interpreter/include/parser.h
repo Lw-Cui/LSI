@@ -6,8 +6,17 @@
 #include <AST.h>
 
 namespace parser {
+    using namespace ast;
 
     std::shared_ptr<ExprAST> parseExpr(lexers::Lexer &lex);
+
+    std::shared_ptr<ExprAST> parseAllExpr(lexers::Lexer &lex);
+
+    std::shared_ptr<ExprAST> parseRawExpr(lexers::Lexer &lex);
+
+    std::shared_ptr<ExprAST> parseBracketExpr(lexers::Lexer &lex);
+
+    std::shared_ptr<ExprAST> parseLoadingFileExpr(lexers::Lexer &lex);
 
     std::shared_ptr<ExprAST> parseTrueExpr(lexers::Lexer &lex);
 

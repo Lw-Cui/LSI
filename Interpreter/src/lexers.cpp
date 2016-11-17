@@ -37,7 +37,6 @@ std::string Lexer::getOperator() {
 std::string Lexer::getIdentifier() {
     if (getTokType() == TokIdentifier) {
         std::string tmp = strToken;
-        CLOG(DEBUG, "lexer") << "Get identifier: " << tmp;
         stepForward();
         return std::move(tmp);
     } else {
@@ -57,22 +56,19 @@ Lexer::TokenType Lexer::stepForward() {
         return stepForward();
     } else if (isdigit(type)) {
         expressionBuf >> numToken;
-        CLOG(DEBUG, "lexer") << "Read number: " << strToken;
         currentType = TokNumber;
-    } else if (isalpha(type) || type == '#') {
-        expressionBuf >> strToken;
-        CLOG(DEBUG, "lexer") << "Read string token: " << strToken;
-        currentType = (keyWord.count(strToken) ? keyWord[strToken] : TokIdentifier);
     } else if (isOperator(type)) {
         expressionBuf >> strToken;
-        CLOG(DEBUG, "lexer") << "Read operator: " << strToken;
         currentType = TokOperator;
     } else if (type == '(') {
         expressionBuf.get();
-        currentType = TokOpenBrace;
+        currentType = TokOpeningBracket;
     } else if (type == ')') {
         expressionBuf.get();
-        currentType = TokCloseBrace;
+        currentType = TokClosingBracket;
+    } else {
+        expressionBuf >> strToken;
+        currentType = (keyWord.count(strToken) ? keyWord[strToken] : TokIdentifier);
     }
     return currentType;
 }

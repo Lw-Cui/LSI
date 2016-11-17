@@ -4,7 +4,7 @@
 #include <memory>
 #include <string>
 
-namespace parser {
+namespace ast {
     class ExprAST;
 }
 
@@ -16,7 +16,7 @@ namespace context {
     public:
         Scope();
 
-        std::shared_ptr<parser::ExprAST> &operator[](const std::string &str);
+        std::shared_ptr<ast::ExprAST> &operator[](const std::string &str);
 
         size_t count(const std::string &str) const;
 

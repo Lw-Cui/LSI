@@ -136,8 +136,8 @@ before_script:
   - cmake --build build -- -j$JOBS
 
 script:
-  - cd build
-  - ./Interpreter/test/InterpreterTest
+  - cd Interpreter/lib
+  - ./../../build/Interpreter/test/InterpreterTest
 
 notifications:
   email: cui@hellolw.com

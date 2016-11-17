@@ -1,7 +1,10 @@
-#include <algorithm>
+#include <fstream>
+#include <parser.h>
+#include <lexers.h>
 #include <AST.h>
 
 using namespace parser;
+using namespace ast;
 
 std::shared_ptr<ExprAST> ExprAST::eval(Scope &) const {
     CLOG(DEBUG, "exception");
@@ -16,6 +19,14 @@ std::shared_ptr<ExprAST> ExprAST::apply(const std::vector<std::shared_ptr<ExprAS
 std::shared_ptr<ExprAST> ExprAST::toBool(Scope &s) const {
     return std::make_shared<BooleansAST>(true)->eval(s);
 };
+
+std::shared_ptr<ExprAST> LoadingFileAST::eval(Scope &s) const {
+    std::ifstream fin{filename};
+    std::string str{std::istreambuf_iterator<char>(fin), std::istreambuf_iterator<char>()};
+    lexers::Lexer lex{str};
+    parseAllExpr(lex)->eval(s);
+    return nullptr;
+}
 
 std::shared_ptr<ExprAST> IfStatementAST::eval(Scope &ss) const {
     if (condition->eval(ss)->toBool(ss)) {
@@ -130,4 +141,11 @@ std::shared_ptr<ExprAST> BooleansAST::eval(Scope &) const {
         return std::make_shared<BooleansAST>(*this);
     else
         return nullptr;
+}
+
+std::shared_ptr<ExprAST> AllExprAST::eval(Scope &s) const {
+    std::shared_ptr<ExprAST> res;
+    for (auto ptr : exprVec)
+        res = ptr->eval(s);
+    return res;
 }

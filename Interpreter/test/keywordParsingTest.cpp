@@ -1,4 +1,3 @@
-
 #include <memory>
 #include <gtest/gtest.h>
 #include <parser.h>
@@ -61,4 +60,25 @@ TEST(KeywordParsingTest, BooleansTest) {
     ASSERT_TRUE(parseExpr(lex)->eval(ss));
     lex.appendExp("#f");
     ASSERT_FALSE(parseExpr(lex)->eval(ss));
+}
+
+TEST(KeywordParsingTest, LoadingFileTest) {
+    Scope s;
+    lexers::Lexer lex("(load \"Test.scm\")");
+    parseExpr(lex)->eval(s);
+    ASSERT_TRUE(s.count("foo"));
+    ASSERT_TRUE(s.count("add"));
+
+    lex.appendExp("(foo 5)");
+    auto res = parseExpr(lex)->eval(s);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
+    auto numPtr = std::dynamic_pointer_cast<NumberAST>(res);
+    ASSERT_EQ(6, numPtr->getValue());
+
+    lex.appendExp("(define n 5)").appendExp("(add n 6)");
+    res = parseAllExpr(lex)->eval(s);
+
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
+    numPtr = std::dynamic_pointer_cast<NumberAST>(res);
+    ASSERT_EQ(11, numPtr->getValue());
 }

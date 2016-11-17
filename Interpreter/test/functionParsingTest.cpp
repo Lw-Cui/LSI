@@ -77,9 +77,7 @@ TEST(FunctionParsingTest, HighOrderFunctionTEST) {
             .appendExp("(define n 4)")
             .appendExp("(bar foo n)");
 
-    std::shared_ptr<ExprAST> exprPtr;
-    while (lex.getTokType() != Lexer::TokEOF)
-        exprPtr = parseExpr(lex)->eval(ss);
+    auto exprPtr = parseAllExpr(lex)->eval(ss);
 
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
     auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);

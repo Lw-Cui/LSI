@@ -2,6 +2,7 @@
 #define GI_AST_H
 
 #include <exception>
+#include <fstream>
 #include <memory>
 #include <string>
 #include <map>
@@ -9,7 +10,7 @@
 #include <easylogging++.h>
 #include <context.h>
 
-namespace parser {
+namespace ast {
     using context::Scope;
 
     class ExprAST {
@@ -21,6 +22,16 @@ namespace parser {
         virtual std::shared_ptr<ExprAST> toBool(Scope &) const;
 
         virtual ~ExprAST() {}
+    };
+
+    class AllExprAST : public ExprAST {
+    public:
+        AllExprAST(const std::vector<std::shared_ptr<ExprAST>> &v) : exprVec{v} {}
+
+        virtual std::shared_ptr<ExprAST> eval(Scope &) const;
+
+    private:
+        std::vector<std::shared_ptr<ExprAST>> exprVec;
     };
 
     class BooleansAST : public ExprAST {
@@ -95,6 +106,16 @@ namespace parser {
     private:
         std::shared_ptr<ExprAST> condition;
         std::shared_ptr<ExprAST> trueClause, falseClause;
+    };
+
+    class LoadingFileAST : public ExprAST {
+    public:
+        LoadingFileAST(const std::string &f) : filename{f} {}
+
+        std::shared_ptr<ExprAST> eval(Scope &) const override;
+
+    private:
+        std::string filename;
     };
 
     class OperatorAST : public ExprAST {

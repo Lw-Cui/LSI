@@ -15,14 +15,15 @@ namespace lexers {
             TokEOF = -1,
             TokNumber = -2,
             TokIdentifier = -3,
-            TokOpenBrace = -4,
-            TokCloseBrace = -5,
+            TokOpeningBracket = -4,
+            TokClosingBracket = -5,
             TokDefine = -6,
             TokLet = -7,
             TokOperator = -8,
             TokIf = -9,
             TokTrue = -10,
             TokFalse = -11,
+            TokLoad = -12,
         };
 
 
@@ -55,6 +56,7 @@ namespace lexers {
                 {"if",     TokIf},
                 {"#t",     TokTrue},
                 {"#f",     TokFalse},
+                {"load",   TokLoad},
         };
 
         std::string strToken;
