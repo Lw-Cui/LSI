@@ -16,6 +16,10 @@ namespace context {
     public:
         Scope();
 
+        Scope(const Scope &);
+
+        Scope &operator=(const Scope &);
+
         std::shared_ptr<ast::ExprAST> &operator[](const std::string &str);
 
         size_t count(const std::string &str) const;
