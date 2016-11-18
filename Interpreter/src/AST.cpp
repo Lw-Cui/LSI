@@ -78,11 +78,13 @@ std::shared_ptr<ExprAST> IdentifierAST::eval(Scope &ss) const {
 std::shared_ptr<ExprAST> LambdaAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs,
                                           Scope &ss) {
     CLOG(DEBUG, "AST") << "Number of formal arguments is " << formalArgs.size();
+    // Backup scope of lambda. If not, recursive calls will destroy scope by binding arguments.
+    Scope tmp = context;
     for (size_t i = 0; i < actualArgs.size(); i++) {
-        CLOG(DEBUG, "AST") << "Set formal argument: " << formalArgs[i];
-        context[formalArgs[i]] = actualArgs[i]->eval(ss);
+        // Evaluate value from current scope and set them into scope of lambda
+        tmp[formalArgs[i]] = actualArgs[i]->eval(ss);
     }
-    return expression->eval(context);
+    return expression->eval(tmp);
 }
 
 std::shared_ptr<ExprAST> LambdaAST::eval(Scope &ss) const {
@@ -139,7 +141,8 @@ std::shared_ptr<ExprAST> ValueBindingAST::eval(Scope &ss) const {
 
 
 std::shared_ptr<ExprAST> LambdaBindingAST::eval(Scope &ss) const {
-    ss[getIdentifier()] = lambda;
+    // Set its identifier into its context to support recursion.
+    ss[getIdentifier()] = lambda->upgradeScope()[getIdentifier()] = lambda;
     return nullptr;
 }
 

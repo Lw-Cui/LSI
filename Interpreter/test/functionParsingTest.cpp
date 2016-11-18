@@ -108,3 +108,22 @@ TEST(KeywordParsingTest, LambdaApplicationTest) {
     auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
     ASSERT_EQ(8, numPtr->getValue());
 }
+
+TEST(KeywordParseingTest, RecursiveTest) {
+    Scope ss;
+    lexers::Lexer lex;
+    lex.appendExp("(define (add x y) (if x (+ 1 (add (- x 1) y)) y))")
+            .appendExp("(add 5 6)");
+
+    auto exprPtr = parseAllExpr(lex)->eval(ss);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
+    auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
+    ASSERT_EQ(11, numPtr->getValue());
+
+    lex.appendExp("(define (add2 x y) (if x (+ (add2 y (- x 1)) 1) y))")
+            .appendExp("(add2 5 6)");
+    exprPtr = parseAllExpr(lex)->eval(ss);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
+    numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
+    ASSERT_EQ(11, numPtr->getValue());
+}
