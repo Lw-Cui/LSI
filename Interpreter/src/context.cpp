@@ -10,7 +10,7 @@ namespace context {
             return impl[str];
         }
 
-        size_t count(const std::string &str)const {
+        size_t count(const std::string &str) const {
             return impl.count(str);
         }
 
@@ -22,11 +22,19 @@ namespace context {
         return impl->operator[](str);
     }
 
-    size_t Scope::count(const std::string &str)const {
+    size_t Scope::count(const std::string &str) const {
         return impl->count(str);
     }
 
-    Scope::Scope():impl{new ScopeImpl} {
+    Scope::Scope() : impl{new ScopeImpl} {
+    }
+
+    Scope::Scope(const Scope &s) : impl{make_shared<ScopeImpl>(*s.impl)} {
+    }
+
+    Scope &Scope::operator=(const Scope &s) {
+        impl = make_shared<ScopeImpl>(*s.impl);
+        return *this;
     }
 }
 

@@ -155,14 +155,10 @@ namespace ast {
 
         std::shared_ptr<ExprAST> eval(Scope &ss) const override;
 
-        void setContext(const Scope &s) {
-            context = s;
-        }
-
     private:
         std::vector<std::string> formalArgs;
         std::shared_ptr<ExprAST> expression;
-        Scope context;
+        mutable Scope context;
     };
 
 

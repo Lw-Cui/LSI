@@ -86,6 +86,7 @@ std::shared_ptr<ExprAST> LambdaAST::apply(const std::vector<std::shared_ptr<Expr
 }
 
 std::shared_ptr<ExprAST> LambdaAST::eval(Scope &ss) const {
+    context = ss;
     return std::make_shared<LambdaAST>(*this);
 }
 
@@ -138,7 +139,6 @@ std::shared_ptr<ExprAST> ValueBindingAST::eval(Scope &ss) const {
 
 
 std::shared_ptr<ExprAST> LambdaBindingAST::eval(Scope &ss) const {
-    lambda->setContext(ss);
     ss[getIdentifier()] = lambda;
     return nullptr;
 }
