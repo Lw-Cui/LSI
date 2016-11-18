@@ -5,8 +5,7 @@
 using namespace lexers;
 using namespace parser;
 
-TEST(LibrariesParsingTest, BasicConsTest
-) {
+TEST(LibrariesParsingTest, BasicConsTest) {
     Scope s;
     lexers::Lexer lex("(load \"Base.scm\")");
     parseExpr(lex)->eval(s);
@@ -27,8 +26,7 @@ TEST(LibrariesParsingTest, BasicConsTest
     ASSERT_EQ(1, numPtr->getValue());
 }
 
-TEST(LibrariesParsingTest, AdvanceConsTest
-) {
+TEST(LibrariesParsingTest, AdvanceConsTest) {
     Scope s;
     lexers::Lexer lex;
     lex.appendExp("(load \"Base.scm\")")

@@ -155,6 +155,8 @@ namespace ast {
 
         std::shared_ptr<ExprAST> eval(Scope &ss) const override;
 
+        Scope &upgradeScope() const { return context; }
+
     private:
         std::vector<std::string> formalArgs;
         std::shared_ptr<ExprAST> expression;
