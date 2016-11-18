@@ -3,7 +3,7 @@ set(LEXERS_TEST lexersTest)
 add_executable(${LEXERS_TEST} ${LEXERS_TEST_FILES} ${TEST_MAIN})
 target_link_libraries(${LEXERS_TEST} gtest ${LEXERS_LIB})
 
-set(PARSER_TEST_FILES parserTest.cpp functionParsingTest.cpp keywordParsingTest.cpp)
+set(PARSER_TEST_FILES parserTest.cpp functionParsingTest.cpp keywordParsingTest.cpp librariesParsingTest.cpp)
 set(PARSER_TEST parserTest)
 add_executable(${PARSER_TEST} ${PARSER_TEST_FILES} ${TEST_MAIN})
 target_link_libraries(${PARSER_TEST} ${INTERPRETER_LIB} gtest)
