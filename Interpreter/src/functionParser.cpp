@@ -88,3 +88,33 @@ shared_ptr<ExprAST> parser::parseFunctionDefinitionExpr(lexers::Lexer &lex) {
     return make_shared<LambdaBindingAST>(identifier, args, expr);
 }
 
+std::shared_ptr<ExprAST> parser::parserBuiltinFunction(lexers::Lexer &lexer) {
+    auto func = lexer.getBuiltinFunc();
+    if (func == "cons")
+        return parseConsFunctionExpr(lexer);
+    else if (func == "car")
+        return parseCarFunctionExpr(lexer);
+    else if (func == "cdr")
+        return parseCdrFunctionExpr(lexer);
+    else
+        throw std::logic_error("Builtin function error.");
+}
+
+std::shared_ptr<ExprAST> parser::parseConsFunctionExpr(lexers::Lexer &lexer) {
+    CLOG(DEBUG, "parser");
+    auto first = parseExpr(lexer);
+    auto second = parseExpr(lexer);
+    return std::make_shared<PairAST>(first, second);
+}
+
+std::shared_ptr<ExprAST> parser::parseCarFunctionExpr(lexers::Lexer &lexer) {
+    CLOG(DEBUG, "parser");
+    auto pair = parseExpr(lexer);
+    return std::make_shared<BuiltinCarAST>(pair);
+}
+
+std::shared_ptr<ExprAST> parser::parseCdrFunctionExpr(lexers::Lexer &lexer) {
+    CLOG(DEBUG, "parser");
+    auto pair = parseExpr(lexer);
+    return std::make_shared<BuiltinCdrAST>(pair);
+}

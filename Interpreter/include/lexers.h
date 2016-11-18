@@ -25,6 +25,7 @@ namespace lexers {
             TokFalse = -11,
             TokLoad = -12,
             TokLambda = -13,
+            TokBuiltinFunc = -14,
         };
 
 
@@ -44,6 +45,8 @@ namespace lexers {
 
         std::string getIdentifier();
 
+        std::string getBuiltinFunc();
+
         TokenType stepForward();
 
     private:
@@ -59,6 +62,13 @@ namespace lexers {
                 {"#f",     TokFalse},
                 {"load",   TokLoad},
                 {"lambda", TokLambda},
+        };
+
+        std::set<std::string> builtinFunc = {
+                {"cons"},
+                {"car"},
+                {"cdr"},
+                {"list"},
         };
 
         std::string strToken;

@@ -47,5 +47,13 @@ namespace parser {
     std::shared_ptr<ExprAST> parseLambdaDefinitionExpr(lexers::Lexer &lex);
 
     std::shared_ptr<ExprAST> parseFunctionDefinitionExpr(lexers::Lexer &lex);
+
+    std::shared_ptr<ExprAST> parserBuiltinFunction(lexers::Lexer &lexer);
+
+    std::shared_ptr<ExprAST> parseConsFunctionExpr(lexers::Lexer &lexer);
+
+    std::shared_ptr<ExprAST> parseCarFunctionExpr(lexers::Lexer &lexer);
+
+    std::shared_ptr<ExprAST> parseCdrFunctionExpr(lexers::Lexer &lexer);
 }
 #endif //GI_PARSER_H
