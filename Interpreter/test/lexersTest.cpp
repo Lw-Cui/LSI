@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <basicParser.h>
+#include <parser.h>
 
 using namespace lexers;
 
@@ -85,14 +85,3 @@ TEST(LexersTest, AppendTest) {
     ASSERT_EQ(Lexer::TokEOF, lex.stepForward());
 }
 
-TEST(LexersTest, OperatorTest) {
-    lexers::Lexer lex{"(+ n 5)"};
-    ASSERT_EQ(Lexer::TokOpeningBracket, lex.getTokType());
-    ASSERT_EQ(Lexer::TokOperator, lex.stepForward());
-    ASSERT_EQ(Lexer::TokIdentifier, lex.stepForward());
-    ASSERT_STREQ("n", lex.getIdentifier().c_str());
-    ASSERT_EQ(Lexer::TokNumber, lex.getTokType());
-    ASSERT_EQ(5, lex.getNum());
-    ASSERT_EQ(Lexer::TokClosingBracket, lex.getTokType());
-    ASSERT_EQ(Lexer::TokEOF, lex.stepForward());
-}

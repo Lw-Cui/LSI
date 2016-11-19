@@ -26,14 +26,6 @@ namespace parser {
 
     std::shared_ptr<ExprAST> parseNumberExpr(lexers::Lexer &lex);
 
-    std::shared_ptr<ExprAST> parseOperatorExpr(lexers::Lexer &lex);
-
-    std::shared_ptr<ExprAST> parseAddOperatorExpr(lexers::Lexer &lex);
-
-    std::shared_ptr<ExprAST> parseMinusOperatorExpr(lexers::Lexer &lex);
-
-    std::shared_ptr<ExprAST> parseLessThanOperatorExpr(lexers::Lexer &lex);
-
     std::shared_ptr<ExprAST> parseIdentifierExpr(lexers::Lexer &lex);
 
     std::shared_ptr<ExprAST> parseIfStatementExpr(lexers::Lexer &lex);
@@ -59,5 +51,11 @@ namespace parser {
     std::shared_ptr<ExprAST> parseBuiltinCdrExpr(lexers::Lexer &lexer);
 
     std::shared_ptr<ExprAST> parseBuiltinNullExpr(lexers::Lexer &lexer);
+
+    std::shared_ptr<ExprAST> parseBuiltinAddExpr(lexers::Lexer &lex);
+
+    std::shared_ptr<ExprAST> parseBuiltinMinusExpr(lexers::Lexer &lex);
+
+    std::shared_ptr<ExprAST> parseBuiltinLessThanExpr(lexers::Lexer &lex);
 }
 #endif //GI_PARSER_H
