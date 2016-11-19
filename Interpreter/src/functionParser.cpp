@@ -96,6 +96,8 @@ std::shared_ptr<ExprAST> parser::parserBuiltinFunction(lexers::Lexer &lexer) {
         return parseBuiltinCarExpr(lexer);
     else if (func == "cdr")
         return parseBuiltinCdrExpr(lexer);
+    else if (func == "null?")
+        return parseBuiltinNullExpr(lexer);
     else
         throw std::logic_error("Builtin function error.");
 }
@@ -118,3 +120,11 @@ std::shared_ptr<ExprAST> parser::parseBuiltinCdrExpr(lexers::Lexer &lexer) {
     auto pair = parseExpr(lexer);
     return std::make_shared<BuiltinCdrAST>(pair);
 }
+
+std::shared_ptr<ExprAST> parser::parseBuiltinNullExpr(lexers::Lexer &lexer) {
+    CLOG(DEBUG, "parser");
+    auto pair = parseExpr(lexer);
+    return std::make_shared<BuiltinNullAST>(pair);
+}
+
+

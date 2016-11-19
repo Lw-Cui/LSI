@@ -83,3 +83,11 @@ TEST(KeywordParsingTest, LoadingFileTest) {
     ASSERT_EQ(11, numPtr->getValue());
 }
 
+TEST(KeywordParsingTest, NilTest) {
+    Scope s;
+    lexers::Lexer lex;
+    lex.appendExp("(define p (cons 1 nil))").appendExp("(cdr p)");
+
+    auto res = parseAllExpr(lex)->eval(s);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NilAST>(res));
+}

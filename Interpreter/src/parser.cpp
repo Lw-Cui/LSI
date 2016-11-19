@@ -37,6 +37,9 @@ std::shared_ptr<ExprAST> parser::parseRawExpr(lexers::Lexer &lex) {
         case Lexer::TokFalse:
             CLOG(DEBUG, "parser") << "Parse #f";
             return parseFalseExpr(lex);
+        case Lexer::TokNil:
+            CLOG(DEBUG, "parser") << "Parse nil";
+            return parseNilExpr(lex);
         default:
             CLOG(DEBUG, "exception");
             throw logic_error("Cannot parse number/identifier.");
@@ -191,5 +194,11 @@ std::shared_ptr<ExprAST> parser::parseLoadingFileExpr(lexers::Lexer &lex) {
     CLOG(DEBUG, "parser") << "Get filename: " << filename;
     return make_shared<LoadingFileAST>(filename);
 }
+
+std::shared_ptr<ExprAST> parser::parseNilExpr(lexers::Lexer &lex) {
+    lex.stepForward();
+    return std::make_shared<NilAST>();
+}
+
 
 
