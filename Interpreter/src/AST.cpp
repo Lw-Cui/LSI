@@ -1,5 +1,5 @@
 #include <fstream>
-#include <basicParser.h>
+#include <parser.h>
 #include <lexers.h>
 #include <AST.h>
 
@@ -38,7 +38,7 @@ std::shared_ptr<ExprAST> IfStatementAST::eval(Scope &ss) const {
     }
 }
 
-std::shared_ptr<ExprAST> LessThanOperatorAST::eval(Scope &s) const {
+std::shared_ptr<ExprAST> BuiltinLessThanAST::eval(Scope &s) const {
     bool res = std::is_sorted(
             std::begin(actualArgs), std::end(actualArgs),
             [&](std::shared_ptr<ExprAST> p1, std::shared_ptr<ExprAST> p2) {
@@ -93,7 +93,7 @@ std::shared_ptr<ExprAST> LambdaAST::eval(Scope &ss) const {
 }
 
 
-std::shared_ptr<ExprAST> AddOperatorAST::eval(Scope &s) const {
+std::shared_ptr<ExprAST> BuiltinAddAST::eval(Scope &s) const {
     double num = 0;
     CLOG(DEBUG, "parser") << "Number of add operands are: " << actualArgs.size();
     for (auto element: actualArgs) {
@@ -109,7 +109,7 @@ std::shared_ptr<ExprAST> AddOperatorAST::eval(Scope &s) const {
     return std::make_shared<NumberAST>(num);
 }
 
-std::shared_ptr<ExprAST> MinusOperatorAST::eval(Scope &s) const {
+std::shared_ptr<ExprAST> BuiltinMinusAST::eval(Scope &s) const {
     double front = 0;
     if (auto p = std::dynamic_pointer_cast<NumberAST>(actualArgs.front()->eval(s))) {
         front = p->getValue();

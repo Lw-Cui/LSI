@@ -19,7 +19,6 @@ namespace lexers {
             TokClosingBracket = -5,
             TokDefine = -6,
             TokLet = -7,
-            TokOperator = -8,
             TokIf = -9,
             TokTrue = -10,
             TokFalse = -11,
@@ -72,6 +71,9 @@ namespace lexers {
                 {"cdr"},
                 {"list"},
                 {"null?"},
+                {"+"},
+                {"-"},
+                {"<"},
         };
 
         std::string strToken;

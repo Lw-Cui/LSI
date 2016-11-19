@@ -138,9 +138,9 @@ namespace ast {
         std::shared_ptr<ExprAST> pair;
     };
 
-    class LessThanOperatorAST : public ExprAST {
+    class BuiltinLessThanAST : public ExprAST {
     public:
-        LessThanOperatorAST(const std::vector<std::shared_ptr<ExprAST>> &v) : actualArgs{v} {}
+        BuiltinLessThanAST(const std::vector<std::shared_ptr<ExprAST>> &v) : actualArgs{v} {}
 
         std::shared_ptr<ExprAST> eval(Scope &s) const override;
 
@@ -148,9 +148,9 @@ namespace ast {
         std::vector<std::shared_ptr<ExprAST>> actualArgs;
     };
 
-    class MinusOperatorAST : public ExprAST {
+    class BuiltinMinusAST : public ExprAST {
     public:
-        MinusOperatorAST(const std::vector<std::shared_ptr<ExprAST>> &v) : actualArgs(v) {}
+        BuiltinMinusAST(const std::vector<std::shared_ptr<ExprAST>> &v) : actualArgs(v) {}
 
         std::shared_ptr<ExprAST> eval(Scope &s) const override;
 
@@ -158,9 +158,9 @@ namespace ast {
         std::vector<std::shared_ptr<ExprAST>> actualArgs;
     };
 
-    class AddOperatorAST : public ExprAST {
+    class BuiltinAddAST : public ExprAST {
     public:
-        AddOperatorAST(const std::vector<std::shared_ptr<ExprAST>> &v) : actualArgs{v} {}
+        BuiltinAddAST(const std::vector<std::shared_ptr<ExprAST>> &v) : actualArgs{v} {}
 
         std::shared_ptr<ExprAST> eval(Scope &s) const override;
 

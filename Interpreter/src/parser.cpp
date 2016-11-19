@@ -1,7 +1,7 @@
 #include <memory>
 #include <fstream>
 #include <lexers.h>
-#include <basicParser.h>
+#include <parser.h>
 
 
 using namespace lexers;
@@ -60,10 +60,6 @@ std::shared_ptr<ExprAST> parser::parseBracketExpr(lexers::Lexer &lex) {
         case Lexer::TokDefine:
             CLOG(DEBUG, "parser") << "Parse Definition";
             res = parseDefinitionExpr(lex);
-            break;
-        case Lexer::TokOperator:
-            CLOG(DEBUG, "parser") << "Parse Operator";
-            res = parseOperatorExpr(lex);
             break;
         case Lexer::TokBuiltinFunc:
             CLOG(DEBUG, "parser") << "Parse builtin function";

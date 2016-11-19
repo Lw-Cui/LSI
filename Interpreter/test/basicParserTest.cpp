@@ -1,6 +1,6 @@
 #include <memory>
 #include <gtest/gtest.h>
-#include <basicParser.h>
+#include <parser.h>
 
 using namespace lexers;
 using namespace parser;
