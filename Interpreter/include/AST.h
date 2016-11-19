@@ -92,6 +92,7 @@ namespace ast {
         std::string filename;
     };
 
+
     class PairAST : public ExprAST {
     public:
         PairAST(std::shared_ptr<ExprAST> f, std::shared_ptr<ExprAST> s) : data{f, s} {}
@@ -99,6 +100,22 @@ namespace ast {
         std::shared_ptr<ExprAST> eval(Scope &s) const override;
 
         std::pair<std::shared_ptr<ExprAST>, std::shared_ptr<ExprAST>> data;
+    };
+
+    class NilAST : public ExprAST {
+    public:
+        NilAST() {}
+        std::shared_ptr<ExprAST> eval(Scope &s) const override;
+    };
+
+    class BuiltinNullAST : public ExprAST {
+    public:
+        BuiltinNullAST(std::shared_ptr<ExprAST> p) : pair{p} {}
+
+        std::shared_ptr<ExprAST> eval(Scope &s) const override;
+
+    private:
+        std::shared_ptr<ExprAST> pair;
     };
 
     class BuiltinCarAST : public ExprAST {

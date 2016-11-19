@@ -1,6 +1,6 @@
 #include <memory>
 #include <gtest/gtest.h>
-#include <parser.h>
+#include <basicParser.h>
 
 using namespace lexers;
 using namespace parser;
@@ -128,7 +128,7 @@ TEST(KeywordParseingTest, RecursiveTest) {
     ASSERT_EQ(11, numPtr->getValue());
 }
 
-TEST(KeywordParseingTest, BuiltinFuncTest) {
+TEST(FunctionParsingTest, BuiltinFuncTest) {
     Scope s;
     lexers::Lexer lex("(define p (cons 1 2))");
 
@@ -150,4 +150,22 @@ TEST(KeywordParseingTest, BuiltinFuncTest) {
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
     numPtr = std::dynamic_pointer_cast<NumberAST>(res);
     ASSERT_EQ(1, numPtr->getValue());
+}
+
+TEST(FunctionParsingTest, NullTest) {
+    Scope s;
+    lexers::Lexer lex("(define p (cons 1 nil))");
+
+    lex.appendExp("(null? (cdr p))");
+    auto res = parseAllExpr(lex)->eval(s);
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansAST>(res));
+    auto boolean = std::dynamic_pointer_cast<BooleansAST>(res);
+    ASSERT_TRUE(boolean->eval(s));
+
+    lex.appendExp("(null? (car p))");
+    res = parseAllExpr(lex)->eval(s);
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansAST>(res));
+    boolean = std::dynamic_pointer_cast<BooleansAST>(res);
+    ASSERT_FALSE(boolean->eval(s));
+
 }

@@ -1,6 +1,6 @@
 #include <memory>
 #include <gtest/gtest.h>
-#include <parser.h>
+#include <basicParser.h>
 
 using namespace lexers;
 using namespace parser;
@@ -81,5 +81,50 @@ TEST(KeywordParsingTest, LoadingFileTest) {
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
     numPtr = std::dynamic_pointer_cast<NumberAST>(res);
     ASSERT_EQ(11, numPtr->getValue());
+}
+
+TEST(KeywordParsingTest, NilTest) {
+    Scope s;
+    lexers::Lexer lex;
+    lex.appendExp("(define p (cons 1 nil))").appendExp("(cdr p)");
+
+    auto res = parseAllExpr(lex)->eval(s);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NilAST>(res));
+}
+
+TEST(OperatorParsingTest, AddOperatorTest) {
+    Scope ss;
+    lexers::Lexer lex{"(+ 5 6 7)"};
+    auto exprPtr = parseExpr(lex)->eval(ss);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
+    auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
+    ASSERT_EQ(18, numPtr->getValue());
+}
+
+TEST(OperatorParsingTest, MinusOperatorTest) {
+    Scope ss;
+    lexers::Lexer lex{"(- 5 6 7)"};
+    auto exprPtr = parseExpr(lex)->eval(ss);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
+    auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
+    ASSERT_EQ(-8, numPtr->getValue());
+
+    lex.appendExp("(+ (- 8) 6 (+ 1))");
+    exprPtr = parseExpr(lex)->eval(ss);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
+    numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
+    ASSERT_EQ(-1, numPtr->getValue());
+}
+
+TEST(OperatorParsingTest, LessThanOperatorTest) {
+    Scope ss;
+    lexers::Lexer lex("(< 5 6 7)");
+    ASSERT_TRUE(parseExpr(lex)->eval(ss)->toBool(ss));
+
+    lex.appendExp("(define n 6)");
+    parseExpr(lex)->eval(ss);
+
+    lex.appendExp("(< n 5)");
+    ASSERT_FALSE(parseExpr(lex)->eval(ss)->toBool(ss));
 }
 

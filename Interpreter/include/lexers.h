@@ -26,6 +26,7 @@ namespace lexers {
             TokLoad = -12,
             TokLambda = -13,
             TokBuiltinFunc = -14,
+            TokNil = -15,
         };
 
 
@@ -62,6 +63,7 @@ namespace lexers {
                 {"#f",     TokFalse},
                 {"load",   TokLoad},
                 {"lambda", TokLambda},
+                {"nil",    TokNil},
         };
 
         std::set<std::string> builtinFunc = {
@@ -69,6 +71,7 @@ namespace lexers {
                 {"car"},
                 {"cdr"},
                 {"list"},
+                {"null?"},
         };
 
         std::string strToken;

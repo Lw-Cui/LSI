@@ -1,5 +1,5 @@
 #include <fstream>
-#include <parser.h>
+#include <basicParser.h>
 #include <lexers.h>
 #include <AST.h>
 
@@ -189,4 +189,15 @@ std::shared_ptr<ExprAST> BuiltinCdrAST::eval(Scope &s) const {
         CLOG(DEBUG, "exception");
         throw std::logic_error("Cannot convert to pair");
     }
+}
+
+std::shared_ptr<ExprAST> BuiltinNullAST::eval(Scope &s) const {
+    if (auto p = std::dynamic_pointer_cast<NilAST>(pair->eval(s)))
+        return std::make_shared<BooleansAST>(true);
+    else
+        return std::make_shared<BooleansAST>(false);
+}
+
+std::shared_ptr<ExprAST> NilAST::eval(Scope &s) const {
+    return std::make_shared<NilAST>(*this);
 }
