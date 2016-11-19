@@ -127,3 +127,27 @@ TEST(KeywordParseingTest, RecursiveTest) {
     numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
     ASSERT_EQ(11, numPtr->getValue());
 }
+
+TEST(KeywordParseingTest, BuiltinFuncTest) {
+    Scope s;
+    lexers::Lexer lex("(define p (cons 1 2))");
+
+    lex.appendExp("(cdr p)");
+    auto res = parseAllExpr(lex)->eval(s);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
+    auto numPtr = std::dynamic_pointer_cast<NumberAST>(res);
+    ASSERT_EQ(2, numPtr->getValue());
+
+    lex.appendExp("(car p)");
+    res = parseAllExpr(lex)->eval(s);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
+    numPtr = std::dynamic_pointer_cast<NumberAST>(res);
+    ASSERT_EQ(1, numPtr->getValue());
+
+    lex.appendExp("(define pp (cons 3 p))")
+            .appendExp("(car (cdr pp))");
+    res = parseAllExpr(lex)->eval(s);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
+    numPtr = std::dynamic_pointer_cast<NumberAST>(res);
+    ASSERT_EQ(1, numPtr->getValue());
+}

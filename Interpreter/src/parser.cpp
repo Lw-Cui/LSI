@@ -62,6 +62,10 @@ std::shared_ptr<ExprAST> parser::parseBracketExpr(lexers::Lexer &lex) {
             CLOG(DEBUG, "parser") << "Parse Operator";
             res = parseOperatorExpr(lex);
             break;
+        case Lexer::TokBuiltinFunc:
+            CLOG(DEBUG, "parser") << "Parse builtin function";
+            res = parserBuiltinFunction(lex);
+            break;
         case Lexer::TokIf:
             CLOG(DEBUG, "parser") << "Parse If statement";
             res = parseIfStatementExpr(lex);
@@ -89,7 +93,8 @@ std::shared_ptr<ExprAST> parser::parseBracketExpr(lexers::Lexer &lex) {
 
 
 std::shared_ptr<ExprAST> parser::parseOperatorExpr(lexers::Lexer &lex) {
-    switch (lex.getOperator()[0]) {
+    auto op = lex.getOperator();
+    switch (op.front()) {
         case '+':
             CLOG(DEBUG, "parser") << "parsing add operator";
             return parseAddOperatorExpr(lex);
@@ -186,4 +191,5 @@ std::shared_ptr<ExprAST> parser::parseLoadingFileExpr(lexers::Lexer &lex) {
     CLOG(DEBUG, "parser") << "Get filename: " << filename;
     return make_shared<LoadingFileAST>(filename);
 }
+
 

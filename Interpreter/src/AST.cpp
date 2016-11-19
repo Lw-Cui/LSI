@@ -168,3 +168,25 @@ std::shared_ptr<ExprAST> AllExprAST::eval(Scope &s) const {
         res = ptr->eval(s);
     return res;
 }
+
+std::shared_ptr<ExprAST> PairAST::eval(Scope &s) const {
+    return std::make_shared<PairAST>(data.first->eval(s), data.second->eval(s));
+}
+
+std::shared_ptr<ExprAST> BuiltinCarAST::eval(Scope &s) const {
+    if (auto p = std::dynamic_pointer_cast<PairAST>(pair->eval(s))) {
+        return p->data.first;
+    } else {
+        CLOG(DEBUG, "exception");
+        throw std::logic_error("Cannot convert to pair");
+    }
+}
+
+std::shared_ptr<ExprAST> BuiltinCdrAST::eval(Scope &s) const {
+    if (auto p = std::dynamic_pointer_cast<PairAST>(pair->eval(s))) {
+        return p->data.second;
+    } else {
+        CLOG(DEBUG, "exception");
+        throw std::logic_error("Cannot convert to pair");
+    }
+}

@@ -92,35 +92,63 @@ namespace ast {
         std::string filename;
     };
 
-    class OperatorAST : public ExprAST {
+    class PairAST : public ExprAST {
     public:
-        OperatorAST(const std::vector<std::shared_ptr<ExprAST>> &v) : actualArgs{v} {}
-
-    protected:
-        std::vector<std::shared_ptr<ExprAST>> actualArgs;
-    };
-
-    class LessThanOperatorAST : public OperatorAST {
-    public:
-        LessThanOperatorAST(const std::vector<std::shared_ptr<ExprAST>> &v) : OperatorAST{v} {}
+        PairAST(std::shared_ptr<ExprAST> f, std::shared_ptr<ExprAST> s) : data{f, s} {}
 
         std::shared_ptr<ExprAST> eval(Scope &s) const override;
+
+        std::pair<std::shared_ptr<ExprAST>, std::shared_ptr<ExprAST>> data;
     };
 
-    class MinusOperatorAST : public OperatorAST {
+    class BuiltinCarAST : public ExprAST {
     public:
-        MinusOperatorAST(const std::vector<std::shared_ptr<ExprAST>> &v) : OperatorAST(v) {}
+        BuiltinCarAST(std::shared_ptr<ExprAST> p) : pair{p} {}
 
         std::shared_ptr<ExprAST> eval(Scope &s) const override;
 
     private:
+        std::shared_ptr<ExprAST> pair;
     };
 
-    class AddOperatorAST : public OperatorAST {
+    class BuiltinCdrAST : public ExprAST {
     public:
-        AddOperatorAST(const std::vector<std::shared_ptr<ExprAST>> &v) : OperatorAST{v} {}
+        BuiltinCdrAST(std::shared_ptr<ExprAST> p) : pair{p} {}
 
         std::shared_ptr<ExprAST> eval(Scope &s) const override;
+
+    private:
+        std::shared_ptr<ExprAST> pair;
+    };
+
+    class LessThanOperatorAST : public ExprAST {
+    public:
+        LessThanOperatorAST(const std::vector<std::shared_ptr<ExprAST>> &v) : actualArgs{v} {}
+
+        std::shared_ptr<ExprAST> eval(Scope &s) const override;
+
+    private:
+        std::vector<std::shared_ptr<ExprAST>> actualArgs;
+    };
+
+    class MinusOperatorAST : public ExprAST {
+    public:
+        MinusOperatorAST(const std::vector<std::shared_ptr<ExprAST>> &v) : actualArgs(v) {}
+
+        std::shared_ptr<ExprAST> eval(Scope &s) const override;
+
+    private:
+        std::vector<std::shared_ptr<ExprAST>> actualArgs;
+    };
+
+    class AddOperatorAST : public ExprAST {
+    public:
+        AddOperatorAST(const std::vector<std::shared_ptr<ExprAST>> &v) : actualArgs{v} {}
+
+        std::shared_ptr<ExprAST> eval(Scope &s) const override;
+
+    private:
+        std::vector<std::shared_ptr<ExprAST>> actualArgs;
     };
 
     class BindingAST : public ExprAST {
