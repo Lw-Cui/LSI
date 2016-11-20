@@ -1,4 +1,5 @@
 #include <memory>
+#include <unordered_map>
 #include <AST.h>
 #include <parser.h>
 #include <context.h>
@@ -28,7 +29,7 @@ namespace context {
         }
 
     private:
-        std::map<std::string, std::shared_ptr<ast::ExprAST>> impl;
+        std::unordered_map<std::string, std::shared_ptr<ast::ExprAST>> impl;
     };
 
     shared_ptr<parser::ExprAST> &Scope::operator[](const std::string &str) {
