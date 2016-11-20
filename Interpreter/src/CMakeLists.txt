@@ -1,7 +1,8 @@
 set(LEXERS_LIB lexer CACHE INTERNAL "Name of lexers libraries")
 set(INTERPRETER_LIB interpreter CACHE INTERNAL "Name of interpreter libraries")
 
-set(LEXERS_SOURCE_FILES lexers.cpp
+set(LEXERS_SOURCE_FILES
+        lexers.cpp
         ../include/lexers.h)
 add_library(${LEXERS_LIB} STATIC ${LEXERS_SOURCE_FILES})
 
@@ -9,8 +10,7 @@ set(INTERPRETER_SOURCE_FILES
         ${LEXERS_SOURCE_FILES}
         functionParser.cpp
         keywordParser.cpp
-        builtinFunction.cpp
-        parser.cpp
+        basicParser.cpp
         context.cpp
         AST.cpp
         ../include/parser.h

@@ -42,20 +42,5 @@ namespace parser {
 
     std::shared_ptr<ExprAST> parseFunctionDefinitionExpr(lexers::Lexer &lex);
 
-    std::shared_ptr<ExprAST> parserBuiltinFunction(lexers::Lexer &lexer);
-
-    std::shared_ptr<ExprAST> parseBuiltinConsExpr(lexers::Lexer &lexer);
-
-    std::shared_ptr<ExprAST> parseBuiltinCarExpr(lexers::Lexer &lexer);
-
-    std::shared_ptr<ExprAST> parseBuiltinCdrExpr(lexers::Lexer &lexer);
-
-    std::shared_ptr<ExprAST> parseBuiltinNullExpr(lexers::Lexer &lexer);
-
-    std::shared_ptr<ExprAST> parseBuiltinAddExpr(lexers::Lexer &lex);
-
-    std::shared_ptr<ExprAST> parseBuiltinMinusExpr(lexers::Lexer &lex);
-
-    std::shared_ptr<ExprAST> parseBuiltinLessThanExpr(lexers::Lexer &lex);
 }
 #endif //GI_PARSER_H
