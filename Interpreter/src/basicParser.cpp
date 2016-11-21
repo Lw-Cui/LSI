@@ -61,10 +61,6 @@ std::shared_ptr<ExprAST> parser::parseBracketExpr(lexers::Lexer &lex) {
             CLOG(DEBUG, "parser") << "Parse Definition";
             res = parseDefinitionExpr(lex);
             break;
-        case Lexer::TokBuiltinFunc:
-            CLOG(DEBUG, "parser") << "Parse builtin function";
-            res = parserBuiltinFunction(lex);
-            break;
         case Lexer::TokIf:
             CLOG(DEBUG, "parser") << "Parse If statement";
             res = parseIfStatementExpr(lex);

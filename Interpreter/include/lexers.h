@@ -19,13 +19,12 @@ namespace lexers {
             TokClosingBracket = -5,
             TokDefine = -6,
             TokLet = -7,
-            TokIf = -9,
-            TokTrue = -10,
-            TokFalse = -11,
-            TokLoad = -12,
-            TokLambda = -13,
-            TokBuiltinFunc = -14,
-            TokNil = -15,
+            TokIf = -8,
+            TokTrue = -9,
+            TokFalse = -10,
+            TokLoad = -11,
+            TokLambda = -12,
+            TokNil = -13,
         };
 
 
@@ -41,16 +40,11 @@ namespace lexers {
 
         double getNum();
 
-        std::string getOperator();
-
         std::string getIdentifier();
-
-        std::string getBuiltinFunc();
 
         TokenType stepForward();
 
     private:
-        bool isOperator(int type) const;
 
         std::string processExp(const std::string exp) const;
 
@@ -63,17 +57,6 @@ namespace lexers {
                 {"load",   TokLoad},
                 {"lambda", TokLambda},
                 {"nil",    TokNil},
-        };
-
-        std::set<std::string> builtinFunc = {
-                {"cons"},
-                {"car"},
-                {"cdr"},
-                {"list"},
-                {"null?"},
-                {"+"},
-                {"-"},
-                {"<"},
         };
 
         std::string strToken;

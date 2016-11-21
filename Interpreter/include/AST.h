@@ -105,68 +105,10 @@ namespace ast {
     class NilAST : public ExprAST {
     public:
         NilAST() {}
+
         std::shared_ptr<ExprAST> eval(Scope &s) const override;
     };
 
-    class BuiltinNullAST : public ExprAST {
-    public:
-        BuiltinNullAST(std::shared_ptr<ExprAST> p) : pair{p} {}
-
-        std::shared_ptr<ExprAST> eval(Scope &s) const override;
-
-    private:
-        std::shared_ptr<ExprAST> pair;
-    };
-
-    class BuiltinCarAST : public ExprAST {
-    public:
-        BuiltinCarAST(std::shared_ptr<ExprAST> p) : pair{p} {}
-
-        std::shared_ptr<ExprAST> eval(Scope &s) const override;
-
-    private:
-        std::shared_ptr<ExprAST> pair;
-    };
-
-    class BuiltinCdrAST : public ExprAST {
-    public:
-        BuiltinCdrAST(std::shared_ptr<ExprAST> p) : pair{p} {}
-
-        std::shared_ptr<ExprAST> eval(Scope &s) const override;
-
-    private:
-        std::shared_ptr<ExprAST> pair;
-    };
-
-    class BuiltinLessThanAST : public ExprAST {
-    public:
-        BuiltinLessThanAST(const std::vector<std::shared_ptr<ExprAST>> &v) : actualArgs{v} {}
-
-        std::shared_ptr<ExprAST> eval(Scope &s) const override;
-
-    private:
-        std::vector<std::shared_ptr<ExprAST>> actualArgs;
-    };
-
-    class BuiltinMinusAST : public ExprAST {
-    public:
-        BuiltinMinusAST(const std::vector<std::shared_ptr<ExprAST>> &v) : actualArgs(v) {}
-
-        std::shared_ptr<ExprAST> eval(Scope &s) const override;
-
-    private:
-        std::vector<std::shared_ptr<ExprAST>> actualArgs;
-    };
-
-    class BuiltinAddAST : public ExprAST {
-    public:
-        BuiltinAddAST(const std::vector<std::shared_ptr<ExprAST>> &v) : actualArgs{v} {}
-
-        std::shared_ptr<ExprAST> eval(Scope &s) const override;
-
-    private:
-        std::vector<std::shared_ptr<ExprAST>> actualArgs;
-    };
 
     class BindingAST : public ExprAST {
     public:
@@ -208,6 +150,41 @@ namespace ast {
         mutable Scope context;
     };
 
+    class BuiltinConsAST : public ExprAST {
+    public:
+        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &) override;
+    };
+
+    class BuiltinCarAST : public ExprAST {
+    public:
+        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &) override;
+    };
+
+    class BuiltinCdrAST : public ExprAST {
+    public:
+        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &) override;
+    };
+
+    class BuiltinAddAST : public ExprAST {
+    public:
+        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &) override;
+    };
+
+    class BuiltinNullAST : public ExprAST {
+    public:
+        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &) override;
+    };
+
+    class BuiltinLessThanAST : public ExprAST {
+    public:
+        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &) override;
+    };
+
+    class BuiltinMinusAST : public ExprAST {
+    public:
+        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &) override;
+    };
+
 
     class LambdaBindingAST : public BindingAST {
     public:
@@ -221,7 +198,6 @@ namespace ast {
     private:
         std::shared_ptr<LambdaAST> lambda;
     };
-
 
     class LambdaApplicationAST : public ExprAST {
     public:

@@ -33,17 +33,6 @@ std::string Lexer::getIdentifier() {
     }
 }
 
-std::string Lexer::getBuiltinFunc() {
-    if (getTokType() == TokBuiltinFunc) {
-        std::string tmp = strToken;
-        stepForward();
-        return std::move(tmp);
-    } else {
-        CLOG(DEBUG, "exception");
-        throw std::logic_error("Token isn't builtin function.");
-    }
-}
-
 Lexer::TokenType Lexer::stepForward() {
     int type{expressionBuf.get()};
     expressionBuf.unget();
@@ -64,9 +53,7 @@ Lexer::TokenType Lexer::stepForward() {
         currentType = TokClosingBracket;
     } else {
         expressionBuf >> strToken;
-        currentType = (keyWord.count(strToken) ?
-                       keyWord[strToken] :
-                       (builtinFunc.count(strToken) ? TokBuiltinFunc : TokIdentifier));
+        currentType = (keyWord.count(strToken) ? keyWord[strToken] : TokIdentifier);
     }
     return currentType;
 }
