@@ -170,6 +170,11 @@ namespace ast {
         std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &) override;
     };
 
+    class BuiltinListAST : public ExprAST {
+    public:
+        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &) override;
+    };
+
     class BuiltinNullAST : public ExprAST {
     public:
         std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &) override;

@@ -83,4 +83,28 @@ TEST(BuiltinFunctionTest, LessThanTest) {
     ASSERT_FALSE(parseExpr(lex)->eval(ss)->toBool(ss));
 }
 
+TEST(BuiltinFunctionTest, ListTest) {
+    Scope ss;
+    lexers::Lexer lex;
+    lex.appendExp("(define seq (list 1 2 3))").appendExp("(car seq)");
+    auto exprPtr = parseAllExpr(lex)->eval(ss);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
+    auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
+    ASSERT_EQ(1, numPtr->getValue());
 
+    lex.appendExp("(car (cdr seq))");
+    exprPtr = parseAllExpr(lex)->eval(ss);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
+    numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
+    ASSERT_EQ(2, numPtr->getValue());
+
+    lex.appendExp("(null? (cdr (cdr (cdr seq))))");
+    exprPtr = parseAllExpr(lex)->eval(ss)->toBool(ss);
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansAST>(exprPtr));
+
+    lex.appendExp("(define aseq (list 5 seq 6))").appendExp("(car (cdr (car (cdr aseq))))");
+    exprPtr = parseAllExpr(lex)->eval(ss);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
+    numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
+    ASSERT_EQ(2, numPtr->getValue());
+}

@@ -116,6 +116,12 @@ std::shared_ptr<ExprAST> BuiltinMinusAST::apply(const std::vector<std::shared_pt
     return std::make_shared<NumberAST>(front);
 }
 
+std::shared_ptr<ExprAST> BuiltinListAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
+    std::shared_ptr<ExprAST> list = std::make_shared<NilAST>();
+    for (int i = actualArgs.size() - 1; i >= 0; i--)
+        list = std::make_shared<PairAST>(actualArgs[i]->eval(s), list);
+    return list;
+}
 
 std::shared_ptr<ExprAST> ValueBindingAST::eval(Scope &ss) const {
     ss[getIdentifier()] = value->eval(ss);
