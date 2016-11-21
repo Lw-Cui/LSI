@@ -21,12 +21,3 @@ TEST(ParserTest, IdentifierTest) {
     ASSERT_STREQ("abs", idPtr->getId().c_str());
 
 }
-
-TEST(ParserTest, ConditionTest) {
-    Scope ss;
-    lexers::Lexer lex{"(define n 0)"};
-    parseExpr(lex)->eval(ss);
-    ASSERT_FALSE(ss["n"]->toBool(ss));
-
-}
-

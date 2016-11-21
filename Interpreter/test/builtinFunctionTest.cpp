@@ -74,13 +74,41 @@ TEST(BuiltinFunctionTest, MinusTest) {
 TEST(BuiltinFunctionTest, LessThanTest) {
     Scope ss;
     lexers::Lexer lex("(< 5 6 7)");
-    ASSERT_TRUE(parseExpr(lex)->eval(ss)->toBool(ss));
+    auto exprPtr = parseExpr(lex)->eval(ss);
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansAST>(exprPtr));
+    ASSERT_TRUE(exprPtr->eval(ss));
 
     lex.appendExp("(define n 6)");
     parseExpr(lex)->eval(ss);
 
     lex.appendExp("(< n 5)");
-    ASSERT_FALSE(parseExpr(lex)->eval(ss)->toBool(ss));
+    exprPtr = parseExpr(lex)->eval(ss);
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansAST>(exprPtr));
+    ASSERT_FALSE(exprPtr->eval(ss));
+}
+
+TEST(BuiltinFunctionTEST, NullTest) {
+    Scope ss;
+    lexers::Lexer lex;
+    lex.appendExp("(null? (list 1 2 3))");
+    auto exprPtr = parseAllExpr(lex)->eval(ss);
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansAST>(exprPtr));
+    ASSERT_FALSE(exprPtr->eval(ss));
+
+    lex.appendExp("(define l (list 1 2 3))").appendExp("(null? l)");
+    exprPtr = parseAllExpr(lex)->eval(ss);
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansAST>(exprPtr));
+    ASSERT_FALSE(exprPtr->eval(ss));
+
+    lex.appendExp("(null? nil)");
+    exprPtr = parseAllExpr(lex)->eval(ss);
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansAST>(exprPtr));
+    ASSERT_TRUE(exprPtr->eval(ss));
+
+    lex.appendExp("(define (add-list l) (if (null? l) #t #f))")
+            .appendExp("(add-list (list 5 6 7 8))");
+    exprPtr = parseAllExpr(lex)->eval(ss);
+    ASSERT_FALSE(exprPtr);
 }
 
 TEST(BuiltinFunctionTest, ListTest) {
@@ -99,8 +127,9 @@ TEST(BuiltinFunctionTest, ListTest) {
     ASSERT_EQ(2, numPtr->getValue());
 
     lex.appendExp("(null? (cdr (cdr (cdr seq))))");
-    exprPtr = parseAllExpr(lex)->eval(ss)->toBool(ss);
+    exprPtr = parseAllExpr(lex)->eval(ss);
     ASSERT_TRUE(std::dynamic_pointer_cast<BooleansAST>(exprPtr));
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansAST>(exprPtr)->eval(ss));
 
     lex.appendExp("(define aseq (list 5 seq 6))").appendExp("(car (cdr (car (cdr aseq))))");
     exprPtr = parseAllExpr(lex)->eval(ss);
@@ -108,3 +137,4 @@ TEST(BuiltinFunctionTest, ListTest) {
     numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
     ASSERT_EQ(2, numPtr->getValue());
 }
+
