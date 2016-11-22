@@ -27,11 +27,11 @@ std::shared_ptr<ExprAST> LoadingFileAST::eval(Scope &s) const {
 std::shared_ptr<ExprAST> IfStatementAST::eval(Scope &ss) const {
     auto ptr = condition->eval(ss);
     auto numPtr = std::dynamic_pointer_cast<NumberAST>(ptr);
-    auto boolPtr = std::dynamic_pointer_cast<BooleansAST>(ptr);
+    auto boolFalsePtr = std::dynamic_pointer_cast<BooleansFalseAST>(ptr);
     if (numPtr && !numPtr->getValue()) {
         CLOG(DEBUG, "AST") << "Evaluate false clause.";
         return falseClause->eval(ss);
-    } else if (boolPtr && !boolPtr->eval(ss)) {
+    } else if (boolFalsePtr) {
         CLOG(DEBUG, "AST") << "Evaluate false clause.";
         return falseClause->eval(ss);
     }
@@ -47,14 +47,15 @@ std::shared_ptr<ExprAST> BuiltinLessThanAST::apply(const std::vector<std::shared
                 auto np1 = std::dynamic_pointer_cast<NumberAST>(p1->eval(s));
                 auto np2 = std::dynamic_pointer_cast<NumberAST>(p2->eval(s));
                 if (np1 && np2) {
-                    return np1->getValue() < np2->getValue();
+                    // Important: if (comp(*next,*first)) return true then is_sorted return false
+                    return np1->getValue() <= np2->getValue();
                 } else {
                     CLOG(DEBUG, "exception");
                     throw std::logic_error("The operands in less than operator cannot be converted to number");
                 }
             });
-    if (res) return std::make_shared<BooleansAST>(true);
-    else return std::make_shared<BooleansAST>(false);
+    if (res) return std::make_shared<BooleansTrueAST>();
+    else return std::make_shared<BooleansFalseAST>();
 }
 
 std::shared_ptr<ExprAST> NumberAST::eval(Scope &) const {
@@ -98,27 +99,13 @@ std::shared_ptr<ExprAST> LambdaAST::eval(Scope &ss) const {
 }
 
 
-std::shared_ptr<ExprAST> BuiltinMinusAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
-    double front = 0;
+std::shared_ptr<ExprAST> BuiltinMinusSignAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
     if (auto p = std::dynamic_pointer_cast<NumberAST>(actualArgs.front()->eval(s))) {
-        front = p->getValue();
+        return std::make_shared<NumberAST>(-p->getValue());
     } else {
         CLOG(DEBUG, "exception");
         throw std::logic_error("The operands cannot be converted to number");
     }
-
-    if (actualArgs.size() == 1) return std::make_shared<NumberAST>(-front);
-    for (int i = 1; i < actualArgs.size(); i++) {
-        auto res = actualArgs[i]->eval(s);
-        if (auto p = std::dynamic_pointer_cast<NumberAST>(res)) {
-            CLOG(DEBUG, "AST") << "Add number: " << p->getValue();
-            front -= p->getValue();
-        } else {
-            CLOG(DEBUG, "exception");
-            throw std::logic_error("The operands cannot be converted to number");
-        }
-    }
-    return std::make_shared<NumberAST>(front);
 }
 
 std::shared_ptr<ExprAST> BuiltinListAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
@@ -151,11 +138,12 @@ std::shared_ptr<ExprAST> LambdaApplicationAST::eval(Scope &ss) const {
 }
 
 
-std::shared_ptr<ExprAST> BooleansAST::eval(Scope &) const {
-    if (booleans)
-        return std::make_shared<BooleansAST>(*this);
-    else
-        return nullptr;
+std::shared_ptr<ExprAST> BooleansTrueAST::eval(Scope &) const {
+    return std::make_shared<BooleansTrueAST>();
+}
+
+std::shared_ptr<ExprAST> BooleansFalseAST::eval(Scope &) const {
+    return std::make_shared<BooleansFalseAST>();
 }
 
 std::shared_ptr<ExprAST> AllExprAST::eval(Scope &s) const {
@@ -173,9 +161,9 @@ std::shared_ptr<ExprAST> PairAST::eval(Scope &s) const {
 std::shared_ptr<ExprAST> BuiltinNullAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
     CLOG(DEBUG, "AST") << "Call builtin null?";
     if (auto p = std::dynamic_pointer_cast<NilAST>(actualArgs.front()->eval(s)))
-        return std::make_shared<BooleansAST>(true);
+        return std::make_shared<BooleansTrueAST>();
     else
-        return std::make_shared<BooleansAST>(false);
+        return std::make_shared<BooleansFalseAST>();
 }
 
 std::shared_ptr<ExprAST> NilAST::eval(Scope &s) const {
