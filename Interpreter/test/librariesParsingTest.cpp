@@ -58,3 +58,18 @@ TEST(LibrariesParsingTest, MinusTest) {
     numPtr = std::dynamic_pointer_cast<NumberAST>(res);
     ASSERT_EQ(-19, numPtr->getValue());
 }
+
+TEST(LibrariesParsingTest, NotTest) {
+    Scope s;
+    lexers::Lexer lex("(load \"Base.scm\")");
+
+    lex.appendExp("(not (- 10 4 6))");
+    auto res = parseAllExpr(lex)->eval(s);
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansAST>(res));
+    auto boolPtr = std::dynamic_pointer_cast<BooleansAST>(res);
+    ASSERT_TRUE(boolPtr->eval(s));
+
+    lex.appendExp("(not (- 10 4 5))");
+    res = parseAllExpr(lex)->eval(s);
+    ASSERT_FALSE(res);
+}
