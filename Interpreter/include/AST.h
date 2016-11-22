@@ -19,8 +19,6 @@ namespace ast {
 
         virtual std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &, Scope &);
 
-        virtual std::shared_ptr<ExprAST> toBool(Scope &) const;
-
         virtual ~ExprAST() {}
     };
 
@@ -49,8 +47,6 @@ namespace ast {
         NumberAST(double n) : value{n} {}
 
         double getValue() const { return value; }
-
-        virtual std::shared_ptr<ExprAST> toBool(Scope &) const override;
 
         std::shared_ptr<ExprAST> eval(Scope &) const override;
 
@@ -166,6 +162,11 @@ namespace ast {
     };
 
     class BuiltinAddAST : public ExprAST {
+    public:
+        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &) override;
+    };
+
+    class BuiltinListAST : public ExprAST {
     public:
         std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &) override;
     };

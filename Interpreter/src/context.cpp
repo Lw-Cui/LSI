@@ -18,6 +18,7 @@ namespace context {
             impl["null?"] = make_shared<BuiltinNullAST>();
             impl["<"] = make_shared<BuiltinLessThanAST>();
             impl["-"] = make_shared<BuiltinMinusAST>();
+            impl["list"] = make_shared<BuiltinListAST>();
         }
 
         shared_ptr<parser::ExprAST> &operator[](const std::string &str) {

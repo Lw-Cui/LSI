@@ -16,10 +16,6 @@ std::shared_ptr<ExprAST> ExprAST::apply(const std::vector<std::shared_ptr<ExprAS
     throw std::logic_error("Expression cannot be applied.");
 }
 
-std::shared_ptr<ExprAST> ExprAST::toBool(Scope &s) const {
-    return std::make_shared<BooleansAST>(true)->eval(s);
-};
-
 std::shared_ptr<ExprAST> LoadingFileAST::eval(Scope &s) const {
     std::ifstream fin{filename};
     std::string str{std::istreambuf_iterator<char>(fin), std::istreambuf_iterator<char>()};
@@ -29,13 +25,17 @@ std::shared_ptr<ExprAST> LoadingFileAST::eval(Scope &s) const {
 }
 
 std::shared_ptr<ExprAST> IfStatementAST::eval(Scope &ss) const {
-    if (condition->eval(ss)->toBool(ss)) {
-        CLOG(DEBUG, "AST") << "Evaluate true clause.";
-        return trueClause->eval(ss);
-    } else {
+    auto ptr = condition->eval(ss);
+    auto numPtr = std::dynamic_pointer_cast<NumberAST>(ptr);
+    auto boolPtr = std::dynamic_pointer_cast<BooleansAST>(ptr);
+    if (numPtr && !numPtr->getValue()) {
+        CLOG(DEBUG, "AST") << "Evaluate false clause.";
+        return falseClause->eval(ss);
+    } else if (boolPtr && !boolPtr->eval(ss)) {
         CLOG(DEBUG, "AST") << "Evaluate false clause.";
         return falseClause->eval(ss);
     }
+    return trueClause->eval(ss);
 }
 
 
@@ -53,16 +53,12 @@ std::shared_ptr<ExprAST> BuiltinLessThanAST::apply(const std::vector<std::shared
                     throw std::logic_error("The operands in less than operator cannot be converted to number");
                 }
             });
-    if (res) return std::make_shared<NumberAST>(1);
-    else return std::make_shared<NumberAST>(0);
+    if (res) return std::make_shared<BooleansAST>(true);
+    else return std::make_shared<BooleansAST>(false);
 }
 
 std::shared_ptr<ExprAST> NumberAST::eval(Scope &) const {
     return std::make_shared<NumberAST>(getValue());
-}
-
-std::shared_ptr<ExprAST> NumberAST::toBool(Scope &s) const {
-    return std::make_shared<BooleansAST>(getValue() != 0)->eval(s);
 }
 
 std::shared_ptr<ExprAST> IdentifierAST::eval(Scope &ss) const {
@@ -71,7 +67,7 @@ std::shared_ptr<ExprAST> IdentifierAST::eval(Scope &ss) const {
         return ss[getId()];
     } else {
         CLOG(DEBUG, "exception");
-        throw std::logic_error("Unbound identifier.");
+        throw std::logic_error("Unbound identifier: " + getId());
     }
 }
 
@@ -81,13 +77,22 @@ std::shared_ptr<ExprAST> LambdaAST::apply(const std::vector<std::shared_ptr<Expr
     // Backup scope of lambda. If not, recursive calls will destroy scope by binding arguments.
     Scope tmp = context;
     for (size_t i = 0; i < actualArgs.size(); i++) {
-        // Evaluate value from current scope and set them into scope of lambda
-        tmp[formalArgs[i]] = actualArgs[i]->eval(ss);
+        if (formalArgs[i] != ".") {
+            CLOG(DEBUG, "AST") << "Binding identifier: " << formalArgs[i];
+            // Evaluate value from current scope and set them into scope of lambda
+            tmp[formalArgs[i]] = actualArgs[i]->eval(ss);
+        } else {
+            tmp[formalArgs[i + 1]] =
+                    std::make_shared<BuiltinListAST>()->apply(
+                            std::vector<std::shared_ptr<ExprAST>>{actualArgs.begin() + i, actualArgs.end()}, ss);
+            break;
+        }
     }
     return expression->eval(tmp);
 }
 
 std::shared_ptr<ExprAST> LambdaAST::eval(Scope &ss) const {
+    // Set closure.
     context = ss;
     return std::make_shared<LambdaAST>(*this);
 }
@@ -116,6 +121,12 @@ std::shared_ptr<ExprAST> BuiltinMinusAST::apply(const std::vector<std::shared_pt
     return std::make_shared<NumberAST>(front);
 }
 
+std::shared_ptr<ExprAST> BuiltinListAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
+    std::shared_ptr<ExprAST> list = std::make_shared<NilAST>();
+    for (int i = static_cast<int>(actualArgs.size() - 1); i >= 0; i--)
+        list = std::make_shared<PairAST>(actualArgs[i]->eval(s), list);
+    return list;
+}
 
 std::shared_ptr<ExprAST> ValueBindingAST::eval(Scope &ss) const {
     ss[getIdentifier()] = value->eval(ss);
@@ -124,7 +135,9 @@ std::shared_ptr<ExprAST> ValueBindingAST::eval(Scope &ss) const {
 
 
 std::shared_ptr<ExprAST> LambdaBindingAST::eval(Scope &ss) const {
-    // Set its identifier into its context to support recursion.
+    // Set closure.
+    lambda->eval(ss);
+    // Set its identifier into its context to support recursion. Cannot assign lambda->eval(ss) to others!
     ss[getIdentifier()] = lambda->upgradeScope()[getIdentifier()] = lambda;
     return nullptr;
 }
@@ -158,6 +171,7 @@ std::shared_ptr<ExprAST> PairAST::eval(Scope &s) const {
 
 
 std::shared_ptr<ExprAST> BuiltinNullAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
+    CLOG(DEBUG, "AST") << "Call builtin null?";
     if (auto p = std::dynamic_pointer_cast<NilAST>(actualArgs.front()->eval(s)))
         return std::make_shared<BooleansAST>(true);
     else
