@@ -95,6 +95,7 @@ std::shared_ptr<ExprAST> LambdaAST::apply(const std::vector<std::shared_ptr<Expr
 std::shared_ptr<ExprAST> LambdaAST::eval(Scope &ss) const {
     // Set closure.
     context = ss;
+    for (auto expr : nestedFunc) expr->eval(context);
     return std::make_shared<LambdaAST>(*this);
 }
 

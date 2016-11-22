@@ -43,19 +43,12 @@ TEST(LibrariesParsingTest, AdvanceConsTest) {
 
 TEST(LibrariesParsingTest, MinusTest) {
     Scope s;
-    lexers::Lexer lex;
-    lex.appendExp("(load \"Base.scm\")").appendExp("(add-list (list 7 8 9))");
+    lexers::Lexer lex("(load \"Base.scm\")");
 
+    lex.appendExp("(- 5 7 8 9)");
     auto res = parseAllExpr(lex)->eval(s);
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
     auto numPtr = std::dynamic_pointer_cast<NumberAST>(res);
-    ASSERT_EQ(24, numPtr->getValue());
-
-    lex.appendExp("(- 5 7 8 9)");
-
-    res = parseAllExpr(lex)->eval(s);
-    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
-    numPtr = std::dynamic_pointer_cast<NumberAST>(res);
     ASSERT_EQ(-19, numPtr->getValue());
 }
 
