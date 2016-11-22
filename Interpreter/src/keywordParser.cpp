@@ -34,12 +34,12 @@ std::shared_ptr<ExprAST> parser::parseIfStatementExpr(lexers::Lexer &lex) {
 
 std::shared_ptr<ExprAST> parser::parseTrueExpr(lexers::Lexer &lex) {
     lex.stepForward();
-    return make_shared<BooleansAST>(true);
+    return make_shared<BooleansTrueAST>();
 }
 
 std::shared_ptr<ExprAST> parser::parseFalseExpr(lexers::Lexer &lex) {
     lex.stepForward();
-    return make_shared<BooleansAST>(false);
+    return make_shared<BooleansFalseAST>();
 }
 
 std::shared_ptr<ExprAST> parser::parseLoadingFileExpr(lexers::Lexer &lex) {

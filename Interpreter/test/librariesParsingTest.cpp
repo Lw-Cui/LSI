@@ -65,13 +65,11 @@ TEST(LibrariesParsingTest, NotTest) {
 
     lex.appendExp("(not (- 10 4 6))");
     auto res = parseAllExpr(lex)->eval(s);
-    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansAST>(res));
-    auto boolPtr = std::dynamic_pointer_cast<BooleansAST>(res);
-    ASSERT_TRUE(boolPtr->eval(s));
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansTrueAST>(res));
 
     lex.appendExp("(not (- 10 4 5))");
     res = parseAllExpr(lex)->eval(s);
-    ASSERT_FALSE(res);
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansFalseAST>(res));
 }
 
 TEST(LibrariesParsingTest, AndTest) {
@@ -80,13 +78,11 @@ TEST(LibrariesParsingTest, AndTest) {
 
     lex.appendExp("(and (+ 10 4 6) (- 10 1) (+ 5 6))");
     auto res = parseAllExpr(lex)->eval(s);
-    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansAST>(res));
-    auto boolPtr = std::dynamic_pointer_cast<BooleansAST>(res);
-    ASSERT_TRUE(boolPtr->eval(s));
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansTrueAST>(res));
 
     lex.appendExp("(and (+ 10 4 6) (- 10 10) (+ 5 7))");
     res = parseAllExpr(lex)->eval(s);
-    ASSERT_FALSE(res);
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansFalseAST>(res));
 }
 
 TEST(LibrariesParsingTest, OrTest) {
@@ -95,11 +91,23 @@ TEST(LibrariesParsingTest, OrTest) {
 
     lex.appendExp("(or (+ 10 (~ 10)) (- 10 1) (- 1 10))");
     auto res = parseAllExpr(lex)->eval(s);
-    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansAST>(res));
-    auto boolPtr = std::dynamic_pointer_cast<BooleansAST>(res);
-    ASSERT_TRUE(boolPtr->eval(s));
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansTrueAST>(res));
 
     lex.appendExp("(or (+ 0 0) (- 10 10) 0)");
     res = parseAllExpr(lex)->eval(s);
-    ASSERT_FALSE(res);
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansFalseAST>(res));
+}
+
+TEST(LibrariesParsingTest, EqualTest) {
+    Scope s;
+    lexers::Lexer lex("(load \"Base.scm\")");
+
+    lex.appendExp("(= (+ 10 (~ 10)) 0)");
+    auto res = parseAllExpr(lex)->eval(s);
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansTrueAST>(res));
+
+    lex.appendExp("(= 13 (- 20 7) (+ 5 8))");
+    res = parseAllExpr(lex)->eval(s);
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansTrueAST>(res));
+
 }

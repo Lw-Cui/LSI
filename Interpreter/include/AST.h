@@ -32,6 +32,20 @@ namespace ast {
         std::vector<std::shared_ptr<ExprAST>> exprVec;
     };
 
+    class BooleansFalseAST : public ExprAST {
+    public:
+        BooleansFalseAST() {}
+
+        virtual std::shared_ptr<ExprAST> eval(Scope &) const;
+    };
+
+    class BooleansTrueAST : public ExprAST {
+    public:
+        BooleansTrueAST() {}
+
+        virtual std::shared_ptr<ExprAST> eval(Scope &) const;
+    };
+
     class BooleansAST : public ExprAST {
     public:
         BooleansAST(bool c) : booleans{c} {}

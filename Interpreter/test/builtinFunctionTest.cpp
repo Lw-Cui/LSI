@@ -35,15 +35,11 @@ TEST(BuiltinFunctionTest, NullTest) {
 
     lex.appendExp("(null? (cdr p))");
     auto res = parseAllExpr(lex)->eval(s);
-    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansAST>(res));
-    auto boolean = std::dynamic_pointer_cast<BooleansAST>(res);
-    ASSERT_TRUE(boolean->eval(s));
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansTrueAST>(res));
 
     lex.appendExp("(null? (car p))");
     res = parseAllExpr(lex)->eval(s);
-    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansAST>(res));
-    boolean = std::dynamic_pointer_cast<BooleansAST>(res);
-    ASSERT_FALSE(boolean->eval(s));
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansFalseAST>(res));
 
 }
 
@@ -75,40 +71,40 @@ TEST(BuiltinFunctionTest, LessThanTest) {
     Scope ss;
     lexers::Lexer lex("(< 5 6 7)");
     auto exprPtr = parseExpr(lex)->eval(ss);
-    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansAST>(exprPtr));
-    ASSERT_TRUE(exprPtr->eval(ss));
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansTrueAST>(exprPtr));
 
     lex.appendExp("(define n 6)");
     parseExpr(lex)->eval(ss);
 
     lex.appendExp("(< n 5)");
     exprPtr = parseExpr(lex)->eval(ss);
-    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansAST>(exprPtr));
-    ASSERT_FALSE(exprPtr->eval(ss));
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansFalseAST>(exprPtr));
+
+    lex.appendExp("(< 0 0)");
+    exprPtr = parseAllExpr(lex)->eval(ss);
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansFalseAST>(exprPtr));
+
 }
 
-TEST(BuiltinFunctionTEST, NullTest) {
+TEST(BuiltinFunctionTest, NilTest) {
     Scope ss;
     lexers::Lexer lex;
     lex.appendExp("(null? (list 1 2 3))");
     auto exprPtr = parseAllExpr(lex)->eval(ss);
-    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansAST>(exprPtr));
-    ASSERT_FALSE(exprPtr->eval(ss));
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansFalseAST>(exprPtr));
 
     lex.appendExp("(define l (list 1 2 3))").appendExp("(null? l)");
     exprPtr = parseAllExpr(lex)->eval(ss);
-    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansAST>(exprPtr));
-    ASSERT_FALSE(exprPtr->eval(ss));
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansFalseAST>(exprPtr));
 
     lex.appendExp("(null? nil)");
     exprPtr = parseAllExpr(lex)->eval(ss);
-    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansAST>(exprPtr));
-    ASSERT_TRUE(exprPtr->eval(ss));
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansTrueAST>(exprPtr));
 
     lex.appendExp("(define (add-list l) (if (null? l) #t #f))")
             .appendExp("(add-list (list 5 6 7 8))");
     exprPtr = parseAllExpr(lex)->eval(ss);
-    ASSERT_FALSE(exprPtr);
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansFalseAST>(exprPtr));
 }
 
 TEST(BuiltinFunctionTest, ListTest) {
@@ -128,8 +124,7 @@ TEST(BuiltinFunctionTest, ListTest) {
 
     lex.appendExp("(null? (cdr (cdr (cdr seq))))");
     exprPtr = parseAllExpr(lex)->eval(ss);
-    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansAST>(exprPtr));
-    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansAST>(exprPtr)->eval(ss));
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansTrueAST>(exprPtr));
 
     lex.appendExp("(define aseq (list 5 seq 6))").appendExp("(car (cdr (car (cdr aseq))))");
     exprPtr = parseAllExpr(lex)->eval(ss);

@@ -57,9 +57,9 @@ TEST(KeywordParsingTest, IfStatementTest) {
 TEST(KeywordParsingTest, BooleansTest) {
     Scope ss;
     lexers::Lexer lex("#t");
-    ASSERT_TRUE(parseExpr(lex)->eval(ss));
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansTrueAST>(parseExpr(lex)->eval(ss)));
     lex.appendExp("#f");
-    ASSERT_FALSE(parseExpr(lex)->eval(ss));
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansFalseAST>(parseExpr(lex)->eval(ss)));
 }
 
 TEST(KeywordParsingTest, LoadingFileTest) {
