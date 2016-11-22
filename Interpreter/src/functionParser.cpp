@@ -49,12 +49,15 @@ std::shared_ptr<ExprAST> parser::parseLambdaDefinitionExpr(lexers::Lexer &lex) {
         lex.stepForward();
     }
 
-    auto expr = parseExpr(lex);
-    if (lex.getTokType() != Lexer::TokClosingBracket) {
-        CLOG(DEBUG, "exception");
-        throw logic_error("Token cannot end lambda parsing");
+    std::vector<std::shared_ptr<ExprAST>> nestedFunc;
+    std::shared_ptr<ExprAST> expr;
+
+    while (true) {
+        expr = parseExpr(lex);
+        if (lex.getTokType() != Lexer::TokClosingBracket) nestedFunc.push_back(expr);
+        else break;
     }
-    return make_shared<LambdaAST>(args, expr);
+    return make_shared<LambdaAST>(args, expr, nestedFunc);
 }
 
 shared_ptr<ExprAST> parser::parseFunctionDefinitionExpr(lexers::Lexer &lex) {
@@ -79,12 +82,15 @@ shared_ptr<ExprAST> parser::parseFunctionDefinitionExpr(lexers::Lexer &lex) {
         lex.stepForward();
     }
 
-    auto expr = parseExpr(lex);
-    if (lex.getTokType() != Lexer::TokClosingBracket) {
-        CLOG(DEBUG, "exception");
-        throw logic_error("Token cannot end function parsing");
+    std::vector<std::shared_ptr<ExprAST>> nestedFunc;
+    std::shared_ptr<ExprAST> expr;
+
+    while (true) {
+        expr = parseExpr(lex);
+        if (lex.getTokType() != Lexer::TokClosingBracket) nestedFunc.push_back(expr);
+        else break;
     }
 
-    return make_shared<LambdaBindingAST>(identifier, args, expr);
+    return make_shared<LambdaBindingAST>(identifier, args, expr, nestedFunc);
 }
 

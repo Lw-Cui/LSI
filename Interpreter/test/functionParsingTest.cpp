@@ -145,3 +145,16 @@ TEST(FunctionParsingTest, VariableArgumentsTest) {
     numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
     ASSERT_EQ(26, numPtr->getValue());
 }
+
+TEST(FunctionParsingTest, NestedFunctionTest) {
+    Scope ss;
+    lexers::Lexer lex;
+    lex.appendExp("(define (- num . args)"
+                          "(define (add-list l) (if (null? l) 0 (+ (car l) (add-list (cdr l)))))"
+                          "(+ num (~ (add-list args))))")
+            .appendExp("(- 5 6 7 8)");
+    auto exprPtr = parseAllExpr(lex)->eval(ss);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
+    auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
+    ASSERT_EQ(-16, numPtr->getValue());
+}
