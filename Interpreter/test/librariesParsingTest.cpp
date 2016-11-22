@@ -78,13 +78,13 @@ TEST(LibrariesParsingTest, AndTest) {
     Scope s;
     lexers::Lexer lex("(load \"Base.scm\")");
 
-    lex.appendExp("(and (+ 10 4 6) (- 10 1))");
+    lex.appendExp("(and (+ 10 4 6) (- 10 1) (+ 5 6))");
     auto res = parseAllExpr(lex)->eval(s);
     ASSERT_TRUE(std::dynamic_pointer_cast<BooleansAST>(res));
     auto boolPtr = std::dynamic_pointer_cast<BooleansAST>(res);
     ASSERT_TRUE(boolPtr->eval(s));
 
-    lex.appendExp("(and (+ 10 4 6) (- 10 10))");
+    lex.appendExp("(and (+ 10 4 6) (- 10 10) (+ 5 7))");
     res = parseAllExpr(lex)->eval(s);
     ASSERT_FALSE(res);
 }
@@ -93,13 +93,13 @@ TEST(LibrariesParsingTest, OrTest) {
     Scope s;
     lexers::Lexer lex("(load \"Base.scm\")");
 
-    lex.appendExp("(or (+ 10 (~ 10)) (- 10 1))");
+    lex.appendExp("(or (+ 10 (~ 10)) (- 10 1) (- 1 10))");
     auto res = parseAllExpr(lex)->eval(s);
     ASSERT_TRUE(std::dynamic_pointer_cast<BooleansAST>(res));
     auto boolPtr = std::dynamic_pointer_cast<BooleansAST>(res);
     ASSERT_TRUE(boolPtr->eval(s));
 
-    lex.appendExp("(or (+ 0 0) (- 10 10))");
+    lex.appendExp("(or (+ 0 0) (- 10 10) 0)");
     res = parseAllExpr(lex)->eval(s);
     ASSERT_FALSE(res);
 }
