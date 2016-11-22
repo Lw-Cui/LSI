@@ -58,13 +58,13 @@ TEST(BuiltinFunctionTest, AddTest) {
 
 TEST(BuiltinFunctionTest, MinusTest) {
     Scope ss;
-    lexers::Lexer lex{"(- 5 6 7)"};
+    lexers::Lexer lex{"(~ 5)"};
     auto exprPtr = parseExpr(lex)->eval(ss);
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
     auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
-    ASSERT_EQ(-8, numPtr->getValue());
+    ASSERT_EQ(-5, numPtr->getValue());
 
-    lex.appendExp("(+ (- 8) 6 (+ 1))");
+    lex.appendExp("(+ (~ 8) 6 (+ 1))");
     exprPtr = parseExpr(lex)->eval(ss);
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
     numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);

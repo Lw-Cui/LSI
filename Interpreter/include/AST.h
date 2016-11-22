@@ -181,7 +181,7 @@ namespace ast {
         std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &) override;
     };
 
-    class BuiltinMinusAST : public ExprAST {
+    class BuiltinMinusSignAST : public ExprAST {
     public:
         std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &) override;
     };

@@ -17,7 +17,7 @@ namespace context {
             impl["+"] = make_shared<BuiltinAddAST>();
             impl["null?"] = make_shared<BuiltinNullAST>();
             impl["<"] = make_shared<BuiltinLessThanAST>();
-            impl["-"] = make_shared<BuiltinMinusAST>();
+            impl["~"] = make_shared<BuiltinMinusSignAST>();
             impl["list"] = make_shared<BuiltinListAST>();
         }
 

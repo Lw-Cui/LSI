@@ -112,7 +112,7 @@ TEST(FunctionParsingTest, LambdaApplicationTest) {
 TEST(FunctionParsingTest, RecursiveTest) {
     Scope ss;
     lexers::Lexer lex;
-    lex.appendExp("(define (add x y) (if x (+ 1 (add (- x 1) y)) y))")
+    lex.appendExp("(load \"Base.scm\")").appendExp("(define (add x y) (if x (+ 1 (add (- x 1) y)) y))")
             .appendExp("(add 5 6)");
 
     auto exprPtr = parseAllExpr(lex)->eval(ss);
