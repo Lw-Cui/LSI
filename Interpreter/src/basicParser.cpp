@@ -26,19 +26,14 @@ shared_ptr<ExprAST> parser::parseExpr(lexers::Lexer &lex) {
 std::shared_ptr<ExprAST> parser::parseRawExpr(lexers::Lexer &lex) {
     switch (lex.getTokType()) {
         case Lexer::TokNumber:
-            CLOG(DEBUG, "parser") << "Parse number";
             return parseNumberExpr(lex);
         case Lexer::TokIdentifier:
-            CLOG(DEBUG, "parser") << "Parse identifier";
             return parseIdentifierExpr(lex);
         case Lexer::TokTrue:
-            CLOG(DEBUG, "parser") << "Parse #t";
             return parseTrueExpr(lex);
         case Lexer::TokFalse:
-            CLOG(DEBUG, "parser") << "Parse #f";
             return parseFalseExpr(lex);
         case Lexer::TokNil:
-            CLOG(DEBUG, "parser") << "Parse nil";
             return parseNilExpr(lex);
         default:
             CLOG(DEBUG, "exception");
@@ -53,23 +48,18 @@ std::shared_ptr<ExprAST> parser::parseBracketExpr(lexers::Lexer &lex) {
             res = parseLambdaApplicationExpr(lex);
             break;
         case Lexer::TokIdentifier:
-            CLOG(DEBUG, "parser") << "Parse function Call";
             res = parseFunctionApplicationExpr(lex);
             break;
         case Lexer::TokDefine:
-            CLOG(DEBUG, "parser") << "Parse Definition";
             res = parseDefinitionExpr(lex);
             break;
         case Lexer::TokIf:
-            CLOG(DEBUG, "parser") << "Parse If statement";
             res = parseIfStatementExpr(lex);
             break;
         case Lexer::TokLoad:
-            CLOG(DEBUG, "parser") << "Parse loading statement";
             res = parseLoadingFileExpr(lex);
             break;
         case Lexer::TokLambda:
-            CLOG(DEBUG, "parser") << "Parse lambda Definition";
             res = parseLambdaDefinitionExpr(lex);
             break;
         default:
@@ -87,16 +77,21 @@ std::shared_ptr<ExprAST> parser::parseBracketExpr(lexers::Lexer &lex) {
 
 
 shared_ptr<ExprAST> parser::parseNumberExpr(Lexer &lex) {
-    return make_shared<NumberAST>(lex.getNum());
+    auto num = lex.getNum();
+    CLOG(DEBUG, "parser") << "Parse number " << num;
+    return make_shared<NumberAST>(num);
 }
 
 shared_ptr<ExprAST> parser::parseIdentifierExpr(lexers::Lexer &lex) {
-    return make_shared<IdentifierAST>(lex.getIdentifier());
+    auto str = lex.getIdentifier();
+    CLOG(DEBUG, "parser") << "Parse identifier " << str;
+    return make_shared<IdentifierAST>(str);
 }
 
 
 shared_ptr<ExprAST> parser::parseIdDefinitionExpr(lexers::Lexer &lex) {
     auto identifier = lex.getIdentifier();
+    CLOG(DEBUG, "parser") << "Parse identifier Definition: " << identifier;
     return make_shared<ValueBindingAST>(identifier, parseExpr(lex));
 }
 

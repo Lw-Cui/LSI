@@ -9,6 +9,7 @@ using namespace std;
 
 shared_ptr<ExprAST> parser::parseFunctionApplicationExpr(lexers::Lexer &lex) {
     string identifier = lex.getIdentifier();
+    CLOG(DEBUG, "parser") << "Parse function Call: " << identifier;
     vector<shared_ptr<ExprAST>> arguments;
     while (lex.getTokType() != Lexer::TokClosingBracket) {
         arguments.push_back(parseExpr(lex));
@@ -26,13 +27,13 @@ shared_ptr<ExprAST> parser::parseLambdaApplicationExpr(lexers::Lexer &lex) {
 }
 
 std::shared_ptr<ExprAST> parser::parseLambdaDefinitionExpr(lexers::Lexer &lex) {
+    CLOG(DEBUG, "parser") << "Parse lambda Definition";
     if (lex.stepForward() != Lexer::TokOpeningBracket || lex.stepForward() != Lexer::TokIdentifier) {
         CLOG(DEBUG, "exception") << lex.getTokType();
         throw logic_error("Lambda definition error.");
     }
     vector<string> args;
     while (lex.getTokType() == Lexer::TokIdentifier) {
-        CLOG(DEBUG, "parser") << "Read formal argument";
         args.push_back(lex.getIdentifier());
     }
 

@@ -46,16 +46,6 @@ namespace ast {
         virtual std::shared_ptr<ExprAST> eval(Scope &) const;
     };
 
-    class BooleansAST : public ExprAST {
-    public:
-        BooleansAST(bool c) : booleans{c} {}
-
-        virtual std::shared_ptr<ExprAST> eval(Scope &) const;
-
-    private:
-        bool booleans;
-    };
-
     class NumberAST : public ExprAST {
     public:
         NumberAST(double n) : value{n} {}
