@@ -2,8 +2,8 @@
     (define (add-list l)
         (if (null? l) 0 (+ (car l) (add-list (cdr l)))))
     (if (null? args)
-        (~ num)
-        (+ num (~ (add-list args)))))
+        (#opposite-number num)
+        (+ num (#opposite-number (add-list args)))))
 
 (define (not expr) (if expr #f #t))
 

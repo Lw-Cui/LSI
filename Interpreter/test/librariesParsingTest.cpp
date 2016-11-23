@@ -85,7 +85,7 @@ TEST(LibrariesParsingTest, OrTest) {
     Scope s;
     lexers::Lexer lex("(load \"Base.scm\")");
 
-    lex.appendExp("(or (+ 10 (~ 10)) (- 10 1) (- 1 10))");
+    lex.appendExp("(or (+ 10 (#opposite-number 10)) (- 10 1) (- 1 10))");
     auto res = parseAllExpr(lex)->eval(s);
     ASSERT_TRUE(std::dynamic_pointer_cast<BooleansTrueAST>(res));
 
@@ -108,22 +108,3 @@ TEST(LibrariesParsingTest, EqualTest) {
 
 }
 
-TEST(LibrariesParsingTest, LambdaFunctionRecursiveTest) {
-    Scope s;
-    lexers::Lexer lex("(load \"Base.scm\")");
-
-    lex.appendExp("(((lambda (give-me-a-function)"
-                          "   ((lambda (f) (f f))"
-                          "    (lambda (fact-function)"
-                          "      (give-me-a-function"
-                          "       (lambda (x) ((fact-function fact-function) x))))))"
-                          " (lambda (graceful-fact-function)"
-                          "   (lambda (x)"
-                          "     (if (= x 0)"
-                          "         1"
-                          "         (* x (graceful-fact-function (- x 1))))))) 5)");
-    auto res = parseAllExpr(lex)->eval(s);
-    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
-    auto numPtr = std::dynamic_pointer_cast<NumberAST>(res);
-    ASSERT_EQ(120, numPtr->getValue());
-}
