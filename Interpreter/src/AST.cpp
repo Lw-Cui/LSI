@@ -26,18 +26,12 @@ std::shared_ptr<ExprAST> LoadingFileAST::eval(Scope &s) const {
 
 std::shared_ptr<ExprAST> IfStatementAST::eval(Scope &ss) const {
     auto ptr = condition->eval(ss);
-    auto numPtr = std::dynamic_pointer_cast<NumberAST>(ptr);
-    auto boolFalsePtr = std::dynamic_pointer_cast<BooleansFalseAST>(ptr);
-    if (numPtr && !numPtr->getValue()) {
-        CLOG(DEBUG, "AST") << "Evaluate false clause.";
-        return falseClause->eval(ss);
-    } else if (boolFalsePtr) {
+    if (auto boolFalsePtr = std::dynamic_pointer_cast<BooleansFalseAST>(ptr)) {
         CLOG(DEBUG, "AST") << "Evaluate false clause.";
         return falseClause->eval(ss);
     }
     return trueClause->eval(ss);
 }
-
 
 std::shared_ptr<ExprAST> BuiltinLessThanAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
     bool res = std::is_sorted(
@@ -71,8 +65,7 @@ std::shared_ptr<ExprAST> IdentifierAST::eval(Scope &ss) const {
     }
 }
 
-std::shared_ptr<ExprAST> LambdaAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs,
-                                          Scope &ss) {
+std::shared_ptr<ExprAST> LambdaAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &ss) {
     // Backup scope of lambda. If not, recursive calls will destroy scope by binding arguments.
     Scope tmp = context;
     for (size_t i = 0; i < actualArgs.size(); i++) {
@@ -97,7 +90,6 @@ std::shared_ptr<ExprAST> LambdaAST::eval(Scope &ss) const {
     for (auto expr : nestedFunc) expr->eval(context);
     return std::make_shared<LambdaAST>(*this);
 }
-
 
 std::shared_ptr<ExprAST> BuiltinMinusSignAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
     if (auto p = std::dynamic_pointer_cast<NumberAST>(actualArgs.front()->eval(s))) {
