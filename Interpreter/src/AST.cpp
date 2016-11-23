@@ -90,7 +90,7 @@ std::shared_ptr<ExprAST> LambdaAST::eval(Scope &ss) const {
     return std::make_shared<LambdaAST>(*this);
 }
 
-std::shared_ptr<ExprAST> BuiltinMinusSignAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
+std::shared_ptr<ExprAST> BuiltinOppositeAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
     if (auto p = std::dynamic_pointer_cast<NumberAST>(actualArgs.front()->eval(s))) {
         return std::make_shared<NumberAST>(-p->getValue());
     } else {
@@ -111,7 +111,6 @@ std::shared_ptr<ExprAST> ValueBindingAST::eval(Scope &ss) const {
     return nullptr;
 }
 
-
 std::shared_ptr<ExprAST> LambdaBindingAST::eval(Scope &ss) const {
     // Set closure.
     lambda->eval(ss);
@@ -127,7 +126,6 @@ std::shared_ptr<ExprAST> LambdaApplicationAST::eval(Scope &ss) const {
         return lambdaOrIdentifier->eval(ss)->apply(actualArgs, ss);
     }
 }
-
 
 std::shared_ptr<ExprAST> BooleansTrueAST::eval(Scope &) const {
     return std::make_shared<BooleansTrueAST>();
@@ -147,7 +145,6 @@ std::shared_ptr<ExprAST> AllExprAST::eval(Scope &s) const {
 std::shared_ptr<ExprAST> PairAST::eval(Scope &s) const {
     return std::make_shared<PairAST>(data.first->eval(s), data.second->eval(s));
 }
-
 
 std::shared_ptr<ExprAST> BuiltinNullAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
     if (auto p = std::dynamic_pointer_cast<NilAST>(actualArgs.front()->eval(s)))
@@ -213,4 +210,13 @@ std::shared_ptr<ExprAST> BuiltinMultiplyAST::apply(const std::vector<std::shared
         }
     }
     return std::make_shared<NumberAST>(num);
+}
+
+std::shared_ptr<ExprAST> BuiltinReciprocalAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
+    if (auto p = std::dynamic_pointer_cast<NumberAST>(actualArgs.front()->eval(s))) {
+        return std::make_shared<NumberAST>(1 / p->getValue());
+    } else {
+        CLOG(DEBUG, "exception");
+        throw std::logic_error("The operands cannot be converted to number");
+    }
 }
