@@ -55,7 +55,6 @@ std::shared_ptr<ExprAST> parser::parseBracketExpr(lexers::Lexer &lex) {
         case Lexer::TokIdentifier:
             CLOG(DEBUG, "parser") << "Parse function Call";
             res = parseFunctionApplicationExpr(lex);
-            CLOG(DEBUG, "parser") << "End parsing function Call";
             break;
         case Lexer::TokDefine:
             CLOG(DEBUG, "parser") << "Parse Definition";
@@ -98,7 +97,6 @@ shared_ptr<ExprAST> parser::parseIdentifierExpr(lexers::Lexer &lex) {
 
 shared_ptr<ExprAST> parser::parseIdDefinitionExpr(lexers::Lexer &lex) {
     auto identifier = lex.getIdentifier();
-    CLOG(DEBUG, "parser") << "define identifier: " << identifier;
     return make_shared<ValueBindingAST>(identifier, parseExpr(lex));
 }
 

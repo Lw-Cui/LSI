@@ -149,12 +149,11 @@ TEST(FunctionParsingTest, VariableArgumentsTest) {
 TEST(FunctionParsingTest, NestedFunctionTest) {
     Scope ss;
     lexers::Lexer lex;
-    lex.appendExp("(define (- num . args)"
-                          "(define (add-list l) (if (null? l) 0 (+ (car l) (add-list (cdr l)))))"
-                          "(+ num (~ (add-list args))))")
-            .appendExp("(- 5 6 7 8)");
+    lex.appendExp("(define (and expr . args)"
+                          "(define (list-and l)"
+                          "(if (null? l) #t (if (car l) (list-and (cdr l)) #f)))"
+                          "(if expr (list-and args) #f))")
+            .appendExp("(and 5 6 7 8)");
     auto exprPtr = parseAllExpr(lex)->eval(ss);
-    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
-    auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
-    ASSERT_EQ(-16, numPtr->getValue());
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansTrueAST>(exprPtr));
 }

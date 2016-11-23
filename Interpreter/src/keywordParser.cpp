@@ -24,11 +24,8 @@ shared_ptr<ExprAST> parser::parseDefinitionExpr(lexers::Lexer &lex) {
 std::shared_ptr<ExprAST> parser::parseIfStatementExpr(lexers::Lexer &lex) {
     lex.stepForward();
     auto condition = parseExpr(lex);
-    CLOG(DEBUG, "parser") << "parsing true clause";
     auto trueClause = parseExpr(lex);
-    CLOG(DEBUG, "parser") << "parsing false clause";
     auto falseClause = parseExpr(lex);
-    CLOG(DEBUG, "parser") << "Finished if statement parsing";
     return make_shared<IfStatementAST>(condition, trueClause, falseClause);
 }
 

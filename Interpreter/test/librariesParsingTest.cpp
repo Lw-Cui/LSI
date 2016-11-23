@@ -95,7 +95,7 @@ TEST(LibrariesParsingTest, EqualTest) {
     Scope s;
     lexers::Lexer lex("(load \"Base.scm\")");
 
-    lex.appendExp("(= (+ 10 (~ 10)) 0)");
+    lex.appendExp("(= (+ 10 (- 10)) 0)");
     auto res = parseAllExpr(lex)->eval(s);
     ASSERT_TRUE(std::dynamic_pointer_cast<BooleansTrueAST>(res));
 

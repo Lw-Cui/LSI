@@ -1,7 +1,9 @@
 (define (- num . args)
     (define (add-list l)
         (if (null? l) 0 (+ (car l) (add-list (cdr l)))))
-    (+ num (~ (add-list args))))
+    (if (null? args)
+        (~ num)
+        (+ num (~ (add-list args)))))
 
 (define (not expr) (if expr #f #t))
 

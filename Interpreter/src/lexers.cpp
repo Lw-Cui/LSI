@@ -5,7 +5,6 @@ using namespace lexers;
 Lexer &Lexer::appendExp(const std::string &exp) {
     expressionBuf.clear();
     expressionBuf << processExp(exp);
-    CLOG(DEBUG, "lexer") << "String is:" << exp;
     if (getTokType() == TokEOF) stepForward();
     return *this;
 }
@@ -13,7 +12,6 @@ Lexer &Lexer::appendExp(const std::string &exp) {
 double Lexer::getNum() {
     if (getTokType() == TokNumber) {
         auto tmp = numToken;
-        CLOG(DEBUG, "lexer") << "Get number: " << tmp;
         stepForward();
         return tmp;
     } else {
