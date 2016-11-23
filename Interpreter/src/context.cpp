@@ -15,6 +15,7 @@ namespace context {
             impl["car"] = make_shared<BuiltinCarAST>();
             impl["cdr"] = make_shared<BuiltinCdrAST>();
             impl["+"] = make_shared<BuiltinAddAST>();
+            impl["*"] = make_shared<BuiltinMultiplyAST>();
             impl["null?"] = make_shared<BuiltinNullAST>();
             impl["<"] = make_shared<BuiltinLessThanAST>();
             impl["~"] = make_shared<BuiltinMinusSignAST>();

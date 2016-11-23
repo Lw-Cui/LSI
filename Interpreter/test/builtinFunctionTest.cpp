@@ -52,6 +52,15 @@ TEST(BuiltinFunctionTest, AddTest) {
     ASSERT_EQ(18, numPtr->getValue());
 }
 
+TEST(BuiltinFunctionTest, MultiplyTest) {
+    Scope ss;
+    lexers::Lexer lex{"(* 5 6 7)"};
+    auto exprPtr = parseExpr(lex)->eval(ss);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
+    auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
+    ASSERT_EQ(210, numPtr->getValue());
+}
+
 TEST(BuiltinFunctionTest, MinusTest) {
     Scope ss;
 

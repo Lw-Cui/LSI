@@ -23,3 +23,4 @@
     (define (equal-list l)
         (if (null? (cdr l)) #t (if (equal (car l) (car (cdr l))) (equal-list (cdr l)) #f)))
     (if (equal expr (car args)) (equal-list args) #f))
+

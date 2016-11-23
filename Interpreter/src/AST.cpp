@@ -200,3 +200,17 @@ std::shared_ptr<ExprAST> BuiltinAddAST::apply(const std::vector<std::shared_ptr<
     }
     return std::make_shared<NumberAST>(num);
 }
+
+std::shared_ptr<ExprAST> BuiltinMultiplyAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
+    double num = 1;
+    for (auto element: actualArgs) {
+        std::shared_ptr<ExprAST> res = element->eval(s);
+        if (auto p = std::dynamic_pointer_cast<NumberAST>(res)) {
+            num *= p->getValue();
+        } else {
+            CLOG(DEBUG, "exception");
+            throw std::logic_error("The operands cannot be converted to number");
+        }
+    }
+    return std::make_shared<NumberAST>(num);
+}
