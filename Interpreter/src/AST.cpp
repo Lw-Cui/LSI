@@ -26,18 +26,12 @@ std::shared_ptr<ExprAST> LoadingFileAST::eval(Scope &s) const {
 
 std::shared_ptr<ExprAST> IfStatementAST::eval(Scope &ss) const {
     auto ptr = condition->eval(ss);
-    auto numPtr = std::dynamic_pointer_cast<NumberAST>(ptr);
-    auto boolFalsePtr = std::dynamic_pointer_cast<BooleansFalseAST>(ptr);
-    if (numPtr && !numPtr->getValue()) {
-        CLOG(DEBUG, "AST") << "Evaluate false clause.";
-        return falseClause->eval(ss);
-    } else if (boolFalsePtr) {
+    if (auto boolFalsePtr = std::dynamic_pointer_cast<BooleansFalseAST>(ptr)) {
         CLOG(DEBUG, "AST") << "Evaluate false clause.";
         return falseClause->eval(ss);
     }
     return trueClause->eval(ss);
 }
-
 
 std::shared_ptr<ExprAST> BuiltinLessThanAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
     bool res = std::is_sorted(
@@ -63,7 +57,6 @@ std::shared_ptr<ExprAST> NumberAST::eval(Scope &) const {
 }
 
 std::shared_ptr<ExprAST> IdentifierAST::eval(Scope &ss) const {
-    CLOG(DEBUG, "AST") << "Evaluate identifier: " << getId();
     if (ss.count(getId())) {
         return ss[getId()];
     } else {
@@ -72,14 +65,11 @@ std::shared_ptr<ExprAST> IdentifierAST::eval(Scope &ss) const {
     }
 }
 
-std::shared_ptr<ExprAST> LambdaAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs,
-                                          Scope &ss) {
-    CLOG(DEBUG, "AST") << "Number of formal arguments is " << formalArgs.size();
+std::shared_ptr<ExprAST> LambdaAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &ss) {
     // Backup scope of lambda. If not, recursive calls will destroy scope by binding arguments.
     Scope tmp = context;
     for (size_t i = 0; i < actualArgs.size(); i++) {
         if (formalArgs[i] != ".") {
-            CLOG(DEBUG, "AST") << "Binding identifier: " << formalArgs[i];
             // Evaluate value from current scope and set them into scope of lambda
             tmp[formalArgs[i]] = actualArgs[i]->eval(ss);
         } else {
@@ -89,6 +79,8 @@ std::shared_ptr<ExprAST> LambdaAST::apply(const std::vector<std::shared_ptr<Expr
             break;
         }
     }
+    if (actualArgs.size() == 1 && formalArgs.size() > 1 && formalArgs[1] == ".")
+        tmp[formalArgs[2]] = std::make_shared<NilAST>()->eval(ss);
     return expression->eval(tmp);
 }
 
@@ -98,7 +90,6 @@ std::shared_ptr<ExprAST> LambdaAST::eval(Scope &ss) const {
     for (auto expr : nestedFunc) expr->eval(context);
     return std::make_shared<LambdaAST>(*this);
 }
-
 
 std::shared_ptr<ExprAST> BuiltinMinusSignAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
     if (auto p = std::dynamic_pointer_cast<NumberAST>(actualArgs.front()->eval(s))) {
@@ -200,11 +191,9 @@ std::shared_ptr<ExprAST> BuiltinConsAST::apply(const std::vector<std::shared_ptr
 
 std::shared_ptr<ExprAST> BuiltinAddAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
     double num = 0;
-    CLOG(DEBUG, "parser") << "Number of add operands are: " << actualArgs.size();
     for (auto element: actualArgs) {
         std::shared_ptr<ExprAST> res = element->eval(s);
         if (auto p = std::dynamic_pointer_cast<NumberAST>(res)) {
-            CLOG(DEBUG, "AST") << "Add number: " << p->getValue();
             num += p->getValue();
         } else {
             CLOG(DEBUG, "exception");

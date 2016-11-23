@@ -7,8 +7,9 @@ using namespace parser;
 
 TEST(LibrariesParsingTest, BasicConsTest) {
     Scope s;
-    lexers::Lexer lex("(load \"Test.scm\")");
-    parseExpr(lex)->eval(s);
+    lexers::Lexer lex;
+    lex.appendExp("(load \"Base.scm\")").appendExp("(load \"Test.scm\")");
+    parseAllExpr(lex)->eval(s);
     ASSERT_TRUE(s.count("Cons"));
     ASSERT_TRUE(s.count("Car"));
     ASSERT_TRUE(s.count("Cdr"));
@@ -29,7 +30,9 @@ TEST(LibrariesParsingTest, BasicConsTest) {
 TEST(LibrariesParsingTest, AdvanceConsTest) {
     Scope s;
     lexers::Lexer lex;
-    lex.appendExp("(load \"Test.scm\")")
+
+    lex.appendExp("(load \"Base.scm\")")
+            .appendExp("(load \"Test.scm\")")
             .appendExp("(define p (Cons 1 2))")
             .appendExp("(define pp (Cons 3 p))")
             .appendExp("(Car (Cdr pp))");
@@ -58,11 +61,11 @@ TEST(LibrariesParsingTest, NotTest) {
 
     lex.appendExp("(not (- 10 4 6))");
     auto res = parseAllExpr(lex)->eval(s);
-    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansTrueAST>(res));
-
-    lex.appendExp("(not (- 10 4 5))");
-    res = parseAllExpr(lex)->eval(s);
     ASSERT_TRUE(std::dynamic_pointer_cast<BooleansFalseAST>(res));
+
+    lex.appendExp("(not #f)");
+    res = parseAllExpr(lex)->eval(s);
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansTrueAST>(res));
 }
 
 TEST(LibrariesParsingTest, AndTest) {
@@ -73,7 +76,7 @@ TEST(LibrariesParsingTest, AndTest) {
     auto res = parseAllExpr(lex)->eval(s);
     ASSERT_TRUE(std::dynamic_pointer_cast<BooleansTrueAST>(res));
 
-    lex.appendExp("(and (+ 10 4 6) (- 10 10) (+ 5 7))");
+    lex.appendExp("(and (+ 10 4 6) #f (+ 5 7))");
     res = parseAllExpr(lex)->eval(s);
     ASSERT_TRUE(std::dynamic_pointer_cast<BooleansFalseAST>(res));
 }
@@ -86,16 +89,16 @@ TEST(LibrariesParsingTest, OrTest) {
     auto res = parseAllExpr(lex)->eval(s);
     ASSERT_TRUE(std::dynamic_pointer_cast<BooleansTrueAST>(res));
 
-    lex.appendExp("(or (+ 0 0) (- 10 10) 0)");
+    lex.appendExp("(or #f (+ 0) 5)");
     res = parseAllExpr(lex)->eval(s);
-    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansFalseAST>(res));
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansTrueAST>(res));
 }
 
 TEST(LibrariesParsingTest, EqualTest) {
     Scope s;
     lexers::Lexer lex("(load \"Base.scm\")");
 
-    lex.appendExp("(= (+ 10 (~ 10)) 0)");
+    lex.appendExp("(= (+ 10 (- 10)) 0)");
     auto res = parseAllExpr(lex)->eval(s);
     ASSERT_TRUE(std::dynamic_pointer_cast<BooleansTrueAST>(res));
 
