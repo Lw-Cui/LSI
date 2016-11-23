@@ -173,6 +173,11 @@ namespace ast {
         std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &) override;
     };
 
+    class BuiltinMultiplyAST : public ExprAST {
+    public:
+        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &) override;
+    };
+
     class BuiltinListAST : public ExprAST {
     public:
         std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &) override;
@@ -188,11 +193,15 @@ namespace ast {
         std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &) override;
     };
 
-    class BuiltinMinusSignAST : public ExprAST {
+    class BuiltinOppositeAST : public ExprAST {
     public:
         std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &) override;
     };
 
+    class BuiltinReciprocalAST : public ExprAST {
+    public:
+        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &) override;
+    };
 
     class LambdaBindingAST : public BindingAST {
     public:

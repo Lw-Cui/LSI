@@ -2,8 +2,13 @@
     (define (add-list l)
         (if (null? l) 0 (+ (car l) (add-list (cdr l)))))
     (if (null? args)
-        (~ num)
-        (+ num (~ (add-list args)))))
+        (#opposite num)
+        (+ num (#opposite (add-list args)))))
+
+(define (/ num . args)
+    (define (multiply-list l)
+        (if (null? l) 1 (* (car l) (multiply-list (cdr l)))))
+    (* num (#reciprocal (multiply-list args))))
 
 (define (not expr) (if expr #f #t))
 
@@ -23,3 +28,9 @@
     (define (equal-list l)
         (if (null? (cdr l)) #t (if (equal (car l) (car (cdr l))) (equal-list (cdr l)) #f)))
     (if (equal expr (car args)) (equal-list args) #f))
+
+
+(define (remainder a b)
+  (if (< a b)
+      a
+      (remainder (- a b) b)))

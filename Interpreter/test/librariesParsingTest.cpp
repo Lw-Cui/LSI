@@ -85,7 +85,7 @@ TEST(LibrariesParsingTest, OrTest) {
     Scope s;
     lexers::Lexer lex("(load \"Base.scm\")");
 
-    lex.appendExp("(or (+ 10 (~ 10)) (- 10 1) (- 1 10))");
+    lex.appendExp("(or (+ 10 (#opposite 10)) (- 10 1) (- 1 10))");
     auto res = parseAllExpr(lex)->eval(s);
     ASSERT_TRUE(std::dynamic_pointer_cast<BooleansTrueAST>(res));
 
@@ -107,3 +107,26 @@ TEST(LibrariesParsingTest, EqualTest) {
     ASSERT_TRUE(std::dynamic_pointer_cast<BooleansTrueAST>(res));
 
 }
+
+TEST(LibrariesParsingTest, RemainderTest) {
+    Scope s;
+    lexers::Lexer lex("(load \"Base.scm\")");
+
+    lex.appendExp("(remainder 5 2)");
+    auto res = parseAllExpr(lex)->eval(s);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
+    auto numPtr = std::dynamic_pointer_cast<NumberAST>(res);
+    ASSERT_EQ(1, numPtr->getValue());
+}
+
+TEST(LibrariesParsingTest, DivideTest) {
+    Scope s;
+    lexers::Lexer lex("(load \"Base.scm\")");
+
+    lex.appendExp("(/ 60 6 2)");
+    auto exprPtr = parseAllExpr(lex)->eval(s);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
+    auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
+    ASSERT_EQ(5, numPtr->getValue());
+}
+
