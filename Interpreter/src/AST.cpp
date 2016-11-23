@@ -27,7 +27,6 @@ std::shared_ptr<ExprAST> LoadingFileAST::eval(Scope &s) const {
 std::shared_ptr<ExprAST> IfStatementAST::eval(Scope &ss) const {
     auto ptr = condition->eval(ss);
     if (auto boolFalsePtr = std::dynamic_pointer_cast<BooleansFalseAST>(ptr)) {
-        CLOG(DEBUG, "AST") << "Evaluate false clause.";
         return falseClause->eval(ss);
     }
     return trueClause->eval(ss);
@@ -151,7 +150,6 @@ std::shared_ptr<ExprAST> PairAST::eval(Scope &s) const {
 
 
 std::shared_ptr<ExprAST> BuiltinNullAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
-    CLOG(DEBUG, "AST") << "Call builtin null?";
     if (auto p = std::dynamic_pointer_cast<NilAST>(actualArgs.front()->eval(s)))
         return std::make_shared<BooleansTrueAST>();
     else

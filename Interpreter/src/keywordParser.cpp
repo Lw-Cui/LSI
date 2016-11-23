@@ -11,7 +11,6 @@ using namespace std;
 shared_ptr<ExprAST> parser::parseDefinitionExpr(lexers::Lexer &lex) {
     switch (lex.stepForward()) {
         case Lexer::TokIdentifier:
-            CLOG(DEBUG, "parser") << "Parse identifier Definition";
             return parseIdDefinitionExpr(lex);
         case Lexer::TokOpeningBracket:
             return parseFunctionDefinitionExpr(lex);
@@ -22,6 +21,7 @@ shared_ptr<ExprAST> parser::parseDefinitionExpr(lexers::Lexer &lex) {
 }
 
 std::shared_ptr<ExprAST> parser::parseIfStatementExpr(lexers::Lexer &lex) {
+    CLOG(DEBUG, "parser") << "Parse If statement";
     lex.stepForward();
     auto condition = parseExpr(lex);
     auto trueClause = parseExpr(lex);
@@ -31,11 +31,13 @@ std::shared_ptr<ExprAST> parser::parseIfStatementExpr(lexers::Lexer &lex) {
 
 std::shared_ptr<ExprAST> parser::parseTrueExpr(lexers::Lexer &lex) {
     lex.stepForward();
+    CLOG(DEBUG, "parser") << "Parse #t";
     return make_shared<BooleansTrueAST>();
 }
 
 std::shared_ptr<ExprAST> parser::parseFalseExpr(lexers::Lexer &lex) {
     lex.stepForward();
+    CLOG(DEBUG, "parser") << "Parse #f";
     return make_shared<BooleansFalseAST>();
 }
 
@@ -43,12 +45,13 @@ std::shared_ptr<ExprAST> parser::parseLoadingFileExpr(lexers::Lexer &lex) {
     lex.stepForward();
     auto filename = lex.getIdentifier().substr(1);
     filename.pop_back();
-    CLOG(DEBUG, "parser") << "Get filename: " << filename;
+    CLOG(DEBUG, "parser") << "Loading file: " << filename;
     return make_shared<LoadingFileAST>(filename);
 }
 
 std::shared_ptr<ExprAST> parser::parseNilExpr(lexers::Lexer &lex) {
     lex.stepForward();
+    CLOG(DEBUG, "parser") << "Parse nil";
     return std::make_shared<NilAST>();
 }
 
