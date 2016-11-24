@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <string>
+#include <unordered_map>
 
 namespace ast {
     class ExprAST;
@@ -11,6 +12,7 @@ namespace ast {
 namespace context {
     class ScopeImpl;
 
+    typedef std::unordered_map<std::string, std::shared_ptr<ast::ExprAST>>::const_iterator Iter;
 
     class Scope {
     public:
@@ -23,6 +25,10 @@ namespace context {
         std::shared_ptr<ast::ExprAST> &operator[](const std::string &str);
 
         size_t count(const std::string &str) const;
+
+        Iter begin() const;
+
+        Iter end() const;
 
     private:
         std::shared_ptr<ScopeImpl> impl;
