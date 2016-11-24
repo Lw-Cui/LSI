@@ -67,6 +67,10 @@ std::shared_ptr<ExprAST> IdentifierAST::eval(Scope &ss) const {
 std::shared_ptr<ExprAST> LambdaAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &ss) {
     // Backup scope of lambda. If not, recursive calls will destroy scope by binding arguments.
     Scope tmp = context;
+    // If external scope contains some identifier needed by this lambda, update it.
+    for (auto iter: ss)
+        if (!tmp.count(iter.first))
+            tmp[iter.first] = iter.second;
     for (size_t i = 0; i < actualArgs.size(); i++) {
         if (formalArgs[i] != ".") {
             // Evaluate value from current scope and set them into scope of lambda
@@ -74,7 +78,8 @@ std::shared_ptr<ExprAST> LambdaAST::apply(const std::vector<std::shared_ptr<Expr
         } else {
             tmp[formalArgs[i + 1]] =
                     std::make_shared<BuiltinListAST>()->apply(
-                            std::vector<std::shared_ptr<ExprAST>>{actualArgs.begin() + i, actualArgs.end()}, ss);
+                            std::vector<std::shared_ptr<ExprAST>>{actualArgs.begin() + i, actualArgs.end()},
+                            ss);
             break;
         }
     }
@@ -212,7 +217,8 @@ std::shared_ptr<ExprAST> BuiltinMultiplyAST::apply(const std::vector<std::shared
     return std::make_shared<NumberAST>(num);
 }
 
-std::shared_ptr<ExprAST> BuiltinReciprocalAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
+std::shared_ptr<ExprAST>
+BuiltinReciprocalAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
     if (auto p = std::dynamic_pointer_cast<NumberAST>(actualArgs.front()->eval(s))) {
         return std::make_shared<NumberAST>(1 / p->getValue());
     } else {

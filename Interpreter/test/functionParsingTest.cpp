@@ -177,3 +177,63 @@ TEST(FunctionParsingTest, LambdaFunctionRecursiveTest) {
     auto numPtr = std::dynamic_pointer_cast<NumberAST>(res);
     ASSERT_EQ(120, numPtr->getValue());
 }
+
+TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV2) {
+    Scope s;
+    lexers::Lexer lex("(load \"Base.scm\")");
+    auto res = parseAllExpr(lex)->eval(s);
+
+    lex.appendExp("(((lambda (fact-function-2)"
+                          " (lambda (x)"
+                          "   (if (= x 0)"
+                          "       1"
+                          "       (* x ((fact-function-2 fact-function-2) (- x 1))))))"
+                          " (lambda (fact-function-2)"
+                          "   (lambda (x)"
+                          "     (if (= x 0)"
+                          "         1"
+                          "         (* x ((fact-function-2 fact-function-2) (- x 1))))))) 5)");
+
+    res = parseAllExpr(lex)->eval(s);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
+    auto numPtr = std::dynamic_pointer_cast<NumberAST>(res);
+    ASSERT_EQ(120, numPtr->getValue());
+}
+
+TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV3) {
+    Scope s;
+    lexers::Lexer lex("(load \"Base.scm\")");
+    auto res = parseAllExpr(lex)->eval(s);
+
+    lex.appendExp("(((lambda (f) (f f))"
+                          " (lambda (fact-function-3)"
+                          "   (lambda (x)"
+                          "     (if (= x 0)"
+                          "         1"
+                          "         (* x ((fact-function-3 fact-function-3) (- x 1))))))) 5)");
+
+    res = parseAllExpr(lex)->eval(s);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
+    auto numPtr = std::dynamic_pointer_cast<NumberAST>(res);
+    ASSERT_EQ(120, numPtr->getValue());
+}
+
+TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV4) {
+    Scope s;
+    lexers::Lexer lex("(load \"Base.scm\")");
+    auto res = parseAllExpr(lex)->eval(s);
+
+    lex.appendExp("(((lambda (f) (f f))"
+                          " (lambda (fact-function-4)"
+                          "   ((lambda (graceful-fact-function)"
+                          "      (lambda (x)"
+                          "        (if (= x 0)"
+                          "            1"
+                          "            (* x (graceful-fact-function (- x 1))))))"
+                          "    (lambda (x) ((fact-function-4 fact-function-4) x))))) 5)");
+
+    res = parseAllExpr(lex)->eval(s);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
+    auto numPtr = std::dynamic_pointer_cast<NumberAST>(res);
+    ASSERT_EQ(120, numPtr->getValue());
+}

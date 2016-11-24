@@ -8,6 +8,7 @@ using namespace std;
 using namespace ast;
 
 namespace context {
+
     class ScopeImpl {
     public:
         ScopeImpl() {
@@ -31,6 +32,14 @@ namespace context {
             return impl.count(str);
         }
 
+        Iter begin() const {
+            return impl.begin();
+        }
+
+        Iter end() const {
+            return impl.end();
+        }
+
     private:
         std::unordered_map<std::string, std::shared_ptr<ast::ExprAST>> impl;
     };
@@ -52,5 +61,9 @@ namespace context {
         impl = make_shared<ScopeImpl>(*s.impl);
         return *this;
     }
+
+    Iter Scope::begin() const { return impl->begin(); }
+
+    Iter Scope::end() const { return impl->end(); }
 }
 

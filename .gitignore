@@ -1,3 +1,4 @@
 .idea
 *.log
 build
+cmake-build-debug
