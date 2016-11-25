@@ -237,3 +237,12 @@ CondStatementAST::CondStatementAST(const std::vector<std::shared_ptr<ExprAST>> &
 std::shared_ptr<ExprAST> CondStatementAST::eval(Scope &s) const {
     return ifStatement->eval(s);
 }
+
+std::shared_ptr<ExprAST> LetStatementAST::eval(Scope &s) const {
+    Scope tmp = s;
+    for (auto index = 0; index < identifier.size(); index++) {
+        auto id = std::dynamic_pointer_cast<IdentifierAST>(identifier[index])->getId();
+        tmp[id] = value[index]->eval(tmp);
+    }
+    return expr->eval(tmp);
+}

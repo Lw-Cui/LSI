@@ -32,6 +32,8 @@ namespace parser {
 
     std::shared_ptr<ExprAST> parseCondStatementExpr(lexers::Lexer &lex);
 
+    std::shared_ptr<ExprAST> parseLetStatementExpr(lexers::Lexer &lex);
+
     std::shared_ptr<ExprAST> parseLambdaApplicationExpr(lexers::Lexer &lex);
 
     std::shared_ptr<ExprAST> parseFunctionApplicationExpr(lexers::Lexer &lex);

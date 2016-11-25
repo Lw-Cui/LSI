@@ -76,6 +76,21 @@ TEST(KeywordParsingTest, CondStatementTest) {
     ASSERT_EQ(2, numPtr->getValue());
 }
 
+
+TEST(KeywordParsingTest, LetStatementTest) {
+    Scope ss;
+    lexers::Lexer lex;
+    lex.appendExp("(load \"Base.scm\")")
+            .appendExp("(let((x 5)"
+                               "      (y 6)"
+                               "      (foo (lambda (x y) (+ x y))))"
+                               "  (foo x y))");
+    auto exprPtr = parseAllExpr(lex)->eval(ss);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
+    auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
+    ASSERT_EQ(11, numPtr->getValue());
+}
+
 TEST(KeywordParsingTest, BooleansTest) {
     Scope ss;
     lexers::Lexer lex("#t");

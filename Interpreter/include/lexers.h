@@ -54,6 +54,7 @@ namespace lexers {
                 {"let",    TokLet},
                 {"if",     TokIf},
                 {"cond",   TokCond},
+                {"let",    TokLet},
                 {"#t",     TokTrue},
                 {"#f",     TokFalse},
                 {"load",   TokLoad},

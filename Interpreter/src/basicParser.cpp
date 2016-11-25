@@ -59,6 +59,9 @@ std::shared_ptr<ExprAST> parser::parseBracketExpr(lexers::Lexer &lex) {
         case Lexer::TokCond:
             res = parseCondStatementExpr(lex);
             break;
+        case Lexer::TokLet:
+            res = parseLetStatementExpr(lex);
+            break;
         case Lexer::TokLoad:
             res = parseLoadingFileExpr(lex);
             break;
