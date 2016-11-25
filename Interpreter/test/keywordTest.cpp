@@ -55,6 +55,27 @@ TEST(KeywordParsingTest, IfStatementTest) {
     ASSERT_EQ(2, numPtr->getValue());
 }
 
+TEST(KeywordParsingTest, CondStatementTest) {
+    Scope ss;
+    lexers::Lexer lex;
+    lex.appendExp("(load \"Base.scm\")")
+            .appendExp("(cond ((= (+ 5 6) 0) 1)"
+                               "       ((= (+ 5 (- 4)) 0) 2)"
+                               "       (else 3))");
+    auto exprPtr = parseAllExpr(lex)->eval(ss);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
+    auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
+    ASSERT_EQ(3, numPtr->getValue());
+
+    lex.appendExp("(cond ((= (+ 5 6) 0) 1)"
+                          "       ((= (+ 5 (- 5)) 0) 2)"
+                          "       (else 3))");
+    exprPtr = parseAllExpr(lex)->eval(ss);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
+    numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
+    ASSERT_EQ(2, numPtr->getValue());
+}
+
 TEST(KeywordParsingTest, BooleansTest) {
     Scope ss;
     lexers::Lexer lex("#t");

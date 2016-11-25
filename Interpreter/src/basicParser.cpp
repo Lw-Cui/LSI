@@ -56,6 +56,9 @@ std::shared_ptr<ExprAST> parser::parseBracketExpr(lexers::Lexer &lex) {
         case Lexer::TokIf:
             res = parseIfStatementExpr(lex);
             break;
+        case Lexer::TokCond:
+            res = parseCondStatementExpr(lex);
+            break;
         case Lexer::TokLoad:
             res = parseLoadingFileExpr(lex);
             break;
@@ -94,4 +97,5 @@ shared_ptr<ExprAST> parser::parseIdDefinitionExpr(lexers::Lexer &lex) {
     CLOG(DEBUG, "parser") << "Parse identifier Definition: " << identifier;
     return make_shared<ValueBindingAST>(identifier, parseExpr(lex));
 }
+
 

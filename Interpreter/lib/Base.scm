@@ -1,6 +1,8 @@
 (define (and expr . args)
     (define (list-and l)
-        (if (null? l) #t (if (car l) (list-and (cdr l)) #f)))
+        (cond ((null? l) #t)
+              ((car l) (list-and (cdr l)))
+              (else #f)))
     (if expr (list-and args) #f))
 
 (define (not expr) (if expr #f #t))
@@ -9,7 +11,9 @@
     (define (equal x y)
         (and (not (< x y)) (not (< y x))))
     (define (equal-list l)
-        (if (null? (cdr l)) #t (if (equal (car l) (car (cdr l))) (equal-list (cdr l)) #f)))
+        (cond ((null? (cdr l)) #t)
+              ((equal (car l) (car (cdr l))) (equal-list (cdr l)))
+              (else #f)))
     (if (equal expr (car args)) (equal-list args) #f))
 
 (define (- num . args)
@@ -24,10 +28,11 @@
         (if (null? l) 1 (* (car l) (multiply-list (cdr l)))))
     (* num (#reciprocal (multiply-list args))))
 
-
 (define (or expr . args)
     (define (list-or l)
-        (if (null? l) #f (if (car l) #t (list-or (cdr l)))))
+        (cond ((null? l) #f)
+              ((car l) #t)
+              (else (list-or (cdr l)))))
     (if expr #t (list-or args)))
 
 (define (remainder a b)

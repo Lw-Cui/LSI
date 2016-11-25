@@ -35,6 +35,18 @@ std::shared_ptr<ExprAST> parser::parseTrueExpr(lexers::Lexer &lex) {
     return make_shared<BooleansTrueAST>();
 }
 
+std::shared_ptr<ExprAST> parser::parseCondStatementExpr(lexers::Lexer &lex) {
+    lex.stepForward();
+    std::vector<std::shared_ptr<ExprAST>> condition, result;
+    while (lex.getTokType() != Lexer::TokClosingBracket) {
+        lex.stepForward();
+        condition.push_back(parseExpr(lex));
+        result.push_back(parseExpr(lex));
+        lex.stepForward();
+    }
+    return make_shared<CondStatementAST>(condition, result);
+}
+
 std::shared_ptr<ExprAST> parser::parseFalseExpr(lexers::Lexer &lex) {
     lex.stepForward();
     CLOG(DEBUG, "parser") << "Parse #f";
@@ -54,7 +66,4 @@ std::shared_ptr<ExprAST> parser::parseNilExpr(lexers::Lexer &lex) {
     CLOG(DEBUG, "parser") << "Parse nil";
     return std::make_shared<NilAST>();
 }
-
-
-
 

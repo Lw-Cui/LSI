@@ -30,6 +30,8 @@ namespace parser {
 
     std::shared_ptr<ExprAST> parseIfStatementExpr(lexers::Lexer &lex);
 
+    std::shared_ptr<ExprAST> parseCondStatementExpr(lexers::Lexer &lex);
+
     std::shared_ptr<ExprAST> parseLambdaApplicationExpr(lexers::Lexer &lex);
 
     std::shared_ptr<ExprAST> parseFunctionApplicationExpr(lexers::Lexer &lex);
@@ -41,6 +43,5 @@ namespace parser {
     std::shared_ptr<ExprAST> parseLambdaDefinitionExpr(lexers::Lexer &lex);
 
     std::shared_ptr<ExprAST> parseFunctionDefinitionExpr(lexers::Lexer &lex);
-
 }
 #endif //GI_PARSER_H
