@@ -25,6 +25,7 @@ namespace lexers {
             TokLoad = -11,
             TokLambda = -12,
             TokNil = -13,
+            TokCond = -14,
         };
 
 
@@ -52,6 +53,8 @@ namespace lexers {
                 {"define", TokDefine},
                 {"let",    TokLet},
                 {"if",     TokIf},
+                {"cond",   TokCond},
+                {"let",    TokLet},
                 {"#t",     TokTrue},
                 {"#f",     TokFalse},
                 {"load",   TokLoad},

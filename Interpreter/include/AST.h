@@ -82,6 +82,28 @@ namespace ast {
         std::shared_ptr<ExprAST> trueClause, falseClause;
     };
 
+    class CondStatementAST : public ExprAST {
+    public:
+        CondStatementAST(const std::vector<std::shared_ptr<ExprAST>> &, const std::vector<std::shared_ptr<ExprAST>> &);
+
+        std::shared_ptr<ExprAST> eval(Scope &) const override;
+
+    private:
+        std::shared_ptr<ExprAST> ifStatement;
+    };
+
+    class LetStatementAST : public ExprAST {
+    public:
+        LetStatementAST(const std::vector<std::shared_ptr<ExprAST>> &id, const std::vector<std::shared_ptr<ExprAST>> &v,
+                        const std::shared_ptr<ExprAST> &e) : identifier{id}, value{v}, expr{e} {}
+
+        std::shared_ptr<ExprAST> eval(Scope &) const override;
+
+    private:
+        std::vector<std::shared_ptr<ExprAST>> identifier, value;
+        std::shared_ptr<ExprAST> expr;
+    };
+
     class LoadingFileAST : public ExprAST {
     public:
         LoadingFileAST(const std::string &f) : filename{f} {}

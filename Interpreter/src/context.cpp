@@ -22,6 +22,7 @@ namespace context {
             impl["#opposite"] = make_shared<BuiltinOppositeAST>();
             impl["#reciprocal"] = make_shared<BuiltinReciprocalAST>();
             impl["list"] = make_shared<BuiltinListAST>();
+            impl["else"] = make_shared<BooleansTrueAST>();
         }
 
         shared_ptr<parser::ExprAST> &operator[](const std::string &str) {

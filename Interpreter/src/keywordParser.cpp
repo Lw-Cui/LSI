@@ -35,6 +35,19 @@ std::shared_ptr<ExprAST> parser::parseTrueExpr(lexers::Lexer &lex) {
     return make_shared<BooleansTrueAST>();
 }
 
+std::shared_ptr<ExprAST> parser::parseCondStatementExpr(lexers::Lexer &lex) {
+    lex.stepForward();
+    CLOG(DEBUG, "parser") << "Parse cond";
+    std::vector<std::shared_ptr<ExprAST>> condition, result;
+    while (lex.getTokType() != Lexer::TokClosingBracket) {
+        lex.stepForward();
+        condition.push_back(parseExpr(lex));
+        result.push_back(parseExpr(lex));
+        lex.stepForward();
+    }
+    return make_shared<CondStatementAST>(condition, result);
+}
+
 std::shared_ptr<ExprAST> parser::parseFalseExpr(lexers::Lexer &lex) {
     lex.stepForward();
     CLOG(DEBUG, "parser") << "Parse #f";
@@ -55,6 +68,19 @@ std::shared_ptr<ExprAST> parser::parseNilExpr(lexers::Lexer &lex) {
     return std::make_shared<NilAST>();
 }
 
-
-
+std::shared_ptr<ExprAST> parser::parseLetStatementExpr(lexers::Lexer &lex) {
+    CLOG(DEBUG, "parser") << "Parse let";
+    lex.stepForward();
+    lex.stepForward();
+    std::vector<std::shared_ptr<ExprAST>> id, v;
+    while (lex.getTokType() != Lexer::TokClosingBracket) {
+        lex.stepForward();
+        id.push_back(parseExpr(lex));
+        v.push_back(parseExpr(lex));
+        lex.stepForward();
+    }
+    lex.stepForward();
+    std::shared_ptr<ExprAST> expr = parseExpr(lex);
+    return make_shared<LetStatementAST>(id, v, expr);
+}
 

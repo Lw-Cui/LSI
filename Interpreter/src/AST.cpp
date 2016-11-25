@@ -226,3 +226,23 @@ BuiltinReciprocalAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualA
         throw std::logic_error("The operands cannot be converted to number");
     }
 }
+
+CondStatementAST::CondStatementAST(const std::vector<std::shared_ptr<ExprAST>> &condition,
+                                   const std::vector<std::shared_ptr<ExprAST>> &result)
+        : ifStatement{std::make_shared<BooleansFalseAST>()} {
+    for (int index = static_cast<int>(condition.size() - 1); index >= 0; index--)
+        ifStatement = std::make_shared<IfStatementAST>(condition[index], result[index], ifStatement);
+}
+
+std::shared_ptr<ExprAST> CondStatementAST::eval(Scope &s) const {
+    return ifStatement->eval(s);
+}
+
+std::shared_ptr<ExprAST> LetStatementAST::eval(Scope &s) const {
+    Scope tmp = s;
+    for (auto index = 0; index < identifier.size(); index++) {
+        auto id = std::dynamic_pointer_cast<IdentifierAST>(identifier[index])->getId();
+        tmp[id] = value[index]->eval(tmp);
+    }
+    return expr->eval(tmp);
+}
