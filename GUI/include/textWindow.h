@@ -17,6 +17,8 @@ namespace tw {
 
         float getHeight() const;
 
+        bool isFinished() const;
+
         std::string context;
         sf::Font font;
 
@@ -29,7 +31,7 @@ namespace tw {
     class TextWindow : public sf::Drawable {
     public:
 
-        TextWindow() {}
+        TextWindow(const sf::Vector2u &s):size{s} {}
 
         void appendChar(char);
 
@@ -56,6 +58,7 @@ namespace tw {
 
         std::vector<Text> history;
         mutable Text currentText;
+        sf::Vector2u size;
     };
 }
 

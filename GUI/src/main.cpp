@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
     drawingBoard.setVerticalSyncEnabled(true);
     textWindow.setVerticalSyncEnabled(true);
 
-    TextWindow textControl;
+    TextWindow textControl{textWindow.getSize()};
 
     while (textWindow.isOpen() && drawingBoard.isOpen()) {
         sf::Event event;

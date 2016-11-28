@@ -1,3 +1,4 @@
+#include <stack>
 #include <textWindow.h>
 
 using namespace std;
@@ -17,13 +18,16 @@ void TextWindow::appendChar(char c) {
 }
 
 void TextWindow::lineFeedProcess() {
-    long openBrace = std::count(begin(currentText.context), end(currentText.context), ')');
-    long closeBrace = std::count(begin(currentText.context), end(currentText.context), '(');
-    if (openBrace > 0 && openBrace == closeBrace) {
+    if (currentText.offsetY + currentText.getHeight() + currentText.size + 10 > size.y) {
+        float delta = 10 + currentText.size;
+        for_each(begin(history), end(history), [delta](Text &text) { text.offsetY -= delta; });
+        currentText.offsetY -= delta;
+    }
+
+    if (currentText.isFinished()) {
         history.push_back(currentText);
         history.back().color = sf::Color::Red;
-        float delta = 10 + currentText.getHeight();
-        for_each(begin(history), end(history), [delta](Text &text) { text.offsetY -= delta; });
+        currentText.offsetY += currentText.getHeight() + 10;
         currentText.context.clear();
     } else {
         currentText.context += "\n\t";
@@ -58,4 +62,16 @@ void tw::Text::draw(sf::RenderTarget &target, sf::RenderStates states) const {
 
 float tw::Text::getHeight() const {
     return sf::Text{context, font, size}.getLocalBounds().height;
+}
+
+bool tw::Text::isFinished() const {
+    if (context.front() != '(' || context.back() != ')') return false;
+    stack<char> s;
+    for (auto ch: context)
+        if (ch == '(') s.push(ch);
+        else if (ch == ')') {
+            if (s.empty()) return false;
+            else s.pop();
+        }
+    return s.empty();
 }
