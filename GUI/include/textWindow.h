@@ -6,40 +6,57 @@
 #include <map>
 #include <SFML/Graphics.hpp>
 
-class TextWindow : public sf::Drawable {
-public:
+namespace tw {
+    class Text : public sf::Drawable {
+    public:
+        virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const;
 
-    TextWindow();
+        Text(const std::string &fontFile = "monaco.ttf") {
+            font.loadFromFile(fontFile);
+        }
 
-    void appendChar(char);
+        float getHeight() const;
 
-    void move(float);
+        std::string context;
+        sf::Font font;
 
-    enum charType {
-        BackSpace,
-        LineFeed,
+        sf::Color color = sf::Color::Black;
+        unsigned int size = 30;
+        float offsetY = 0;
+
     };
 
-private:
-    virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const;
+    class TextWindow : public sf::Drawable {
+    public:
 
-    std::map<char, charType> toType = {
-            {8,  BackSpace},
-            {10, LineFeed},
+        TextWindow() {}
+
+        void appendChar(char);
+
+        void move(float);
+
+        enum charType {
+            BackSpace,
+            LineFeed,
+        };
+
+    private:
+        virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const;
+
+        std::map<char, charType> toType = {
+                {8,  BackSpace},
+                {10, LineFeed},
+        };
+
+        void lineFeedProcess();
+
+        void backSpaceProcess();
+
+        void normalCharProcess(char c);
+
+        std::vector<Text> history;
+        mutable Text currentText;
     };
-
-    void lineFeedProcess();
-
-    void backSpaceProcess();
-
-    void normalCharProcess(char c);
-
-    std::vector<sf::Text> history;
-
-    std::string context;
-    mutable sf::Text currentText;
-
-    sf::Font font;
-};
+}
 
 #endif //GI_TEXTWINDOW_H

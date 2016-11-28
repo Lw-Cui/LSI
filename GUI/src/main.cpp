@@ -3,11 +3,11 @@
 #include <SFML/Graphics.hpp>
 #include <easylogging++.h>
 #include <textWindow.h>
-#include <utility.h>
 
 INITIALIZE_EASYLOGGINGPP
 
 using namespace std;
+using namespace tw;
 
 int main(int argc, char *argv[]) {
     START_EASYLOGGINGPP(argc, argv);
