@@ -18,15 +18,17 @@ namespace tw {
 
         float getHeight() const;
 
-        bool isFinished() const;
+        void lindFeed();
 
         std::string context;
         sf::Font font;
 
         sf::Color color = sf::Color::Black;
-        unsigned int size = 30;
+        unsigned int fontSize = 30;
         float offsetY = 0;
 
+    private:
+        unsigned int getIndentation(size_t pos) const;
     };
 
     class TextWindow : public sf::Drawable {
@@ -39,6 +41,8 @@ namespace tw {
         void move(float);
 
         void clear();
+
+        void execute();
 
         enum charType {
             BackSpace,

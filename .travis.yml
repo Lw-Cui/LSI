@@ -138,6 +138,7 @@ before_script:
 script:
   - cd Interpreter/lib
   - ./../../build/Interpreter/test/InterpreterTest
+  - ./../../build/GUI/test/TextTest
 
 notifications:
   email: cui@hellolw.com

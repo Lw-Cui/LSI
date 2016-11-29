@@ -1,4 +1,5 @@
 #include <stack>
+#include <string>
 #include <textWindow.h>
 #include <context.h>
 #include <parser.h>
@@ -22,19 +23,11 @@ void TextWindow::appendChar(char c) {
 }
 
 void TextWindow::lineFeedProcess() {
-    if (currentText.offsetY + currentText.getHeight() + currentText.size + 10 > screenSize.y) {
-        float delta = 10 + currentText.size;
-        for_each(begin(history), end(history), [delta](Text &text) { text.offsetY -= delta; });
-        currentText.offsetY -= delta;
-    }
-
-    if (currentText.isFinished()) {
-        history.push_back(currentText);
-        history.back().color = sf::Color::Red;
-        currentText.offsetY += currentText.getHeight() + 10;
-        currentText.context.clear();
-    } else {
-        currentText.context += "\n\t";
+    currentText.lindFeed();
+    auto newline = 10 + currentText.fontSize;
+    if (currentText.offsetY + currentText.getHeight() + newline > screenSize.y) {
+        for_each(begin(history), end(history), [newline](Text &text) { text.offsetY -= newline; });
+        currentText.offsetY -= newline;
     }
 }
 
@@ -62,25 +55,26 @@ void TextWindow::clear() {
     context.clear();
 }
 
+void TextWindow::execute() {
+    history.push_back(currentText);
+    history.back().color = sf::Color::Red;
+    currentText.offsetY += currentText.getHeight() + 10;
+    currentText.context.clear();
+}
+
 void tw::Text::draw(sf::RenderTarget &target, sf::RenderStates states) const {
-    sf::Text text{context, font, size};
+    sf::Text text{context, font, fontSize};
     text.setFillColor(color);
     text.move(0, offsetY);
     target.draw(text);
 }
 
 float tw::Text::getHeight() const {
-    return sf::Text{context, font, size}.getLocalBounds().height;
+    return sf::Text{context, font, fontSize}.getLocalBounds().height;
 }
 
-bool tw::Text::isFinished() const {
-    if (context.front() != '(' || context.back() != ')') return false;
-    stack<char> s;
-    for (auto ch: context)
-        if (ch == '(') s.push(ch);
-        else if (ch == ')') {
-            if (s.empty()) return false;
-            else s.pop();
-        }
-    return s.empty();
+void tw::Text::lindFeed() {
+}
+
+unsigned int tw::Text::getIndentation(size_t pos) const {
 }
