@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <SFML/Graphics.hpp>
+#include <context.h>
 
 namespace tw {
     class Text : public sf::Drawable {
@@ -31,11 +32,13 @@ namespace tw {
     class TextWindow : public sf::Drawable {
     public:
 
-        TextWindow(const sf::Vector2u &s):size{s} {}
+        TextWindow(const sf::Vector2u &s) : screenSize{s} {}
 
         void appendChar(char);
 
         void move(float);
+
+        void clear();
 
         enum charType {
             BackSpace,
@@ -56,9 +59,10 @@ namespace tw {
 
         void normalCharProcess(char c);
 
+        context::Scope context;
         std::vector<Text> history;
         mutable Text currentText;
-        sf::Vector2u size;
+        sf::Vector2u screenSize;
     };
 }
 

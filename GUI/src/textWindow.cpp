@@ -1,9 +1,13 @@
 #include <stack>
 #include <textWindow.h>
+#include <context.h>
+#include <parser.h>
 
 using namespace std;
 using namespace sf;
 using namespace tw;
+using namespace context;
+using namespace parser;
 
 void TextWindow::appendChar(char c) {
     if (!toType.count(c))
@@ -18,7 +22,7 @@ void TextWindow::appendChar(char c) {
 }
 
 void TextWindow::lineFeedProcess() {
-    if (currentText.offsetY + currentText.getHeight() + currentText.size + 10 > size.y) {
+    if (currentText.offsetY + currentText.getHeight() + currentText.size + 10 > screenSize.y) {
         float delta = 10 + currentText.size;
         for_each(begin(history), end(history), [delta](Text &text) { text.offsetY -= delta; });
         currentText.offsetY -= delta;
@@ -52,6 +56,11 @@ void TextWindow::move(float delta) {
     for_each(begin(history), end(history), [delta](Text &text) { text.offsetY += delta; });
 }
 
+void TextWindow::clear() {
+    history.clear();
+    currentText.context.clear();
+    context.clear();
+}
 
 void tw::Text::draw(sf::RenderTarget &target, sf::RenderStates states) const {
     sf::Text text{context, font, size};

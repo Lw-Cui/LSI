@@ -30,6 +30,9 @@ int main(int argc, char *argv[]) {
         while (textWindow.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
                 textWindow.close();
+            } else if (event.type == sf::Event::KeyPressed && event.key.system) {
+               if (event.key.code == sf::Keyboard::E)
+                   textControl.clear();
             } else if (event.type == sf::Event::TextEntered) {
                 textControl.appendChar(static_cast<char>(event.text.unicode));
             } else if (event.type == sf::Event::MouseWheelScrolled) {

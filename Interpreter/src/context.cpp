@@ -29,6 +29,10 @@ namespace context {
             return impl[str];
         }
 
+        void clear() {
+            impl.clear();
+        }
+
         size_t count(const std::string &str) const {
             return impl.count(str);
         }
@@ -66,5 +70,7 @@ namespace context {
     Iter Scope::begin() const { return impl->begin(); }
 
     Iter Scope::end() const { return impl->end(); }
+
+    void Scope::clear() { impl->clear(); }
 }
 
