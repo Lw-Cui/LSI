@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <SFML/Graphics.hpp>
+#include <context.h>
 
 namespace tw {
     class Text : public sf::Drawable {
@@ -17,25 +18,31 @@ namespace tw {
 
         float getHeight() const;
 
-        bool isFinished() const;
+        void lindFeed();
 
         std::string context;
         sf::Font font;
 
         sf::Color color = sf::Color::Black;
-        unsigned int size = 30;
+        unsigned int fontSize = 30;
         float offsetY = 0;
 
+    private:
+        unsigned int getIndentation(size_t pos) const;
     };
 
     class TextWindow : public sf::Drawable {
     public:
 
-        TextWindow(const sf::Vector2u &s):size{s} {}
+        TextWindow(const sf::Vector2u &s) : screenSize{s} {}
 
         void appendChar(char);
 
         void move(float);
+
+        void clear();
+
+        void execute();
 
         enum charType {
             BackSpace,
@@ -56,9 +63,10 @@ namespace tw {
 
         void normalCharProcess(char c);
 
+        context::Scope context;
         std::vector<Text> history;
         mutable Text currentText;
-        sf::Vector2u size;
+        sf::Vector2u screenSize;
     };
 }
 
