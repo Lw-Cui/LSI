@@ -8,7 +8,7 @@
 namespace text {
     class FormatString {
     public:
-        FormatString() {}
+        FormatString();
 
         void lineFeedProcess();
 
@@ -19,7 +19,10 @@ namespace text {
         std::string toString() const;
 
     private:
-        std::vector<std::string> content;
+        std::vector<std::pair<unsigned long, std::string>> content;
+        // openBracketPos.top(): the lastest open brakcet which doesn't be closed
+        // delBracketPos.top(): the lastest open brakcet which is closed
+        std::stack<unsigned long> openBracketPos, delBracketPos;
     };
 }
 
