@@ -11,11 +11,11 @@ void text::FormatString::lineFeedProcess() {
 
 void text::FormatString::backSpaceProcess() {
     if (content.empty()) return;
-    if (!content.back().second.empty()) {
-        char c = content.back().second.back();
-        content.back().second.pop_back();
-        if (c == '(' && !openBracketPos.empty()) {
-            delBracketPos.push(openBracketPos.top());
+    auto &str = content.back().second;
+    if (!str.empty()) {
+        char c = str.back();
+        str.pop_back();
+        if (c == '(') {
             openBracketPos.pop();
         } else if (c == ')' && !delBracketPos.empty()) {
             openBracketPos.push(delBracketPos.top());
