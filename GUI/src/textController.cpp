@@ -1,16 +1,16 @@
 #include <stack>
 #include <string>
-#include <textWindow.h>
+#include <textController.h>
 #include <context.h>
 #include <parser.h>
 
 using namespace std;
 using namespace sf;
-using namespace tw;
+using namespace text;
 using namespace context;
 using namespace parser;
 
-void TextWindow::appendChar(char c) {
+void TextController::appendChar(char c) {
     if (!toType.count(c))
         return normalCharProcess(c);
     switch (toType[c]) {
@@ -22,8 +22,8 @@ void TextWindow::appendChar(char c) {
     }
 }
 
-void TextWindow::lineFeedProcess() {
-    currentText.lindFeed();
+void TextController::lineFeedProcess() {
+    currentText.formatString.lineFeedProcess();
     auto newline = 10 + currentText.fontSize;
     if (currentText.offsetY + currentText.getHeight() + newline > screenSize.y) {
         for_each(begin(history), end(history), [newline](Text &text) { text.offsetY -= newline; });
@@ -31,50 +31,48 @@ void TextWindow::lineFeedProcess() {
     }
 }
 
-void TextWindow::backSpaceProcess() {
-    if (!currentText.context.empty()) currentText.context.pop_back();
+void TextController::backSpaceProcess() {
+    currentText.formatString.backSpaceProcess();
 }
 
-void TextWindow::normalCharProcess(char c) {
-    currentText.context.push_back(c);
+void TextController::normalCharProcess(char c) {
+    currentText.formatString.normalCharProcess(c);
 }
 
-void TextWindow::draw(sf::RenderTarget &target, sf::RenderStates states) const {
+void TextController::draw(sf::RenderTarget &target, sf::RenderStates states) const {
     target.draw(currentText);
     for_each(begin(history), end(history), [&target](const Text &text) { target.draw(text); });
 }
 
-void TextWindow::move(float delta) {
+void TextController::moveScreen(float delta) {
     currentText.offsetY += delta;
     for_each(begin(history), end(history), [delta](Text &text) { text.offsetY += delta; });
 }
 
-void TextWindow::clear() {
+void TextController::clearScreen() {
     history.clear();
-    currentText.context.clear();
-    context.clear();
+    currentText.clear();
+    scope.clear();
 }
 
-void TextWindow::execute() {
+void TextController::execute() {
     history.push_back(currentText);
     history.back().color = sf::Color::Red;
     currentText.offsetY += currentText.getHeight() + 10;
-    currentText.context.clear();
+    currentText.clear();
 }
 
-void tw::Text::draw(sf::RenderTarget &target, sf::RenderStates states) const {
-    sf::Text text{context, font, fontSize};
+void text::Text::draw(sf::RenderTarget &target, sf::RenderStates states) const {
+    sf::Text text{formatString.toString(), font, fontSize};
     text.setFillColor(color);
     text.move(0, offsetY);
     target.draw(text);
 }
 
-float tw::Text::getHeight() const {
-    return sf::Text{context, font, fontSize}.getLocalBounds().height;
+float text::Text::getHeight() const {
+    return sf::Text{formatString.toString(), font, fontSize}.getLocalBounds().height;
 }
 
-void tw::Text::lindFeed() {
-}
+void text::Text::clear() {
 
-unsigned int tw::Text::getIndentation(size_t pos) const {
 }
