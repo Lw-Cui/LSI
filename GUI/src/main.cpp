@@ -2,12 +2,12 @@
 #include <vector>
 #include <SFML/Graphics.hpp>
 #include <easylogging++.h>
-#include <textWindow.h>
+#include <textController.h>
 
 INITIALIZE_EASYLOGGINGPP
 
 using namespace std;
-using namespace tw;
+using namespace text;
 
 int main(int argc, char *argv[]) {
     START_EASYLOGGINGPP(argc, argv);
@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
     drawingBoard.setVerticalSyncEnabled(true);
     textWindow.setVerticalSyncEnabled(true);
 
-    TextWindow textControl{textWindow.getSize()};
+    TextController textController{textWindow.getSize()};
 
     while (textWindow.isOpen() && drawingBoard.isOpen()) {
         sf::Event event;
@@ -31,12 +31,12 @@ int main(int argc, char *argv[]) {
             if (event.type == sf::Event::Closed) {
                 textWindow.close();
             } else if (event.type == sf::Event::KeyPressed && event.key.system) {
-               if (event.key.code == sf::Keyboard::E)
-                   textControl.clear();
+                if (event.key.code == sf::Keyboard::E)
+                    textController.clearScreen();
             } else if (event.type == sf::Event::TextEntered) {
-                textControl.appendChar(static_cast<char>(event.text.unicode));
+                textController.appendChar(static_cast<char>(event.text.unicode));
             } else if (event.type == sf::Event::MouseWheelScrolled) {
-                textControl.move(event.mouseWheelScroll.delta * 5);
+                textController.moveScreen(event.mouseWheelScroll.delta * 5);
             }
         }
 
@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        textWindow.draw(textControl);
+        textWindow.draw(textController);
 
         textWindow.display();
         drawingBoard.display();

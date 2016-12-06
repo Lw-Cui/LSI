@@ -5,9 +5,10 @@
 #include <vector>
 #include <map>
 #include <SFML/Graphics.hpp>
+#include <formatString.h>
 #include <context.h>
 
-namespace tw {
+namespace text {
     class Text : public sf::Drawable {
     public:
         virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const;
@@ -16,31 +17,27 @@ namespace tw {
             font.loadFromFile(fontFile);
         }
 
+        void clear();
+
         float getHeight() const;
 
-        void lindFeed();
-
-        std::string context;
+        FormatString formatString;
         sf::Font font;
-
         sf::Color color = sf::Color::Black;
         unsigned int fontSize = 30;
         float offsetY = 0;
-
-    private:
-        unsigned int getIndentation(size_t pos) const;
     };
 
-    class TextWindow : public sf::Drawable {
+    class TextController : public sf::Drawable {
     public:
 
-        TextWindow(const sf::Vector2u &s) : screenSize{s} {}
+        TextController(const sf::Vector2u &s) : screenSize{s} {}
 
         void appendChar(char);
 
-        void move(float);
+        void moveScreen(float);
 
-        void clear();
+        void clearScreen();
 
         void execute();
 
@@ -49,13 +46,13 @@ namespace tw {
             LineFeed,
         };
 
-    private:
-        virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const;
-
         std::map<char, charType> toType = {
                 {8,  BackSpace},
                 {10, LineFeed},
         };
+
+    private:
+        virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const;
 
         void lineFeedProcess();
 
@@ -63,7 +60,7 @@ namespace tw {
 
         void normalCharProcess(char c);
 
-        context::Scope context;
+        context::Scope scope;
         std::vector<Text> history;
         mutable Text currentText;
         sf::Vector2u screenSize;
