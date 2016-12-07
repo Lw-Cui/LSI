@@ -7,17 +7,18 @@
 #include <SFML/Graphics.hpp>
 #include <formatString.h>
 #include <context.h>
+#include <parser.h>
 
 namespace text {
     class Text : public sf::Drawable {
     public:
         virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const;
 
-        Text(const std::string &fontFile = "monaco.ttf") {
+        Text(const std::string &fontFile = "../font/monaco.ttf") {
             font.loadFromFile(fontFile);
         }
 
-        void clear();
+        void clearStr();
 
         float getHeight() const;
 
@@ -31,7 +32,10 @@ namespace text {
     class TextController : public sf::Drawable {
     public:
 
-        TextController(const sf::Vector2u &s) : screenSize{s} {}
+        TextController(const sf::Vector2u &s) : screenSize{s} {
+            lexers::Lexer lex("(load \"Base.scm\")");
+            parser::parseAllExpr(lex)->eval(scope);
+        }
 
         void appendChar(char);
 
@@ -59,6 +63,8 @@ namespace text {
         void backSpaceProcess();
 
         void normalCharProcess(char c);
+
+        Text evaluation();
 
         context::Scope scope;
         std::vector<Text> history;

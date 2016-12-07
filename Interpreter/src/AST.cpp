@@ -1,4 +1,5 @@
 #include <fstream>
+#include <sstream>
 #include <parser.h>
 #include <lexers.h>
 #include <AST.h>
@@ -14,6 +15,11 @@ std::shared_ptr<ExprAST> ExprAST::eval(Scope &) const {
 std::shared_ptr<ExprAST> ExprAST::apply(const std::vector<std::shared_ptr<ExprAST>> &, Scope &) {
     CLOG(DEBUG, "exception");
     throw std::logic_error("Expression cannot be applied.");
+}
+
+std::string ExprAST::display() const {
+    CLOG(DEBUG, "exception");
+    throw std::logic_error("Expression cannot be displayed.");
 }
 
 std::shared_ptr<ExprAST> LoadingFileAST::eval(Scope &s) const {
@@ -55,6 +61,12 @@ std::shared_ptr<ExprAST> NumberAST::eval(Scope &) const {
     return std::make_shared<NumberAST>(getValue());
 }
 
+std::string NumberAST::display() const {
+    std::stringstream ss;
+    ss << value;
+    return ss.str();
+}
+
 std::shared_ptr<ExprAST> IdentifierAST::eval(Scope &ss) const {
     if (ss.count(getId())) {
         return ss[getId()];
@@ -93,6 +105,10 @@ std::shared_ptr<ExprAST> LambdaAST::eval(Scope &ss) const {
     context = ss;
     for (auto expr : nestedFunc) expr->eval(context);
     return std::make_shared<LambdaAST>(*this);
+}
+
+std::string LambdaAST::display() const {
+    return "#proceduce";
 }
 
 std::shared_ptr<ExprAST> BuiltinOppositeAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
@@ -136,8 +152,16 @@ std::shared_ptr<ExprAST> BooleansTrueAST::eval(Scope &) const {
     return std::make_shared<BooleansTrueAST>();
 }
 
+std::string BooleansTrueAST::display() const {
+    return "#t";
+}
+
 std::shared_ptr<ExprAST> BooleansFalseAST::eval(Scope &) const {
     return std::make_shared<BooleansFalseAST>();
+}
+
+std::string BooleansFalseAST::display() const {
+    return "#f";
 }
 
 std::shared_ptr<ExprAST> AllExprAST::eval(Scope &s) const {
@@ -151,6 +175,10 @@ std::shared_ptr<ExprAST> PairAST::eval(Scope &s) const {
     return std::make_shared<PairAST>(data.first->eval(s), data.second->eval(s));
 }
 
+std::string PairAST::display() const {
+    return "(" + data.first->display() + ", " + data.second->display() + ")";
+}
+
 std::shared_ptr<ExprAST> BuiltinNullAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
     if (auto p = std::dynamic_pointer_cast<NilAST>(actualArgs.front()->eval(s)))
         return std::make_shared<BooleansTrueAST>();
@@ -160,6 +188,10 @@ std::shared_ptr<ExprAST> BuiltinNullAST::apply(const std::vector<std::shared_ptr
 
 std::shared_ptr<ExprAST> NilAST::eval(Scope &s) const {
     return std::make_shared<NilAST>(*this);
+}
+
+std::string NilAST::display() const {
+    return "\'()";
 }
 
 std::shared_ptr<ExprAST> BuiltinCarAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {

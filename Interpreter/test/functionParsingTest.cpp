@@ -10,6 +10,7 @@ TEST(FunctionParsingTest, FunctionDefinitionTest) {
     lexers::Lexer lex{"(define (foo x) x)"};
     auto exprPtr = parser::parseExpr(lex)->eval(ss);
     ASSERT_TRUE(ss.count("foo"));
+    ASSERT_STREQ("#proceduce", ss["foo"]->display().c_str());
 }
 
 TEST(FunctionParsingTest, FunctionApplicationTest) {
@@ -17,6 +18,7 @@ TEST(FunctionParsingTest, FunctionApplicationTest) {
     lexers::Lexer lex{"(define (foo x) x)"};
     auto exprPtr = parser::parseExpr(lex)->eval(ss);
     ASSERT_TRUE(ss.count("foo"));
+    ASSERT_STREQ("#proceduce", ss["foo"]->display().c_str());
 
     lex.appendExp("(foo 5)");
     exprPtr = parseExpr(lex)->eval(ss);
@@ -27,6 +29,7 @@ TEST(FunctionParsingTest, FunctionApplicationTest) {
     lex.appendExp("(define (bar x) (+ x 1))");
     exprPtr = parseExpr(lex)->eval(ss);
     ASSERT_TRUE(ss.count("bar"));
+    ASSERT_STREQ("#proceduce", ss["bar"]->display().c_str());
 
     lex.appendExp("(bar 4)");
     exprPtr = parseExpr(lex)->eval(ss);
@@ -93,6 +96,7 @@ TEST(FunctionParsingTest, LambdaDefintionTest) {
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
     auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
     ASSERT_EQ(6, numPtr->getValue());
+    ASSERT_STREQ("6", numPtr->display().c_str());
 }
 
 TEST(FunctionParsingTest, LambdaApplicationTest) {
@@ -119,6 +123,7 @@ TEST(FunctionParsingTest, RecursiveTest) {
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
     auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
     ASSERT_EQ(11, numPtr->getValue());
+    ASSERT_STREQ("11", numPtr->display().c_str());
 
     lex.appendExp("(define (add2 x y) (if (not (= x 0)) (+ (add2 y (- x 1)) 1) y))")
             .appendExp("(add2 5 6)");
@@ -126,6 +131,7 @@ TEST(FunctionParsingTest, RecursiveTest) {
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
     numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
     ASSERT_EQ(11, numPtr->getValue());
+    ASSERT_STREQ("11", numPtr->display().c_str());
 }
 
 TEST(FunctionParsingTest, VariableArgumentsTest) {
@@ -137,6 +143,7 @@ TEST(FunctionParsingTest, VariableArgumentsTest) {
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
     auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
     ASSERT_EQ(26, numPtr->getValue());
+    ASSERT_STREQ("26", numPtr->display().c_str());
 
     lex.appendExp("(define (add x . args) (+ (add-list args) x))")
             .appendExp("(add 5 6 7 8)");
@@ -144,6 +151,7 @@ TEST(FunctionParsingTest, VariableArgumentsTest) {
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
     numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
     ASSERT_EQ(26, numPtr->getValue());
+    ASSERT_STREQ("26", numPtr->display().c_str());
 }
 
 TEST(FunctionParsingTest, NestedFunctionTest) {
@@ -176,6 +184,7 @@ TEST(FunctionParsingTest, LambdaFunctionRecursiveTest) {
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
     auto numPtr = std::dynamic_pointer_cast<NumberAST>(res);
     ASSERT_EQ(120, numPtr->getValue());
+    ASSERT_STREQ("120", numPtr->display().c_str());
 }
 
 TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV2) {
@@ -198,6 +207,7 @@ TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV2) {
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
     auto numPtr = std::dynamic_pointer_cast<NumberAST>(res);
     ASSERT_EQ(120, numPtr->getValue());
+    ASSERT_STREQ("120", numPtr->display().c_str());
 }
 
 TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV3) {
@@ -216,6 +226,7 @@ TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV3) {
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
     auto numPtr = std::dynamic_pointer_cast<NumberAST>(res);
     ASSERT_EQ(120, numPtr->getValue());
+    ASSERT_STREQ("120", numPtr->display().c_str());
 }
 
 TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV4) {
@@ -236,4 +247,5 @@ TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV4) {
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
     auto numPtr = std::dynamic_pointer_cast<NumberAST>(res);
     ASSERT_EQ(120, numPtr->getValue());
+    ASSERT_STREQ("120", numPtr->display().c_str());
 }

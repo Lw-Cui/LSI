@@ -2,21 +2,6 @@
 #include <string>
 #include <formatString.h>
 
-void pushString(text::FormatString &formatString, const std::string &str) {
-    for (char c: str)
-        formatString.normalCharProcess(c);
-}
-
-void setLineFeed(text::FormatString &formatString, int count) {
-    for (int i = 0; i < count; i++)
-        formatString.lineFeedProcess();
-}
-
-void setBackSpace(text::FormatString &formatString, int count) {
-    for (int i = 0; i < count; i++)
-        formatString.backSpaceProcess();
-}
-
 TEST(FormatTextTest, NormalCharTest) {
     text::FormatString formatString;
     pushString(formatString, "Hello world!");
@@ -30,9 +15,9 @@ TEST(FormatTextTest, lineFeedTest) {
     pushString(formatString, ")");
     ASSERT_STREQ(""
                          "(\n"
-                         " \n"
-                         " \n"
-                         " )\n", formatString.toString().c_str());
+                         "  \n"
+                         "  \n"
+                         "  )\n", formatString.toString().c_str());
 }
 
 TEST(FormatTextTest, backSpaceTest) {
@@ -48,8 +33,8 @@ TEST(FormatTextTest, backSpaceTest) {
 
     ASSERT_STREQ(""
                          "(\n"
-                         " bc\n"
-                         " )\n", formatString.toString().c_str());
+                         "  bc\n"
+                         "  )\n", formatString.toString().c_str());
 }
 
 TEST(FormatTextTest, multiBracketLineFeedTest) {
@@ -63,11 +48,11 @@ TEST(FormatTextTest, multiBracketLineFeedTest) {
     pushString(formatString, ")");
     ASSERT_STREQ(""
                          "(((\n"
-                         "   \n"
-                         "   \n"
+                         "    \n"
+                         "    \n"
+                         "    )\n"
                          "   )\n"
-                         "  )\n"
-                         " )\n", formatString.toString().c_str());
+                         "  )\n", formatString.toString().c_str());
 }
 
 TEST(FormatTextTest, MultiBracketBackSpaceTest) {
@@ -85,8 +70,8 @@ TEST(FormatTextTest, MultiBracketBackSpaceTest) {
     pushString(formatString, ")");
     ASSERT_STREQ(""
                          "(((\n"
-                         "   \n"
-                         "   \n"
-                         "   ))\n"
-                         " )\n", formatString.toString().c_str());
+                         "    \n"
+                         "    \n"
+                         "    ))\n"
+                         "  )\n", formatString.toString().c_str());
 }

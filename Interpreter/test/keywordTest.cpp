@@ -127,5 +127,7 @@ TEST(KeywordParsingTest, NilTest) {
 
     auto res = parseAllExpr(lex)->eval(s);
     ASSERT_TRUE(std::dynamic_pointer_cast<NilAST>(res));
+    auto nil = std::dynamic_pointer_cast<NilAST>(res);
+    ASSERT_STREQ("\'()", nil->display().c_str());
 }
 

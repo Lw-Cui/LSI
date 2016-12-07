@@ -136,11 +136,10 @@ before_script:
   - cmake --build build -- -j$JOBS
 
 script:
-  - cd Interpreter/lib
-  - ./../../build/Interpreter/test/lexersTest
-  - ./../../build/Interpreter/test/parserTest
-  - cd ../../GUI/font
-  - ./../../build/GUI/test/TextTest
+  - cd Scheme
+  - ./../build/Interpreter/test/lexersTest
+  - ./../build/Interpreter/test/parserTest
+  - ./../build/GUI/test/TextTest
 
 notifications:
   email: cui@hellolw.com
