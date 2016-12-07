@@ -14,7 +14,7 @@ namespace text {
     public:
         virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const;
 
-        Text(const std::string &fontFile = "font/monaco.ttf") {
+        Text(const std::string &fontFile = "../font/monaco.ttf") {
             font.loadFromFile(fontFile);
         }
 
@@ -33,7 +33,7 @@ namespace text {
     public:
 
         TextController(const sf::Vector2u &s) : screenSize{s} {
-            lexers::Lexer lex("(load \"lib/Base.scm\")");
+            lexers::Lexer lex("(load \"Base.scm\")");
             parser::parseAllExpr(lex)->eval(scope);
         }
 

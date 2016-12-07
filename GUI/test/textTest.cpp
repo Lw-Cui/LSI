@@ -15,9 +15,9 @@ TEST(FormatTextTest, lineFeedTest) {
     pushString(formatString, ")");
     ASSERT_STREQ(""
                          "(\n"
-                         " \n"
-                         " \n"
-                         " )\n", formatString.toString().c_str());
+                         "  \n"
+                         "  \n"
+                         "  )\n", formatString.toString().c_str());
 }
 
 TEST(FormatTextTest, backSpaceTest) {
@@ -33,8 +33,8 @@ TEST(FormatTextTest, backSpaceTest) {
 
     ASSERT_STREQ(""
                          "(\n"
-                         " bc\n"
-                         " )\n", formatString.toString().c_str());
+                         "  bc\n"
+                         "  )\n", formatString.toString().c_str());
 }
 
 TEST(FormatTextTest, multiBracketLineFeedTest) {
@@ -48,11 +48,11 @@ TEST(FormatTextTest, multiBracketLineFeedTest) {
     pushString(formatString, ")");
     ASSERT_STREQ(""
                          "(((\n"
-                         "   \n"
-                         "   \n"
+                         "    \n"
+                         "    \n"
+                         "    )\n"
                          "   )\n"
-                         "  )\n"
-                         " )\n", formatString.toString().c_str());
+                         "  )\n", formatString.toString().c_str());
 }
 
 TEST(FormatTextTest, MultiBracketBackSpaceTest) {
@@ -70,8 +70,8 @@ TEST(FormatTextTest, MultiBracketBackSpaceTest) {
     pushString(formatString, ")");
     ASSERT_STREQ(""
                          "(((\n"
-                         "   \n"
-                         "   \n"
-                         "   ))\n"
-                         " )\n", formatString.toString().c_str());
+                         "    \n"
+                         "    \n"
+                         "    ))\n"
+                         "  )\n", formatString.toString().c_str());
 }
