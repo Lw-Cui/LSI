@@ -19,6 +19,8 @@ namespace ast {
 
         virtual std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &, Scope &);
 
+        virtual std::string display() const;
+
         virtual ~ExprAST() {}
     };
 
@@ -26,7 +28,7 @@ namespace ast {
     public:
         AllExprAST(const std::vector<std::shared_ptr<ExprAST>> &v) : exprVec{v} {}
 
-        virtual std::shared_ptr<ExprAST> eval(Scope &) const;
+        virtual std::shared_ptr<ExprAST> eval(Scope &) const override;
 
     private:
         std::vector<std::shared_ptr<ExprAST>> exprVec;
@@ -36,14 +38,18 @@ namespace ast {
     public:
         BooleansFalseAST() {}
 
-        virtual std::shared_ptr<ExprAST> eval(Scope &) const;
+        virtual std::shared_ptr<ExprAST> eval(Scope &) const override;
+
+        virtual std::string display() const override;
     };
 
     class BooleansTrueAST : public ExprAST {
     public:
         BooleansTrueAST() {}
 
-        virtual std::shared_ptr<ExprAST> eval(Scope &) const;
+        virtual std::shared_ptr<ExprAST> eval(Scope &) const override;
+
+        virtual std::string display() const override;
     };
 
     class NumberAST : public ExprAST {
@@ -53,6 +59,8 @@ namespace ast {
         double getValue() const { return value; }
 
         std::shared_ptr<ExprAST> eval(Scope &) const override;
+
+        virtual std::string display() const override;
 
     private:
         double value;
@@ -121,7 +129,10 @@ namespace ast {
 
         std::shared_ptr<ExprAST> eval(Scope &s) const override;
 
+        virtual std::string display() const override;
+
         std::pair<std::shared_ptr<ExprAST>, std::shared_ptr<ExprAST>> data;
+
     };
 
     class NilAST : public ExprAST {
@@ -129,6 +140,8 @@ namespace ast {
         NilAST() {}
 
         std::shared_ptr<ExprAST> eval(Scope &s) const override;
+
+        virtual std::string display() const override;
     };
 
 
@@ -165,6 +178,8 @@ namespace ast {
         std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &) override;
 
         std::shared_ptr<ExprAST> eval(Scope &ss) const override;
+
+        virtual std::string display() const override;
 
         Scope &upgradeScope() const { return context; }
 
