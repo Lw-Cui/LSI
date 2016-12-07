@@ -30,7 +30,7 @@ void text::FormatString::backSpaceProcess() {
 void text::FormatString::normalCharProcess(char c) {
     content.back().second.push_back(c);
     if (c == '(') {
-        openBracketPos.push(content.back().first + content.back().second.size());
+        openBracketPos.push(content.back().first + content.back().second.size() + 1);
     } else if (c == ')' && !openBracketPos.empty()) {
         delBracketPos.push(openBracketPos.top());
         openBracketPos.pop();
