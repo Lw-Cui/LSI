@@ -1,6 +1,7 @@
 #include <formatString.h>
 
 using namespace std;
+using namespace text;
 
 void text::FormatString::lineFeedProcess() {
     if (!openBracketPos.empty())
@@ -45,5 +46,26 @@ std::string text::FormatString::toString() const {
 }
 
 text::FormatString::FormatString() : content{1} {
+}
 
+void text::FormatString::clearStr() {
+    content.clear();
+    content.push_back(make_pair(0, string{}));
+    openBracketPos = std::stack<unsigned long>();
+    delBracketPos = std::stack<unsigned long>();
+}
+
+void text::pushString(text::FormatString &formatString, const std::string &str) {
+    for (char c: str)
+        formatString.normalCharProcess(c);
+}
+
+void text::setLineFeed(text::FormatString &formatString, int count) {
+    for (int i = 0; i < count; i++)
+        formatString.lineFeedProcess();
+}
+
+void text::setBackSpace(text::FormatString &formatString, int count) {
+    for (int i = 0; i < count; i++)
+        formatString.backSpaceProcess();
 }

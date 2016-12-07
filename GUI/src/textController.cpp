@@ -51,15 +51,32 @@ void TextController::moveScreen(float delta) {
 
 void TextController::clearScreen() {
     history.clear();
-    currentText.clear();
+    currentText.clearStr();
     scope.clear();
 }
 
 void TextController::execute() {
     history.push_back(currentText);
-    history.back().color = sf::Color::Red;
-    currentText.offsetY += currentText.getHeight() + 10;
-    currentText.clear();
+    history.push_back(evaluation());
+
+    currentText.offsetY = history.back().offsetY + history.back().getHeight();
+    currentText.clearStr();
+}
+
+text::Text TextController::evaluation() {
+    Text resultText;
+    resultText.color = sf::Color::Blue;
+    resultText.offsetY = currentText.offsetY + currentText.getHeight();
+    pushString(resultText.formatString, "-> ");
+
+    lexers::Lexer lex(currentText.formatString.toString());
+    if (auto ptr = parseAllExpr(lex)->eval(scope)) {
+        pushString(resultText.formatString, ptr->display());
+    } else {
+        pushString(resultText.formatString, "\'()");
+    }
+
+    return resultText;
 }
 
 void text::Text::draw(sf::RenderTarget &target, sf::RenderStates states) const {
@@ -73,6 +90,6 @@ float text::Text::getHeight() const {
     return sf::Text{formatString.toString(), font, fontSize}.getLocalBounds().height;
 }
 
-void text::Text::clear() {
-
+void text::Text::clearStr() {
+    formatString.clearStr();
 }

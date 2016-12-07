@@ -11,6 +11,12 @@ using namespace text;
 
 int main(int argc, char *argv[]) {
     START_EASYLOGGINGPP(argc, argv);
+    el::Logger *parserLogger = el::Loggers::getLogger("parser");
+    el::Logger *exceptionLogger = el::Loggers::getLogger("exception");
+    el::Loggers::reconfigureAllLoggers(el::ConfigurationType::ToFile, "false");
+    el::Loggers::reconfigureAllLoggers(el::ConfigurationType::Format,
+                                       "[%logger] %msg [%fbase:%line]");
+
     sf::RenderWindow drawingBoard(sf::VideoMode(1300, 1300), "Drawing Board"),
             textWindow(sf::VideoMode(1100, 800), "Shell");
 
@@ -33,6 +39,8 @@ int main(int argc, char *argv[]) {
             } else if (event.type == sf::Event::KeyPressed && event.key.system) {
                 if (event.key.code == sf::Keyboard::E)
                     textController.clearScreen();
+                else if (event.key.code == sf::Keyboard::R)
+                    textController.execute();
             } else if (event.type == sf::Event::TextEntered) {
                 textController.appendChar(static_cast<char>(event.text.unicode));
             } else if (event.type == sf::Event::MouseWheelScrolled) {
@@ -47,7 +55,6 @@ int main(int argc, char *argv[]) {
         }
 
         textWindow.draw(textController);
-
         textWindow.display();
         drawingBoard.display();
     }

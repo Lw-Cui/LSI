@@ -2,21 +2,6 @@
 #include <string>
 #include <formatString.h>
 
-void pushString(text::FormatString &formatString, const std::string &str) {
-    for (char c: str)
-        formatString.normalCharProcess(c);
-}
-
-void setLineFeed(text::FormatString &formatString, int count) {
-    for (int i = 0; i < count; i++)
-        formatString.lineFeedProcess();
-}
-
-void setBackSpace(text::FormatString &formatString, int count) {
-    for (int i = 0; i < count; i++)
-        formatString.backSpaceProcess();
-}
-
 TEST(FormatTextTest, NormalCharTest) {
     text::FormatString formatString;
     pushString(formatString, "Hello world!");
