@@ -23,11 +23,7 @@ void Controller::appendChar(char c) {
 
 void Controller::lineFeedProcess() {
     currentText.formatString.lineFeedProcess();
-    auto newline = 10 + currentText.fontSize;
-    if (currentText.offsetY + currentText.getHeight() + newline > textWindow.getSize().y) {
-        for_each(begin(history), end(history), [newline](Text &text) { text.offsetY -= newline; });
-        currentText.offsetY -= newline;
-    }
+    adjustText();
 }
 
 void Controller::backSpaceProcess() {
@@ -36,9 +32,6 @@ void Controller::backSpaceProcess() {
 
 void Controller::normalCharProcess(char c) {
     currentText.formatString.normalCharProcess(c);
-}
-
-void Controller::draw(sf::RenderTarget &target, sf::RenderStates states) const {
 }
 
 void Controller::moveScreen(float delta) {
@@ -58,6 +51,8 @@ void Controller::execute() {
 
     currentText.offsetY = history.back().offsetY + history.back().getHeight();
     currentText.clearStr();
+
+    adjustText();
 }
 
 con::Text Controller::evaluation() {
@@ -113,4 +108,17 @@ con::Controller::Controller(sf::RenderTarget &text, sf::RenderTarget &board)
     lexers::Lexer lex("(load \"Base.scm\")");
     parser::parseAllExpr(lex)->eval(scope);
     scope.addBuiltinFunc("draw", std::make_shared<ast::BuiltinDrawAST>(*this));
+}
+
+void Controller::adjustText() {
+    if (history.empty()) return;
+    auto newline = currentText.fontSize + 5;
+    auto lastLine = std::max(currentText.offsetY + currentText.getHeight() + newline,
+                             history.back().offsetY + history.back().getHeight() + newline);
+
+    if (textWindow.getSize().y < lastLine) {
+        auto delta = lastLine - textWindow.getSize().y;
+        for_each(begin(history), end(history), [delta](Text &text) { text.offsetY -= delta; });
+        currentText.offsetY -= delta;
+    }
 }
