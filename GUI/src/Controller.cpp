@@ -51,6 +51,7 @@ void Controller::execute() {
 
     currentText.offsetY = history.back().offsetY + history.back().getHeight();
     currentText.clearStr();
+    pushString(currentText.formatString, "]=> ");
 
     adjustText();
 }
@@ -59,10 +60,10 @@ con::Text Controller::evaluation() {
     Text resultText;
     resultText.color = sf::Color::Blue;
     resultText.offsetY = currentText.offsetY + currentText.getHeight();
-    pushString(resultText.formatString, "-> ");
+    pushString(resultText.formatString, ";Value: ");
 
     try {
-        lexers::Lexer lex(currentText.formatString.toString());
+        lexers::Lexer lex(currentText.formatString.toString().substr(4));
         if (auto ptr = parseAllExpr(lex)->eval(scope)) {
             pushString(resultText.formatString, ptr->display());
         } else {
@@ -108,11 +109,12 @@ con::Controller::Controller(sf::RenderTarget &text, sf::RenderTarget &board)
     lexers::Lexer lex("(load \"Base.scm\")");
     parser::parseAllExpr(lex)->eval(scope);
     scope.addBuiltinFunc("draw", std::make_shared<ast::BuiltinDrawAST>(*this));
+    pushString(currentText.formatString, "]=> ");
 }
 
 void Controller::adjustText() {
     if (history.empty()) return;
-    auto newline = currentText.fontSize + 5;
+    auto newline = currentText.fontSize;
     auto lastLine = std::max(currentText.offsetY + currentText.getHeight() + newline,
                              history.back().offsetY + history.back().getHeight() + newline);
 
