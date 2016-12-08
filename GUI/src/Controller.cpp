@@ -1,7 +1,7 @@
 #include <stack>
 #include <string>
 #include <Controller.h>
-#include <builtinDraw.h>
+#include <GUIbuiltinFunc.h>
 
 using namespace std;
 using namespace sf;
@@ -109,6 +109,7 @@ con::Controller::Controller(sf::RenderTarget &text, sf::RenderTarget &board)
     lexers::Lexer lex("(load \"Base.scm\")");
     parser::parseAllExpr(lex)->eval(scope);
     scope.addBuiltinFunc("draw", std::make_shared<ast::BuiltinDrawAST>(*this));
+    scope.addBuiltinFunc("line", std::make_shared<ast::BuiltinLineAST>());
     pushString(currentText.formatString, "]=> ");
 }
 
