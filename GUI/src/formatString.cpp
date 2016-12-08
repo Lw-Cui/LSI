@@ -1,16 +1,16 @@
 #include <formatString.h>
 
 using namespace std;
-using namespace text;
+using namespace con;
 
-void text::FormatString::lineFeedProcess() {
+void con::FormatString::lineFeedProcess() {
     if (!openBracketPos.empty())
         content.push_back(make_pair(openBracketPos.top(), string()));
     else
         content.push_back(make_pair(0, string()));
 }
 
-void text::FormatString::backSpaceProcess() {
+void con::FormatString::backSpaceProcess() {
     if (content.empty()) return;
     auto &str = content.back().second;
     if (!str.empty()) {
@@ -27,7 +27,7 @@ void text::FormatString::backSpaceProcess() {
     }
 }
 
-void text::FormatString::normalCharProcess(char c) {
+void con::FormatString::normalCharProcess(char c) {
     content.back().second.push_back(c);
     if (c == '(') {
         openBracketPos.push(content.back().first + content.back().second.size() + 1);
@@ -37,7 +37,7 @@ void text::FormatString::normalCharProcess(char c) {
     }
 }
 
-std::string text::FormatString::toString() const {
+std::string con::FormatString::toString() const {
     string str;
     for (auto &s: content) {
         str += string(s.first, ' ') + s.second + "\n";
@@ -45,27 +45,27 @@ std::string text::FormatString::toString() const {
     return std::move(str);
 }
 
-text::FormatString::FormatString() : content{1} {
+con::FormatString::FormatString() : content{1} {
 }
 
-void text::FormatString::clearStr() {
+void con::FormatString::clearStr() {
     content.clear();
     content.push_back(make_pair(0, string{}));
     openBracketPos = std::stack<unsigned long>();
     delBracketPos = std::stack<unsigned long>();
 }
 
-void text::pushString(text::FormatString &formatString, const std::string &str) {
+void con::pushString(FormatString &formatString, const std::string &str) {
     for (char c: str)
         formatString.normalCharProcess(c);
 }
 
-void text::setLineFeed(text::FormatString &formatString, int count) {
+void con::setLineFeed(FormatString &formatString, int count) {
     for (int i = 0; i < count; i++)
         formatString.lineFeedProcess();
 }
 
-void text::setBackSpace(text::FormatString &formatString, int count) {
+void con::setBackSpace(FormatString &formatString, int count) {
     for (int i = 0; i < count; i++)
         formatString.backSpaceProcess();
 }

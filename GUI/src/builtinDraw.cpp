@@ -1,0 +1,37 @@
+#include <builtinDraw.h>
+
+using namespace std;
+
+std::shared_ptr<ast::ExprAST>
+ast::BuiltinDrawAST::apply(const std::vector<std::shared_ptr<ast::ExprAST>> &actualArgs, context::Scope &s) {
+    sf::VertexArray vertex;
+    auto exprPtr = actualArgs.front()->eval(s);
+    while (!dynamic_pointer_cast<NilAST>(exprPtr)) {
+        auto pairPtr = dynamic_pointer_cast<PairAST>(exprPtr);
+        vertex.append(sf::Vertex{toVec2f(pairPtr->data.first), sf::Color::Black});
+        exprPtr = pairPtr->data.second;
+    }
+    controller.appendShape(vertex);
+    return std::make_shared<BuiltinDrawAST>(controller);
+}
+
+sf::Vector2f ast::BuiltinDrawAST::toVec2f(const shared_ptr<ast::ExprAST> &ptr) const {
+    if (auto pairPtr = dynamic_pointer_cast<PairAST>(ptr)) {
+        auto firstPtr = dynamic_pointer_cast<NumberAST>(pairPtr->data.first);
+        auto secondPtr = dynamic_pointer_cast<NumberAST>(pairPtr->data.second);
+
+        auto vec2f = sf::Vector2f(static_cast<float>(firstPtr->getValue()),
+                                  static_cast<float>(secondPtr->getValue()));
+        LOG(DEBUG) << "Parse vec2f: (" << vec2f.x << ", " << vec2f.y << ")";
+        return vec2f;
+    } else {
+        CLOG(DEBUG, "exception");
+        throw std::logic_error("Cannot convert to vector2f.");
+    }
+}
+
+string ast::BuiltinDrawAST::display() const {
+    return "Finished drawing.";
+}
+
+ast::BuiltinDrawAST::BuiltinDrawAST(con::Controller &c) : controller{c} {}

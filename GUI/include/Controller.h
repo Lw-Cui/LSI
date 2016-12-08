@@ -9,7 +9,11 @@
 #include <context.h>
 #include <parser.h>
 
-namespace text {
+namespace ast {
+    class BuiltinDrawAST;
+}
+
+namespace con {
     class Text : public sf::Drawable {
     public:
         virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const;
@@ -29,15 +33,15 @@ namespace text {
         float offsetY = 0;
     };
 
-    class TextController : public sf::Drawable {
+    class Controller {
     public:
+        Controller(sf::RenderTarget &text, sf::RenderTarget &board);
 
-        TextController(const sf::Vector2u &s) : screenSize{s} {
-            lexers::Lexer lex("(load \"Base.scm\")");
-            parser::parseAllExpr(lex)->eval(scope);
-        }
+        void drawToWindows();
 
         void appendChar(char);
+
+        void appendShape(const sf::VertexArray &);
 
         void moveScreen(float);
 
@@ -66,10 +70,14 @@ namespace text {
 
         Text evaluation();
 
-        context::Scope scope;
-        std::vector<Text> history;
+        sf::RenderTarget &textWindow;
         mutable Text currentText;
-        sf::Vector2u screenSize;
+        std::vector<Text> history;
+        context::Scope scope;
+
+        sf::RenderTarget &drawingBoard;
+        std::vector<sf::VertexArray> shapes;
+
     };
 }
 

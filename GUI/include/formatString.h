@@ -5,7 +5,7 @@
 #include <stack>
 #include <vector>
 
-namespace text {
+namespace con {
     class FormatString {
     public:
         FormatString();
@@ -27,11 +27,11 @@ namespace text {
         std::stack<unsigned long> openBracketPos, delBracketPos;
     };
 
-    void pushString(text::FormatString &formatString, const std::string &str);
+    void pushString(con::FormatString &formatString, const std::string &str);
 
-    void setLineFeed(text::FormatString &formatString, int count);
+    void setLineFeed(con::FormatString &formatString, int count);
 
-    void setBackSpace(text::FormatString &formatString, int count);
+    void setBackSpace(con::FormatString &formatString, int count);
 }
 
 #endif //GI_UTILITY_H
