@@ -12,17 +12,21 @@ namespace context {
     class ScopeImpl {
     public:
         ScopeImpl() {
-            impl["cons"] = make_shared<BuiltinConsAST>();
-            impl["car"] = make_shared<BuiltinCarAST>();
-            impl["cdr"] = make_shared<BuiltinCdrAST>();
-            impl["+"] = make_shared<BuiltinAddAST>();
-            impl["*"] = make_shared<BuiltinMultiplyAST>();
-            impl["null?"] = make_shared<BuiltinNullAST>();
-            impl["<"] = make_shared<BuiltinLessThanAST>();
-            impl["#opposite"] = make_shared<BuiltinOppositeAST>();
-            impl["#reciprocal"] = make_shared<BuiltinReciprocalAST>();
-            impl["list"] = make_shared<BuiltinListAST>();
-            impl["else"] = make_shared<BooleansTrueAST>();
+            addBuiltinFunc("cons", make_shared<BuiltinConsAST>());
+            addBuiltinFunc("car", make_shared<BuiltinCarAST>());
+            addBuiltinFunc("cdr", make_shared<BuiltinCdrAST>());
+            addBuiltinFunc("+", make_shared<BuiltinAddAST>());
+            addBuiltinFunc("*", make_shared<BuiltinMultiplyAST>());
+            addBuiltinFunc("null?", make_shared<BuiltinNullAST>());
+            addBuiltinFunc("<", make_shared<BuiltinLessThanAST>());
+            addBuiltinFunc("#opposite", make_shared<BuiltinOppositeAST>());
+            addBuiltinFunc("#reciprocal", make_shared<BuiltinReciprocalAST>());
+            addBuiltinFunc("list", make_shared<BuiltinListAST>());
+            addBuiltinFunc("else", make_shared<BooleansTrueAST>());
+        }
+
+        void addBuiltinFunc(const std::string &name, const std::shared_ptr<ast::ExprAST> &expr) {
+            impl[name] = expr;
         }
 
         shared_ptr<parser::ExprAST> &operator[](const std::string &str) {
@@ -72,5 +76,9 @@ namespace context {
     Iter Scope::end() const { return impl->end(); }
 
     void Scope::clear() { impl->clear(); }
+
+    void Scope::addBuiltinFunc(const std::string &name, const std::shared_ptr<ast::ExprAST> &expr) const {
+        impl->addBuiltinFunc(name, expr);
+    }
 }
 

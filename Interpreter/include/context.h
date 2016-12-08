@@ -26,6 +26,8 @@ namespace context {
 
         size_t count(const std::string &str) const;
 
+        void addBuiltinFunc(const std::string &name, const std::shared_ptr<ast::ExprAST> &) const;
+
         void clear();
 
         Iter begin() const;

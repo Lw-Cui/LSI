@@ -1,15 +1,16 @@
 #include <gtest/gtest.h>
 #include <string>
 #include <formatString.h>
+using namespace con;
 
 TEST(FormatTextTest, NormalCharTest) {
-    text::FormatString formatString;
+    FormatString formatString;
     pushString(formatString, "Hello world!");
     ASSERT_STREQ("Hello world!\n", formatString.toString().c_str());
 }
 
 TEST(FormatTextTest, lineFeedTest) {
-    text::FormatString formatString;
+    FormatString formatString;
     pushString(formatString, "(");
     setLineFeed(formatString, 3);
     pushString(formatString, ")");
@@ -21,7 +22,7 @@ TEST(FormatTextTest, lineFeedTest) {
 }
 
 TEST(FormatTextTest, backSpaceTest) {
-    text::FormatString formatString;
+    FormatString formatString;
     pushString(formatString, "(");
     formatString.lineFeedProcess();
     pushString(formatString, "bcd)");
@@ -38,7 +39,7 @@ TEST(FormatTextTest, backSpaceTest) {
 }
 
 TEST(FormatTextTest, multiBracketLineFeedTest) {
-    text::FormatString formatString;
+    FormatString formatString;
     pushString(formatString, "(((");
     setLineFeed(formatString, 3);
     pushString(formatString, ")");
@@ -56,7 +57,7 @@ TEST(FormatTextTest, multiBracketLineFeedTest) {
 }
 
 TEST(FormatTextTest, MultiBracketBackSpaceTest) {
-    text::FormatString formatString;
+    FormatString formatString;
     pushString(formatString, "(((");
     setLineFeed(formatString, 3);
     pushString(formatString, ")");

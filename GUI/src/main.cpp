@@ -2,12 +2,12 @@
 #include <vector>
 #include <SFML/Graphics.hpp>
 #include <easylogging++.h>
-#include <textController.h>
+#include <Controller.h>
 
 INITIALIZE_EASYLOGGINGPP
 
 using namespace std;
-using namespace text;
+using namespace con;
 
 int main(int argc, char *argv[]) {
     START_EASYLOGGINGPP(argc, argv);
@@ -26,25 +26,24 @@ int main(int argc, char *argv[]) {
     drawingBoard.setVerticalSyncEnabled(true);
     textWindow.setVerticalSyncEnabled(true);
 
-    TextController textController{textWindow.getSize()};
+    Controller controller{textWindow, drawingBoard};
 
     while (textWindow.isOpen() && drawingBoard.isOpen()) {
         sf::Event event;
-        textWindow.clear(sf::Color::White);
-        drawingBoard.clear(sf::Color::White);
 
         while (textWindow.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
                 textWindow.close();
             } else if (event.type == sf::Event::KeyPressed && event.key.system) {
-                if (event.key.code == sf::Keyboard::E)
-                    textController.clearScreen();
-                else if (event.key.code == sf::Keyboard::R)
-                    textController.execute();
+                if (event.key.code == sf::Keyboard::E) {
+                    controller.clearScreen();
+                } else if (event.key.code == sf::Keyboard::R) {
+                    controller.execute();
+                }
             } else if (event.type == sf::Event::TextEntered) {
-                textController.appendChar(static_cast<char>(event.text.unicode));
+                controller.appendChar(static_cast<char>(event.text.unicode));
             } else if (event.type == sf::Event::MouseWheelScrolled) {
-                textController.moveScreen(event.mouseWheelScroll.delta * 5);
+                controller.moveScreen(event.mouseWheelScroll.delta * 5);
             }
         }
 
@@ -54,7 +53,7 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        textWindow.draw(textController);
+        controller.drawToWindows();
         textWindow.display();
         drawingBoard.display();
     }
