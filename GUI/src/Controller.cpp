@@ -106,10 +106,10 @@ void con::Text::clearStr() {
 
 con::Controller::Controller(sf::RenderTarget &text, sf::RenderTarget &board)
         : textWindow{text}, drawingBoard{board} {
-    lexers::Lexer lex("(load \"Base.scm\")");
+    lexers::Lexer lex;
+    lex.appendExp("(load \"Base.scm\")").appendExp("(load \"GUI.scm\")");
     parser::parseAllExpr(lex)->eval(scope);
     scope.addBuiltinFunc("draw", std::make_shared<ast::BuiltinDrawAST>(*this));
-    scope.addBuiltinFunc("line", std::make_shared<ast::BuiltinLineAST>());
     pushString(currentText.formatString, "]=> ");
 }
 
