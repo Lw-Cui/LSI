@@ -25,16 +25,6 @@ namespace ast {
 
         con::Controller &controller;
     };
-
-    class BuiltinLineAST : public GUIBuiltinAST {
-    public:
-        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &) override;
-
-    private:
-        std::vector<sf::Vector2f> getPointSet(sf::Vector2f begin, sf::Vector2f end) const;
-
-        std::vector<sf::Vector2f> SimpleLinePointSet(sf::Vector2f begin, sf::Vector2f end) const;
-    };
 }
 
 #endif //GI_BUILTINDRAW_H
