@@ -29,8 +29,22 @@
                           ((merge reverse op dx dy) end))
              (merge op reverse dx dy))))
 
-(define (mid-point p1 p2)
-    (cons (/ (+ (x p1) (x p2)) 2) (/ (+ (y p1) (y p2)) 2)))
-
 (define (triangle p1 p2 p3)
     (reduce (list (line p1 p2) (line p2 p3) (line p3 p1)) append))
+
+(define (sierpinskiTriangle p1 p2 p3)
+    (define (st-aux p1 p2 p3)
+        (define (mid-point p1 p2)
+            (cons (/ (+ (x p1) (x p2)) 2) (/ (+ (y p1) (y p2)) 2)))
+        (define (close-enough? p1 p2)
+            (define (distance p1 p2)
+                (+ (square (- (x p1) (x p2))) (square (- (y p1) (y p2)))))
+            (if (< (distance p1 p2) 100) #t #f))
+        (let ((m12 (mid-point p1 p2))
+            (m23 (mid-point p2 p3))
+            (m31 (mid-point p3 p1)))
+        (if (close-enough? m12 m23) nil
+            (reduce
+            (list  (st-aux p1 m12 m31) (st-aux p2 m12 m23) (st-aux p3 m31 m23) (triangle m12 m23 m31))
+            append))))
+    (append (st-aux p1 p2 p3) (triangle p1 p2 p3)))

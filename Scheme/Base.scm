@@ -50,3 +50,5 @@
     (define (reduce-iter seq res)
     (if (null? seq) res (reduce-iter (cdr seq) (op res (car seq)))))
     (reduce-iter seq nil))
+
+(define (square x) (* x x))
