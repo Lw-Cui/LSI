@@ -61,3 +61,9 @@
     (reduce-iter seq init))
 
 (define (square x) (* x x))
+
+(define Y
+    (lambda (fn)
+    ((lambda (f)
+        (f f)) (lambda (f)
+            (fn (lambda (s) ((f f) s)))))))

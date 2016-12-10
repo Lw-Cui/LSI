@@ -165,3 +165,18 @@ TEST(LibrariesParsingTest, ReduceTest) {
     ASSERT_EQ(6, numPtr->getValue());
 }
 
+TEST(LibrariesParsingTest, YcombinatorTest) {
+    Scope s;
+    lexers::Lexer lex("(load \"Base.scm\")");
+
+    lex.appendExp(""
+                          "((Y (lambda (g)"
+                          "     (lambda (x)"
+                          "       (if (= x 0) 1"
+                          "           (* x (g (- x 1))))))) 5)");
+    auto exprPtr = parseAllExpr(lex)->eval(s);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
+    auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
+    ASSERT_EQ(120, numPtr->getValue());
+}
+
