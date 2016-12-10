@@ -36,6 +36,42 @@
     (if expr #t (list-or args)))
 
 (define (remainder a b)
-  (if (< a b)
-      a
-      (remainder (- a b) b)))
+  (if (< a b) a (remainder (- a b) b)))
+
+(define (reverse l)
+    (define (reverse-iter l1 res)
+        (if (null? l1) res (reverse-iter (cdr l1) (cons (car l1) res))))
+    (reverse-iter l nil))
+
+(define (append l1 l2)
+    (define (append-iter l1 l2)
+        (if (null? l1) l2 (append-iter (cdr l1) (cons (car l1) l2))))
+    (append-iter (reverse l1) l2))
+
+(define (map seq op)
+    (define (map-iter seq res)
+        (if (null? seq) res  (map-iter (cdr seq) (cons (op (car seq)) res))))
+    (map-iter (reverse seq) nil))
+
+(define (abs x) ((if (< 0 x) + -) x))
+
+(define (reduce seq op init)
+    (define (reduce-iter seq res)
+        (if (null? seq) res (reduce-iter (cdr seq) (op res (car seq)))))
+    (reduce-iter seq init))
+
+(define (square x) (* x x))
+
+(define (sqrt x)
+    (define (average x y) (/ (+ x y) 2))
+    (define (close-enough? guess) (< (abs (- (square guess) x)) 0.01))
+    (define (improve guess) (average guess (/ x guess)))
+    (define (sqrt-iter guess) (if (close-enough? guess) guess (sqrt-iter (improve guess))))
+    (sqrt-iter 1.0))
+
+(define Y
+    (lambda (fn)
+    ((lambda (f)
+        (f f)) (lambda (f)
+            (fn (lambda (s) ((f f) s)))))))
+

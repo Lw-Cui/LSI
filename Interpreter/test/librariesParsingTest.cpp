@@ -130,3 +130,64 @@ TEST(LibrariesParsingTest, DivideTest) {
     ASSERT_EQ(5, numPtr->getValue());
 }
 
+TEST(LibrariesParsingTest, ReverseTest) {
+    Scope s;
+    lexers::Lexer lex("(load \"Base.scm\")");
+    lex.appendExp("(reverse (list 1 2 3))");
+    auto exprPtr = parseAllExpr(lex)->eval(s);
+    ASSERT_STREQ("(3, (2, (1, '())))", exprPtr->display().c_str());
+}
+
+TEST(LibrariesParsingTest, AppendTest) {
+    Scope s;
+    lexers::Lexer lex("(load \"Base.scm\")");
+    lex.appendExp("(append (list 1 2 3) (list 4 5 6))");
+    auto exprPtr = parseAllExpr(lex)->eval(s);
+    ASSERT_STREQ("(1, (2, (3, (4, (5, (6, '()))))))", exprPtr->display().c_str());
+}
+
+TEST(LibrariesParsingTest, MapTest) {
+    Scope s;
+    lexers::Lexer lex("(load \"Base.scm\")");
+    lex.appendExp("(map (list 1 2 3) (lambda (x) (+ x 1)))");
+    auto exprPtr = parseAllExpr(lex)->eval(s);
+    ASSERT_STREQ("(2, (3, (4, '())))", exprPtr->display().c_str());
+}
+
+TEST(LibrariesParsingTest, ReduceTest) {
+    Scope s;
+    lexers::Lexer lex("(load \"Base.scm\")");
+
+    lex.appendExp("(reduce (list 1 2 3) (lambda (res x) (+ res x)) 0)");
+    auto exprPtr = parseAllExpr(lex)->eval(s);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
+    auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
+    ASSERT_EQ(6, numPtr->getValue());
+}
+
+TEST(LibrariesParsingTest, sqrtTest) {
+    Scope s;
+    lexers::Lexer lex("(load \"Base.scm\")");
+
+    lex.appendExp("(sqrt 4)");
+    auto exprPtr = parseAllExpr(lex)->eval(s);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
+    auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
+    ASSERT_EQ(2, static_cast<int>(numPtr->getValue()));
+}
+
+TEST(LibrariesParsingTest, YcombinatorTest) {
+    Scope s;
+    lexers::Lexer lex("(load \"Base.scm\")");
+
+    lex.appendExp(""
+                          "((Y (lambda (g)"
+                          "     (lambda (x)"
+                          "       (if (= x 0) 1"
+                          "           (* x (g (- x 1))))))) 5)");
+    auto exprPtr = parseAllExpr(lex)->eval(s);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
+    auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
+    ASSERT_EQ(120, numPtr->getValue());
+}
+
