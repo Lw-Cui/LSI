@@ -36,6 +36,17 @@
     (if expr #t (list-or args)))
 
 (define (remainder a b)
-  (if (< a b)
-      a
-      (remainder (- a b) b)))
+  (if (< a b) a (remainder (- a b) b)))
+
+(define (append l1 l2)
+    (if (null? l1) l2 (cons (car l1) (append (cdr l1) l2))))
+
+(define (map seq op)
+    (if (null? seq) nil (cons (op (car seq)) (map (cdr seq) op))))
+
+(define (abs x) ((if (< 0 x) + -) x))
+
+(define (reduce seq op)
+    (define (reduce-iter seq res)
+    (if (null? seq) res (reduce-iter (cdr seq) (op res (car seq)))))
+    (reduce-iter seq nil))
