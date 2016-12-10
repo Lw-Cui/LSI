@@ -62,8 +62,16 @@
 
 (define (square x) (* x x))
 
+(define (sqrt x)
+    (define (average x y) (/ (+ x y) 2))
+    (define (close-enough? guess) (< (abs (- (square guess) x)) 0.01))
+    (define (improve guess) (average guess (/ x guess)))
+    (define (sqrt-iter guess) (if (close-enough? guess) guess (sqrt-iter (improve guess))))
+    (sqrt-iter 1.0))
+
 (define Y
     (lambda (fn)
     ((lambda (f)
         (f f)) (lambda (f)
             (fn (lambda (s) ((f f) s)))))))
+

@@ -165,6 +165,17 @@ TEST(LibrariesParsingTest, ReduceTest) {
     ASSERT_EQ(6, numPtr->getValue());
 }
 
+TEST(LibrariesParsingTest, sqrtTest) {
+    Scope s;
+    lexers::Lexer lex("(load \"Base.scm\")");
+
+    lex.appendExp("(sqrt 4)");
+    auto exprPtr = parseAllExpr(lex)->eval(s);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
+    auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
+    ASSERT_EQ(2, static_cast<int>(numPtr->getValue()));
+}
+
 TEST(LibrariesParsingTest, YcombinatorTest) {
     Scope s;
     lexers::Lexer lex("(load \"Base.scm\")");
