@@ -9,6 +9,23 @@ INITIALIZE_EASYLOGGINGPP
 using namespace std;
 using namespace con;
 
+void setStack(rlim_t stackSize) {
+    struct rlimit rl;
+    int result;
+    if ((result = getrlimit(RLIMIT_STACK, &rl)) == 0) {
+        if (rl.rlim_cur < stackSize) {
+            rl.rlim_cur = stackSize;
+            if ((result = setrlimit(RLIMIT_STACK, &rl)) != 0) {
+                CLOG(DEBUG, "exception");
+                throw std::logic_error("Cannot set resource info.");
+            }
+        }
+    } else {
+        CLOG(DEBUG, "exception");
+        throw std::logic_error("Cannot get resource info.");
+    }
+}
+
 int main(int argc, char *argv[]) {
     START_EASYLOGGINGPP(argc, argv);
     el::Logger *parserLogger = el::Loggers::getLogger("parser");
@@ -16,6 +33,8 @@ int main(int argc, char *argv[]) {
     el::Loggers::reconfigureAllLoggers(el::ConfigurationType::ToFile, "false");
     el::Loggers::reconfigureAllLoggers(el::ConfigurationType::Format,
                                        "[%logger] %msg [%fbase:%line]");
+
+    setStack(16 * 1024 * 1024);   // 16MB
 
     sf::RenderWindow drawingBoard(sf::VideoMode(1300, 1300), "Drawing Board"),
             textWindow(sf::VideoMode(1100, 800), "Shell");
