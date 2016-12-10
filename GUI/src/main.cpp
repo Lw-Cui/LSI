@@ -11,11 +11,10 @@ using namespace con;
 
 void setStack(rlim_t stackSize) {
     struct rlimit rl;
-    int result;
-    if ((result = getrlimit(RLIMIT_STACK, &rl)) == 0) {
+    if (getrlimit(RLIMIT_STACK, &rl) == 0) {
         if (rl.rlim_cur < stackSize) {
             rl.rlim_cur = stackSize;
-            if ((result = setrlimit(RLIMIT_STACK, &rl)) != 0) {
+            if (setrlimit(RLIMIT_STACK, &rl) != 0) {
                 CLOG(DEBUG, "exception");
                 throw std::logic_error("Cannot set resource info.");
             }

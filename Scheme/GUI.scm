@@ -30,7 +30,7 @@
              (merge op reverse dx dy))))
 
 (define (triangle p1 p2 p3)
-    (reduce (list (line p1 p2) (line p2 p3) (line p3 p1)) append))
+    (reduce (list (line p1 p2) (line p2 p3) (line p3 p1)) append nil))
 
 (define (sierpinskiTriangle p1 p2 p3)
     (define (st-aux p1 p2 p3)
@@ -46,5 +46,5 @@
         (if (close-enough? m12 m23) nil
             (reduce
             (list  (st-aux p1 m12 m31) (st-aux p2 m12 m23) (st-aux p3 m31 m23) (triangle m12 m23 m31))
-            append))))
+            append nil))))
     (append (st-aux p1 p2 p3) (triangle p1 p2 p3)))
