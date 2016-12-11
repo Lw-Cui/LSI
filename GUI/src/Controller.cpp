@@ -27,7 +27,8 @@ void Controller::lineFeedProcess() {
 }
 
 void Controller::backSpaceProcess() {
-    currentText.formatString.backSpaceProcess();
+    if (currentText.formatString.toString() != "]=> \n")
+        currentText.formatString.backSpaceProcess();
 }
 
 void Controller::normalCharProcess(char c) {
