@@ -6,7 +6,7 @@ add_library(${TEXT_LIB} STATIC ${TEXT_SOURCE_FILES})
 if (NOT DEFINED ENV{DO_NOT_BUILD_GUI})
     set(GUI_SOURCE_FILES
             ../include/Controller.h Controller.cpp
-            ../include/GUIbuiltinFunc.h GUIbuiltinFunc.cpp
+            ../include/GUIbuiltinAST.h GUIbuiltinAST.cpp
             main.cpp)
     add_executable(${PROJECT_NAME} ${GUI_SOURCE_FILES})
     include_directories(${SFML_INCLUDE_DIR})
