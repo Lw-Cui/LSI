@@ -94,6 +94,24 @@ TEST(LibrariesParsingTest, OrTest) {
     ASSERT_TRUE(std::dynamic_pointer_cast<BooleansTrueAST>(res));
 }
 
+
+TEST(LibrariesParsingTest, GreaterTest) {
+    Scope s;
+    lexers::Lexer lex("(load \"Base.scm\")");
+
+    lex.appendExp("(> (+ 10 (- 10)) 0)");
+    auto res = parseAllExpr(lex)->eval(s);
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansFalseAST>(res));
+
+    lex.appendExp("(> 13 (- 20 8) (+ 5 4))");
+    res = parseAllExpr(lex)->eval(s);
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansTrueAST>(res));
+
+    lex.appendExp("(> 12 (- 20 8) (+ 5 4))");
+    res = parseAllExpr(lex)->eval(s);
+    ASSERT_TRUE(std::dynamic_pointer_cast<BooleansFalseAST>(res));
+}
+
 TEST(LibrariesParsingTest, EqualTest) {
     Scope s;
     lexers::Lexer lex("(load \"Base.scm\")");

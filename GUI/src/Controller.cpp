@@ -1,7 +1,7 @@
 #include <stack>
 #include <string>
 #include <Controller.h>
-#include <GUIbuiltinFunc.h>
+#include <GUIbuiltinAST.h>
 
 using namespace std;
 using namespace sf;
@@ -27,7 +27,8 @@ void Controller::lineFeedProcess() {
 }
 
 void Controller::backSpaceProcess() {
-    currentText.formatString.backSpaceProcess();
+    if (currentText.formatString.toString() != "]=> \n")
+        currentText.formatString.backSpaceProcess();
 }
 
 void Controller::normalCharProcess(char c) {
