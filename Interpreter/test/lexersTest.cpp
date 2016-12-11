@@ -8,6 +8,16 @@ TEST(LexersTest, NumberTest) {
     ASSERT_EQ(Lexer::TokNumber, lex.getTokType());
     ASSERT_EQ(5, lex.getNum());
     ASSERT_EQ(Lexer::TokEOF, lex.getTokType());
+
+    lex.appendExp("-5");
+    ASSERT_EQ(Lexer::TokNumber, lex.getTokType());
+    ASSERT_EQ(-5, lex.getNum());
+    ASSERT_EQ(Lexer::TokEOF, lex.getTokType());
+
+    lex.appendExp("+5");
+    ASSERT_EQ(Lexer::TokNumber, lex.getTokType());
+    ASSERT_EQ(5, lex.getNum());
+    ASSERT_EQ(Lexer::TokEOF, lex.getTokType());
 }
 
 TEST(LexersTest, IdentifierTest) {

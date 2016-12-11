@@ -42,6 +42,7 @@ Lexer::TokenType Lexer::stepForward() {
         return stepForward();
     } else if (isdigit(type)) {
         expressionBuf >> numToken;
+        Number:
         currentType = TokNumber;
     } else if (type == '(') {
         expressionBuf.get();
@@ -51,6 +52,12 @@ Lexer::TokenType Lexer::stepForward() {
         currentType = TokClosingBracket;
     } else {
         expressionBuf >> strToken;
+        if (strToken.size() > 1
+            && (strToken[0] == '+' || strToken[0] == '-')
+            && isdigit(strToken[1])) {
+            std::stringstream(strToken) >> numToken;
+            goto Number;
+        }
         currentType = (keyWord.count(strToken) ? keyWord[strToken] : TokIdentifier);
     }
     return currentType;
