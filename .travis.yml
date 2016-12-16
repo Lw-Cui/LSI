@@ -81,7 +81,6 @@ matrix:
       addons: *gcc6
 
 install:
-  - export DO_NOT_BUILD_GUI=true
   - if [[ -n "$CLANG_VERSION" ]]; then export CXX=clang++-$CLANG_VERSION CC=clang-$CLANG_VERSION; fi
   - if [[ -n "$GCC_VERSION" ]]; then export CXX=g++-$GCC_VERSION CC=gcc-$GCC_VERSION; fi
   - JOBS=2
@@ -100,6 +99,22 @@ install:
       export PATH="${DEPS_DIR}/cmake/bin:${PATH}"
     else
       if ! brew ls --version cmake &>/dev/null; then brew install cmake; fi
+      brew install sfml
+    fi
+
+  ############################################################################
+  # Install a recent SFML
+  ############################################################################
+  - |
+    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+      wget http://www.sfml-dev.org/files/SFML-2.4.1-linux-gcc-64-bit.tar.gz
+      tar -xzvf SFML-2.4.1-linux-gcc-64-bit.tar.gz
+      bash "${TRAVIS_BUILD_DIR}"/DependencyInstall.sh
+      sudo cp -r SFML-2.4.1/lib/* /usr/lib/x86_64-linux-gnu/
+      sudo cp -r SFML-2.4.1/include/* /usr/include/x86_64-linux-gnu/
+      sudo ldconfig
+    else
+      brew install sfml
     fi
 
   ############################################################################
@@ -139,7 +154,7 @@ script:
   - cd Scheme
   - ./../build/Interpreter/test/lexersTest
   - ./../build/Interpreter/test/parserTest
-  - ./../build/GUI/test/TextTest
+  - ./../build/GUI/test/GUITest
 
 notifications:
   email: cui@hellolw.com

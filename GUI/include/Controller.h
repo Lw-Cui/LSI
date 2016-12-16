@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <string>
 #include <SFML/Graphics.hpp>
 #include <formatString.h>
 #include <context.h>
@@ -14,6 +15,7 @@ namespace ast {
 }
 
 namespace con {
+
     class Text : public sf::Drawable {
     public:
         virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const;
@@ -33,15 +35,36 @@ namespace con {
         float offsetY = 0;
     };
 
+    class VertexArray : public sf::VertexArray {
+    public:
+        bool operator==(const VertexArray &va) const {
+            if (va.getVertexCount() != getVertexCount()) return false;
+            for (size_t i = 0; i < getVertexCount(); i++)
+                if (va[i].position != operator[](i).position || va[i].color != operator[](i).color)
+                    return false;
+            return true;
+        }
+    };
+
+    class Window : public sf::RenderWindow {
+    public:
+        Window(const sf::VideoMode &vm, const std::string &str) : sf::RenderWindow(vm, str) {}
+
+        virtual void draw(const VertexArray &va) { sf::RenderWindow::draw(va); }
+
+        virtual void draw(const Text &text) {
+            sf::RenderWindow::draw(text); }
+    };
+
     class Controller {
     public:
-        Controller(sf::RenderTarget &text, sf::RenderTarget &board);
+        Controller(Window &text, Window &board);
 
         void drawToWindows();
 
         void appendChar(char);
 
-        void appendShape(const sf::VertexArray &);
+        void appendShape(const VertexArray &);
 
         void moveScreen(float);
 
@@ -70,13 +93,13 @@ namespace con {
 
         Text evaluation();
 
-        sf::RenderTarget &textWindow;
+        Window &textWindow;
         mutable Text currentText;
         std::vector<Text> history;
         context::Scope scope;
 
-        sf::RenderTarget &drawingBoard;
-        std::vector<sf::VertexArray> shapes;
+        Window &drawingBoard;
+        std::vector<con::VertexArray> shapes;
 
     };
 }
