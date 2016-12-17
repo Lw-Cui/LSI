@@ -10,15 +10,12 @@ using namespace sf;
 
 class MockWindow : public con::Window {
 public:
-    MockWindow(const VideoMode &vm, const string &str) : con::Window(vm, str) {}
-
     MOCK_METHOD1(draw, void(
             const con::VertexArray &va));
 };
 
 TEST(DrawingBoardTest, drawPointTest) {
-    testing::StrictMock<MockWindow> drawingBoard(sf::VideoMode(1300, 1300), "Drawing Board");
-    Window textWindow(sf::VideoMode(1100, 800), "Shell");
+    testing::StrictMock<MockWindow> drawingBoard, textWindow;
 
     con::VertexArray va;
     va.append(Vertex{Vector2f(5, 5), Color::Black});

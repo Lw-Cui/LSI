@@ -1,4 +1,5 @@
 include_directories(../Interpreter/include)
+set(SFML_LIB sfml-system sfml-window sfml-graphics)
 include_directories(include)
 add_subdirectory(src)
 add_subdirectory(test)

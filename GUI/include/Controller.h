@@ -46,14 +46,38 @@ namespace con {
         }
     };
 
-    class Window : public sf::RenderWindow {
+    class Window {
     public:
-        Window(const sf::VideoMode &vm, const std::string &str) : sf::RenderWindow(vm, str) {}
+        Window(const sf::VideoMode &vm, const std::string &str) :
+                winPtr(std::make_shared<sf::RenderWindow>(vm, str)) {}
 
-        virtual void draw(const VertexArray &va) { sf::RenderWindow::draw(va); }
+        Window() : winPtr(nullptr) {}
 
-        virtual void draw(const Text &text) {
-            sf::RenderWindow::draw(text); }
+        virtual void draw(const VertexArray &va) { if (winPtr) winPtr->draw(va); }
+
+        virtual void draw(const Text &text) { if (winPtr)winPtr->draw(text); }
+
+        void clear(sf::Color c) { if (winPtr) winPtr->clear(c); }
+
+        sf::Vector2u getSize() const { if (winPtr) return winPtr->getSize(); else return sf::Vector2u{0, 0}; }
+
+        void setPosition(sf::Vector2i pos) { if (winPtr) winPtr->setPosition(pos); }
+
+        void setVerticalSyncEnabled(bool status) { if (winPtr) winPtr->setVerticalSyncEnabled(status); }
+
+        bool isOpen() const { if (winPtr) return winPtr->isOpen(); else return true; }
+
+        bool pollEvent(sf::Event &event) {
+            if (winPtr) return winPtr->pollEvent(event);
+            else return false;
+        }
+
+        void close() { if (winPtr) winPtr->close(); }
+
+        void display() { if (winPtr) winPtr->display(); }
+
+    private:
+        std::shared_ptr<sf::RenderWindow> winPtr;
     };
 
     class Controller {
