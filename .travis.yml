@@ -181,7 +181,7 @@ script:
   - |
     if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
       ./../build/GUI/test/GUITest
-    if
+    fi
 
 notifications:
   email: cui@hellolw.com
