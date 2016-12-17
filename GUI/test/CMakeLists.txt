@@ -4,5 +4,5 @@ set(TEST_FILES
         drawingBoardTest.cpp)
 
 add_executable(${GUI_TEST} ${TEST_FILES} ${TEST_MAIN})
-target_link_libraries(${GUI_TEST} ${GTEST_LIB} ${CONTROL_LIB} ${INTERPRETER_LIB} ${SFML_LIB})
+target_link_libraries(${GUI_TEST} ${GTEST_LIB} ${CONTROL_LIB})
 

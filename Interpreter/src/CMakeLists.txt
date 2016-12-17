@@ -7,7 +7,6 @@ set(LEXERS_SOURCE_FILES
 add_library(${LEXERS_LIB} SHARED ${LEXERS_SOURCE_FILES})
 
 set(INTERPRETER_SOURCE_FILES
-        ${LEXERS_SOURCE_FILES}
         functionParser.cpp
         keywordParser.cpp
         basicParser.cpp
@@ -17,3 +16,4 @@ set(INTERPRETER_SOURCE_FILES
         ../include/context.h
         ../include/AST.h)
 add_library(${INTERPRETER_LIB} SHARED ${INTERPRETER_SOURCE_FILES})
+target_link_libraries(${INTERPRETER_LIB} ${LEXERS_LIB})
