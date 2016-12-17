@@ -158,11 +158,7 @@ install:
       wget http://www.sfml-dev.org/files/SFML-2.4.1-linux-gcc-64-bit.tar.gz
       tar -xzvf SFML-2.4.1-linux-gcc-64-bit.tar.gz
       bash "${TRAVIS_BUILD_DIR}"/DependencyInstall.sh
-      if [[ -n "$CLANG_VERSION" ]]; then
-        sudo cp -r SFML-2.4.1/lib/* ${LLVM_ROOT}/install/lib/
-      else
-        sudo cp -r SFML-2.4.1/lib/* /usr/lib/x86_64-linux-gnu/
-      fi
+      sudo cp -r SFML-2.4.1/lib/* /usr/lib/x86_64-linux-gnu/
       sudo cp -r SFML-2.4.1/include/* /usr/include/x86_64-linux-gnu/
       sudo ldconfig
     else
