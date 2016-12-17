@@ -3,7 +3,7 @@ set(CONTROL_SOURCE_FILES
         ../include/formatString.h formatString.cpp
         ../include/Controller.h Controller.cpp
         ../include/GUIbuiltinAST.h GUIbuiltinAST.cpp)
-add_library(${CONTROL_LIB} STATIC ${CONTROL_SOURCE_FILES})
+add_library(${CONTROL_LIB} ${CONTROL_SOURCE_FILES})
 
 set(GUI_SOURCE_FILES
         main.cpp)

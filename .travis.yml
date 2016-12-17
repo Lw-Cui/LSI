@@ -145,10 +145,10 @@ install:
         (cd "${LLVM_ROOT}/build/projects/libcxx" && make install -j$JOBS)
         (cd "${LLVM_ROOT}/build/projects/libcxxabi" && make install -j$JOBS)
       fi
-      export CXXFLAGS="-I ${LLVM_ROOT}/install/include/c++/v1"
-      export LDFLAGS="-L ${LLVM_ROOT}/install/lib -lc++ -lc++abi"
-      export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${LLVM_ROOT}/install/lib"
     fi
+#      export CXXFLAGS="-I ${LLVM_ROOT}/install/include/c++/v1"
+#      export LDFLAGS="-L ${LLVM_ROOT}/install/lib -lc++ -lc++abi"
+#      export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${LLVM_ROOT}/install/lib"
 
   ############################################################################
   # Install a recent SFML
