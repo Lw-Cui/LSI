@@ -23,6 +23,40 @@ matrix:
       sudo: true
       osx_image: xcode8
       compiler: clang
+    - env: CLANG_VERSION=3.6 BUILD_TYPE=Debug
+      os: linux
+      dist: trusty
+      sudo: required
+      addons: &clang36
+        apt:
+          packages:
+            - clang-3.6
+            - g++-5
+          sources: &sources
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.6
+    - env: CLANG_VERSION=3.6 BUILD_TYPE=Release
+      os: linux
+      dist: trusty
+      sudo: required
+      addons: *clang36
+    - env: CLANG_VERSION=3.7 BUILD_TYPE=Debug
+      os: linux
+      dist: trusty
+      sudo: required
+      addons: &clang37
+        apt:
+          packages:
+            - clang-3.7
+            - g++-5
+          sources: &sources
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.7
+    - env: CLANG_VERSION=3.7 BUILD_TYPE=Release
+      os: linux
+      dist: trusty
+      sudo: required
+      addons: *clang37
     - env: CLANG_VERSION=3.8 BUILD_TYPE=Debug
       os: linux
       dist: trusty
@@ -66,95 +100,6 @@ matrix:
       dist: trusty
       sudo: required
       addons: *gcc6
-#matrix:
-#  include:
-#    - env: BUILD_TYPE=Debug
-#      os: osx
-#      sudo: true
-#      osx_image: xcode8
-#      compiler: clang
-#    - env: BUILD_TYPE=Release
-#      os: osx
-#      sudo: true
-#      osx_image: xcode8
-#      compiler: clang
-#    - env: CLANG_VERSION=3.6 BUILD_TYPE=Debug
-#      os: linux
-#      dist: trusty
-#      sudo: required
-#      addons: &clang36
-#        apt:
-#          packages:
-#            - clang-3.6
-#            - g++-5
-#          sources: &sources
-#            - ubuntu-toolchain-r-test
-#            - llvm-toolchain-precise-3.6
-#    - env: CLANG_VERSION=3.6 BUILD_TYPE=Release
-#      os: linux
-#      dist: trusty
-#      sudo: required
-#      addons: *clang36
-#    - env: CLANG_VERSION=3.7 BUILD_TYPE=Debug
-#      os: linux
-#      dist: trusty
-#      sudo: required
-#      addons: &clang37
-#        apt:
-#          packages:
-#            - clang-3.7
-#            - g++-5
-#          sources: &sources
-#            - ubuntu-toolchain-r-test
-#            - llvm-toolchain-precise-3.7
-#    - env: CLANG_VERSION=3.7 BUILD_TYPE=Release
-#      os: linux
-#      dist: trusty
-#      sudo: required
-#      addons: *clang37
-#    - env: CLANG_VERSION=3.8 BUILD_TYPE=Debug
-#      os: linux
-#      dist: trusty
-#      sudo: required
-#      addons: &clang38
-#        apt:
-#          packages:
-#            - clang-3.8
-#            - g++-5
-#          sources: &sources
-#            - ubuntu-toolchain-r-test
-#            - llvm-toolchain-precise-3.8
-#    - env: CLANG_VERSION=3.8 BUILD_TYPE=Release
-#      os: linux
-#      dist: trusty
-#      sudo: required
-#      addons: *clang38
-#    - env: GCC_VERSION=5 BUILD_TYPE=Debug
-#      os: linux
-#      dist: trusty
-#      sudo: required
-#      addons: &gcc5
-#        apt:
-#          packages: g++-5
-#          sources: *sources
-#    - env: GCC_VERSION=5 BUILD_TYPE=Release
-#      os: linux
-#      dist: trusty
-#      sudo: required
-#      addons: *gcc5
-#    - env: GCC_VERSION=6 BUILD_TYPE=Debug
-#      os: linux
-#      dist: trusty
-#      sudo: required
-#      addons: &gcc6
-#        apt:
-#          packages: g++-6
-#          sources: *sources
-#    - env: GCC_VERSION=6 BUILD_TYPE=Release
-#      os: linux
-#      dist: trusty
-#      sudo: required
-#      addons: *gcc6
 
 install:
   - if [[ -n "$CLANG_VERSION" ]]; then export CXX=clang++-$CLANG_VERSION CC=clang-$CLANG_VERSION; fi
