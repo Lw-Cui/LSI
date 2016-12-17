@@ -1,7 +1,6 @@
 # Based on https://github.com/ldionne/hana/blob/master/.travis.yml
 
 language: cpp
-sudo: true
 
 cache:
   directories:
@@ -16,14 +15,18 @@ matrix:
   include:
     - env: BUILD_TYPE=Debug
       os: osx
+      sudo: true
       osx_image: xcode8
       compiler: clang
     - env: BUILD_TYPE=Release
       os: osx
+      sudo: true
       osx_image: xcode8
       compiler: clang
     - env: CLANG_VERSION=3.6 BUILD_TYPE=Debug
       os: linux
+      dist: trusty
+      sudo: required
       addons: &clang36
         apt:
           packages:
@@ -34,9 +37,13 @@ matrix:
             - llvm-toolchain-precise-3.6
     - env: CLANG_VERSION=3.6 BUILD_TYPE=Release
       os: linux
+      dist: trusty
+      sudo: required
       addons: *clang36
     - env: CLANG_VERSION=3.7 BUILD_TYPE=Debug
       os: linux
+      dist: trusty
+      sudo: required
       addons: &clang37
         apt:
           packages:
@@ -47,9 +54,13 @@ matrix:
             - llvm-toolchain-precise-3.7
     - env: CLANG_VERSION=3.7 BUILD_TYPE=Release
       os: linux
+      dist: trusty
+      sudo: required
       addons: *clang37
     - env: CLANG_VERSION=3.8 BUILD_TYPE=Debug
       os: linux
+      dist: trusty
+      sudo: required
       addons: &clang38
         apt:
           packages:
@@ -60,28 +71,37 @@ matrix:
             - llvm-toolchain-precise-3.8
     - env: CLANG_VERSION=3.8 BUILD_TYPE=Release
       os: linux
+      dist: trusty
+      sudo: required
       addons: *clang38
     - env: GCC_VERSION=5 BUILD_TYPE=Debug
       os: linux
+      dist: trusty
+      sudo: required
       addons: &gcc5
         apt:
           packages: g++-5
           sources: *sources
     - env: GCC_VERSION=5 BUILD_TYPE=Release
       os: linux
+      dist: trusty
+      sudo: required
       addons: *gcc5
     - env: GCC_VERSION=6 BUILD_TYPE=Debug
       os: linux
+      dist: trusty
+      sudo: required
       addons: &gcc6
         apt:
           packages: g++-6
           sources: *sources
     - env: GCC_VERSION=6 BUILD_TYPE=Release
       os: linux
+      dist: trusty
+      sudo: required
       addons: *gcc6
 
 install:
-  - export DO_NOT_BUILD_GUI=true
   - if [[ -n "$CLANG_VERSION" ]]; then export CXX=clang++-$CLANG_VERSION CC=clang-$CLANG_VERSION; fi
   - if [[ -n "$GCC_VERSION" ]]; then export CXX=g++-$GCC_VERSION CC=gcc-$GCC_VERSION; fi
   - JOBS=2
@@ -130,6 +150,21 @@ install:
       export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${LLVM_ROOT}/install/lib"
     fi
 
+  ############################################################################
+  # Install a recent SFML
+  ############################################################################
+  - |
+    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+      wget http://www.sfml-dev.org/files/SFML-2.4.1-linux-gcc-64-bit.tar.gz
+      tar -xzvf SFML-2.4.1-linux-gcc-64-bit.tar.gz
+      bash "${TRAVIS_BUILD_DIR}"/DependencyInstall.sh
+      sudo cp -r SFML-2.4.1/lib/* /usr/lib/x86_64-linux-gnu/
+      sudo cp -r SFML-2.4.1/include/* /usr/include/x86_64-linux-gnu/
+      sudo ldconfig
+    else
+      brew install sfml
+    fi
+
 before_script:
   - cd "${TRAVIS_BUILD_DIR}"
   - cmake . -Bbuild -DCMAKE_CXX_COMPILER="$CXX" -DCMAKE_C_COMPILER="$CC" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
@@ -139,7 +174,10 @@ script:
   - cd Scheme
   - ./../build/Interpreter/test/lexersTest
   - ./../build/Interpreter/test/parserTest
-  - ./../build/GUI/test/TextTest
+  - |
+    if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
+      ./../build/GUI/test/GUITest
+    fi
 
 notifications:
   email: cui@hellolw.com

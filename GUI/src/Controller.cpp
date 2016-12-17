@@ -86,7 +86,7 @@ void Controller::drawToWindows() {
     for (auto text: history) textWindow.draw(text);
 }
 
-void Controller::appendShape(const sf::VertexArray &va) {
+void Controller::appendShape(const con::VertexArray &va) {
     shapes.push_back(va);
 }
 
@@ -105,7 +105,7 @@ void con::Text::clearStr() {
     formatString.clearStr();
 }
 
-con::Controller::Controller(sf::RenderTarget &text, sf::RenderTarget &board)
+con::Controller::Controller(Window &text, Window &board)
         : textWindow{text}, drawingBoard{board} {
     lexers::Lexer lex;
     scope.addBuiltinFunc("draw", std::make_shared<ast::BuiltinDrawAST>(*this));
