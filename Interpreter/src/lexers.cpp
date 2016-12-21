@@ -31,6 +31,10 @@ std::string Lexer::getIdentifier() {
     }
 }
 
+Lexer::TokenType Lexer::getTokType() const {
+    return currentType;
+}
+
 Lexer::TokenType Lexer::stepForward() {
     int type{expressionBuf.get()};
     expressionBuf.unget();
