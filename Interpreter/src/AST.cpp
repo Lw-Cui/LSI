@@ -274,7 +274,7 @@ std::shared_ptr<ExprAST> LetStatementAST::eval(Scope &s) const {
     Scope tmp = s;
     for (auto index = 0; index < identifier.size(); index++) {
         auto id = std::dynamic_pointer_cast<IdentifierAST>(identifier[index])->getId();
-        tmp[id] = value[index]->eval(tmp);
+        tmp[id] = value[index]->eval(s);
     }
     return expr->eval(tmp);
 }

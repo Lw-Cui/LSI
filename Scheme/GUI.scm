@@ -48,3 +48,18 @@
             (list  (st-aux p1 m12 m31) (st-aux p2 m12 m23) (st-aux p3 m31 m23) (triangle m12 m23 m31))
             append nil))))
     (append (st-aux p1 p2 p3) (triangle p1 p2 p3)))
+
+
+(define (circle point radius)
+    (define (eighth-circle radius)
+        (define (circle-iter d x y l)
+            (if (> x y) l
+                (if (> d 0)
+                    (circle-iter (- (+ x d 1) y) (+ x 1) (- y 1) (cons (cons x y) l))
+                    (circle-iter (+ d 3 x) (+ x 1) y (cons (cons x y) l)))))
+        (circle-iter (- 1 radius) 0 radius nil))
+    (let ((eighth (eighth-circle radius)))
+        (let ((fourth (append eighth (map eighth (lambda (p) (cons (y p) (x p)))))))
+            (let ((second (append fourth (map fourth (lambda (p) (cons (x p) (- (y p))))))))
+                (let ((first (append second (map second (lambda (p) (cons (- (x p)) (y p)))))))
+                    (map first (lambda (p) (cons (+ (x point) (x p)) (+ (y point) (y p))))))))))

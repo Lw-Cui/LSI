@@ -53,10 +53,13 @@
         (if (null? l1) res (reverse-iter (cdr l1) (cons (car l1) res))))
     (reverse-iter l nil))
 
-(define (append l1 l2)
+(define (append l1 . more)
     (define (append-iter l1 l2)
         (if (null? l1) l2 (append-iter (cdr l1) (cons (car l1) l2))))
-    (append-iter (reverse l1) l2))
+  (define (append-list l1 more)
+    (if (null? more) l1
+        (append-list (append-iter (reverse l1) (car more)) (cdr more))))
+  (if (null? more) l1 (append-list l1 more)))
 
 (define (map seq op)
     (define (map-iter seq res)
