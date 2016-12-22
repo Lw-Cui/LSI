@@ -108,7 +108,7 @@ void con::Text::clearStr() {
 con::Controller::Controller(Window &text, Window &board)
         : textWindow{text}, drawingBoard{board} {
     lexers::Lexer lex;
-    scope.addBuiltinFunc("draw", std::make_shared<ast::BuiltinDrawAST>(*this));
+    scope.addBuiltinFunc("#painter", std::make_shared<ast::BuiltinDrawAST>(*this));
     lex.appendExp("(load \"Base.scm\")").appendExp("(load \"GUI.scm\")");
     parser::parseAllExpr(lex)->eval(scope);
     pushString(currentText.formatString, "]=> ");
