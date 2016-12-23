@@ -97,13 +97,22 @@ std::shared_ptr<ExprAST> LambdaAST::apply(const std::vector<std::shared_ptr<Expr
     }
     if (actualArgs.size() == 1 && formalArgs.size() > 1 && formalArgs[1] == ".")
         tmp[formalArgs[2]] = std::make_shared<NilAST>()->eval(ss);
-    return expression->eval(tmp);
+
+    for (int i = 0; i < expression.size() - 1; i++)
+        // Don't eval sub-routine
+        if (!std::dynamic_pointer_cast<LambdaBindingAST>(expression[i])) expression[i]->eval(tmp);
+    return expression.back()->eval(tmp);
 }
 
 std::shared_ptr<ExprAST> LambdaAST::eval(Scope &ss) const {
     // Set closure.
     context = ss;
-    for (auto expr : nestedFunc) expr->eval(context);
+    // Set sub-routine closure.
+    for (auto expr: expression)
+        if (std::shared_ptr<LambdaBindingAST> ptr = std::dynamic_pointer_cast<LambdaBindingAST>(expr)) {
+            expr->eval(context);
+            LOG(DEBUG) << "Set closure of sub-routine: " << ptr->getIdentifier();
+        }
     return std::make_shared<LambdaAST>(*this);
 }
 
