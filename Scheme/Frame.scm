@@ -25,8 +25,8 @@
   (lambda (v)
     (add-vect
      (origin-frame frame)
-     (add-vect (scale-vect (xcor-vect v) (edge1-frame frame))
-               (scale-vect (ycor-vect v) (edge2-frame frame))))))
+     (add-vect (scale-vect (/ (xcor-vect v) 1000) (edge1-frame frame))
+               (scale-vect (/ (ycor-vect v) 1000) (edge2-frame frame))))))
 
 (define (transform-painter painter origin corner1 corner2)
   (lambda (frame)
@@ -36,14 +36,14 @@
                              (sub-vect (m corner1) new-origin)
                              (sub-vect (m corner2) new-origin)))))))
 
-(define default (make-frame (cons 0 0) (cons 1 0) (cons 0 1)))
+(define default (make-frame (cons 0 0) (cons 1000 0) (cons 0 1000)))
 
-(define (flip-vert painter)
-    (transform-painter painter (make-vect 0 1000) (make-vect 1 1000) (make-vect 0 999)))
-
-(define (shrink-to-upper-right painter)
-    (transform-painter painter (make-vect 500 500) (make-vect 500.5 500) (make-vect 500 500.5)))
+(define (flip-vert painter) (transform-painter painter (make-vect 0 1000) (make-vect 1000 1000) (make-vect 0 0)))
+(define (shrink-to-upper-right painter) (transform-painter painter (make-vect 500 500) (make-vect 1000 500) (make-vect 500 1000)))
+(define (shrink-to-upper-left painter) (transform-painter painter (make-vect 0 500) (make-vect 500 500) (make-vect 0 1000)))
+(define (shrink-to-lower-right painter) (transform-painter painter (make-vect 500 0) (make-vect 1000 0) (make-vect 500 500)))
+(define (shrink-to-lower-left painter) (transform-painter painter (make-vect 0 0) (make-vect 500 0) (make-vect 0 500)))
+(define (rotate90 painter) (transform-painter painter (make-vect 1000 0) (make-vect 1000 1000) (make-vect 0 0)))
 
 (define (st-painter frame) (#painter (map (sierpinskiTriangle (cons 0 0) (cons 500 866) (cons 1000 0) 30) (frame-coord-map frame))))
 (define (line-painter frame) (#painter (map (line (cons 0 0) (cons 100 100)) (frame-coord-map frame))))
-
