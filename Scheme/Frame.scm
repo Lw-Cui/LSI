@@ -41,9 +41,9 @@
 (define (flip-vert painter)
     (transform-painter painter (make-vect 0 1000) (make-vect 1 1000) (make-vect 0 999)))
 
+(define (shrink-to-upper-right painter)
+    (transform-painter painter (make-vect 500 500) (make-vect 500.5 500) (make-vect 500 500.5)))
+
 (define (st-painter frame) (#painter (map (sierpinskiTriangle (cons 0 0) (cons 500 866) (cons 1000 0) 30) (frame-coord-map frame))))
 (define (line-painter frame) (#painter (map (line (cons 0 0) (cons 100 100)) (frame-coord-map frame))))
 
-(define (map n) ((frame-coord-map test) n))
-((flip-vert line-painter) default)
-((flip-vert st-painter) default)

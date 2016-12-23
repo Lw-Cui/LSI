@@ -10,8 +10,8 @@ using namespace sf;
 
 class MockWindow : public con::Window {
 public:
-    MOCK_METHOD1(draw, void(
-            const con::VertexArray &va));
+    MOCK_METHOD1(draw, void(con::VertexArray
+            va));
 };
 
 TEST(DrawingBoardTest, drawPointTest) {
@@ -22,7 +22,7 @@ TEST(DrawingBoardTest, drawPointTest) {
     EXPECT_CALL(drawingBoard, draw(va)).Times(1);
 
     Controller controller{textWindow, drawingBoard};
-    string code{"(draw (list (cons 5 5)))"};
+    string code{"(#painter (list (cons 5 5)))"};
     for (char c: code) controller.appendChar(c);
     controller.execute();
     controller.drawToWindows();
@@ -38,7 +38,7 @@ TEST(DrawingBoardTest, drawMultiplePointTest) {
     EXPECT_CALL(drawingBoard, draw(va)).Times(1);
 
     Controller controller{textWindow, drawingBoard};
-    string code{"(draw (list (cons 5 5) (cons 50 50) (cons 500 500)))"};
+    string code{"(#painter (list (cons 5 5) (cons 50 50) (cons 500 500)))"};
     for (char c: code) controller.appendChar(c);
     controller.execute();
     controller.drawToWindows();
@@ -53,7 +53,7 @@ TEST(DrawingBoardTest, drawLineTest) {
     EXPECT_CALL(drawingBoard, draw(va)).Times(1);
 
     Controller controller{textWindow, drawingBoard};
-    string code{"(draw (line (cons 5 5) (cons 5 100)))"};
+    string code{"(#painter (line (cons 5 5) (cons 5 100)))"};
     for (char c: code) controller.appendChar(c);
     controller.execute();
     controller.drawToWindows();
@@ -68,7 +68,7 @@ TEST(DrawingBoardTest, drawLineTestV2) {
     EXPECT_CALL(drawingBoard, draw(va)).Times(1);
 
     Controller controller{textWindow, drawingBoard};
-    string code{"(draw (line (cons 5 5) (cons 100 100)))"};
+    string code{"(#painter (line (cons 5 5) (cons 100 100)))"};
     for (char c: code) controller.appendChar(c);
     controller.execute();
     controller.drawToWindows();
