@@ -53,7 +53,18 @@ namespace con {
 
         Window() : winPtr(nullptr) {}
 
-        virtual void draw(const VertexArray &va) { if (winPtr) winPtr->draw(va); }
+        virtual void draw(VertexArray va) {
+            if (winPtr) {
+                for (int i = 0; i < va.getVertexCount(); i++) {
+                    /*
+                        va[i].position.x += getSize().x / 2;
+                        va[i].position.y = -va[i].position.y + getSize().y / 2;
+                    */
+                    va[i].position.y = getSize().y - va[i].position.y;
+                }
+                winPtr->draw(va);
+            }
+        }
 
         virtual void draw(const Text &text) { if (winPtr)winPtr->draw(text); }
 
