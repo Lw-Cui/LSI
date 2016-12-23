@@ -21,12 +21,14 @@
 (define (edge1-frame frame) (car (cdr frame)))
 (define (edge2-frame frame) (cdr (cdr frame)))
 
+(define default (make-frame (cons 0 0) (cons 1000 0) (cons 0 1000)))
+
 (define (frame-coord-map frame)
   (lambda (v)
     (add-vect
      (origin-frame frame)
-     (add-vect (scale-vect (/ (xcor-vect v) 1000) (edge1-frame frame))
-               (scale-vect (/ (ycor-vect v) 1000) (edge2-frame frame))))))
+     (add-vect (scale-vect (/ (xcor-vect v) (xcor-vect (edge1-frame default))) (edge1-frame frame))
+               (scale-vect (/ (ycor-vect v) (ycor-vect (edge2-frame default))) (edge2-frame frame))))))
 
 (define (transform-painter painter origin corner1 corner2)
   (lambda (frame)
@@ -36,7 +38,6 @@
                              (sub-vect (m corner1) new-origin)
                              (sub-vect (m corner2) new-origin)))))))
 
-(define default (make-frame (cons 0 0) (cons 1000 0) (cons 0 1000)))
 
 (define (flip-vert painter) (transform-painter painter (make-vect 0 1000) (make-vect 1000 1000) (make-vect 0 0)))
 (define (shrink-to-upper-right painter) (transform-painter painter (make-vect 500 500) (make-vect 1000 500) (make-vect 500 1000)))
