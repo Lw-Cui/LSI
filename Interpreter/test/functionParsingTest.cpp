@@ -154,6 +154,30 @@ TEST(FunctionParsingTest, VariableArgumentsTest) {
     ASSERT_STREQ("26", numPtr->display().c_str());
 }
 
+TEST(FunctionParsingTest, MultipleExpressionTest) {
+    Scope ss;
+    lexers::Lexer lex;
+    lex.appendExp("(define (getNum) (+ 5 6) (+ 7 8))")
+            .appendExp("(getNum)");
+    auto exprPtr = parseAllExpr(lex)->eval(ss);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
+    auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
+    ASSERT_EQ(15, numPtr->getValue());
+    ASSERT_STREQ("15", numPtr->display().c_str());
+
+    lex.appendExp("(define (getNumV2)"
+                          "  (define (add-and-plus2 x y) (add (add x y) 2))"
+                          "  (define (add x y) (+ x y))"
+                          "  (add 7 8)"
+                          "  (add-and-plus2 5 6))").appendExp("(getNumV2)");
+
+    exprPtr = parseAllExpr(lex)->eval(ss);
+    ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
+    numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
+    ASSERT_EQ(13, numPtr->getValue());
+    ASSERT_STREQ("13", numPtr->display().c_str());
+}
+
 TEST(FunctionParsingTest, NestedFunctionTest) {
     Scope ss;
     lexers::Lexer lex;
