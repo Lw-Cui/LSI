@@ -98,7 +98,7 @@ std::shared_ptr<ExprAST> LambdaAST::apply(const std::vector<std::shared_ptr<Expr
     if (actualArgs.size() == 1 && formalArgs.size() > 1 && formalArgs[1] == ".")
         tmp[formalArgs[2]] = std::make_shared<NilAST>()->eval(ss);
 
-    for (int i = 0; i < expression.size(); i++)
+    for (int i = 0; i < expression.size() - 1; i++)
         // Don't eval sub-routine
         if (!std::dynamic_pointer_cast<LambdaBindingAST>(expression[i])) expression[i]->eval(tmp);
     return expression.back()->eval(tmp);
