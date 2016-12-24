@@ -5,7 +5,7 @@
 using namespace lexers;
 using namespace parser;
 
-TEST(LibrariesParsingTest, BasicConsTest) {
+TEST(BaseLibrariesParsingTest, BasicConsTest) {
     Scope s;
     lexers::Lexer lex;
     lex.appendExp("(load \"Base.scm\")").appendExp("(load \"Test.scm\")");
@@ -27,7 +27,7 @@ TEST(LibrariesParsingTest, BasicConsTest) {
     ASSERT_EQ(1, numPtr->getValue());
 }
 
-TEST(LibrariesParsingTest, AdvanceConsTest) {
+TEST(BaseLibrariesParsingTest, AdvanceConsTest) {
     Scope s;
     lexers::Lexer lex;
 
@@ -44,7 +44,7 @@ TEST(LibrariesParsingTest, AdvanceConsTest) {
 }
 
 
-TEST(LibrariesParsingTest, MinusTest) {
+TEST(BaseLibrariesParsingTest, MinusTest) {
     Scope s;
     lexers::Lexer lex("(load \"Base.scm\")");
 
@@ -55,7 +55,7 @@ TEST(LibrariesParsingTest, MinusTest) {
     ASSERT_EQ(-19, numPtr->getValue());
 }
 
-TEST(LibrariesParsingTest, NotTest) {
+TEST(BaseLibrariesParsingTest, NotTest) {
     Scope s;
     lexers::Lexer lex("(load \"Base.scm\")");
 
@@ -68,7 +68,7 @@ TEST(LibrariesParsingTest, NotTest) {
     ASSERT_TRUE(std::dynamic_pointer_cast<BooleansTrueAST>(res));
 }
 
-TEST(LibrariesParsingTest, AndTest) {
+TEST(BaseLibrariesParsingTest, AndTest) {
     Scope s;
     lexers::Lexer lex("(load \"Base.scm\")");
 
@@ -81,7 +81,7 @@ TEST(LibrariesParsingTest, AndTest) {
     ASSERT_TRUE(std::dynamic_pointer_cast<BooleansFalseAST>(res));
 }
 
-TEST(LibrariesParsingTest, OrTest) {
+TEST(BaseLibrariesParsingTest, OrTest) {
     Scope s;
     lexers::Lexer lex("(load \"Base.scm\")");
 
@@ -95,7 +95,7 @@ TEST(LibrariesParsingTest, OrTest) {
 }
 
 
-TEST(LibrariesParsingTest, GreaterTest) {
+TEST(BaseLibrariesParsingTest, GreaterTest) {
     Scope s;
     lexers::Lexer lex("(load \"Base.scm\")");
 
@@ -112,7 +112,7 @@ TEST(LibrariesParsingTest, GreaterTest) {
     ASSERT_TRUE(std::dynamic_pointer_cast<BooleansFalseAST>(res));
 }
 
-TEST(LibrariesParsingTest, EqualTest) {
+TEST(BaseLibrariesParsingTest, EqualTest) {
     Scope s;
     lexers::Lexer lex("(load \"Base.scm\")");
 
@@ -126,7 +126,7 @@ TEST(LibrariesParsingTest, EqualTest) {
 
 }
 
-TEST(LibrariesParsingTest, RemainderTest) {
+TEST(BaseLibrariesParsingTest, RemainderTest) {
     Scope s;
     lexers::Lexer lex("(load \"Base.scm\")");
 
@@ -137,7 +137,7 @@ TEST(LibrariesParsingTest, RemainderTest) {
     ASSERT_EQ(1, numPtr->getValue());
 }
 
-TEST(LibrariesParsingTest, DivideTest) {
+TEST(BaseLibrariesParsingTest, DivideTest) {
     Scope s;
     lexers::Lexer lex("(load \"Base.scm\")");
 
@@ -148,7 +148,7 @@ TEST(LibrariesParsingTest, DivideTest) {
     ASSERT_EQ(5, numPtr->getValue());
 }
 
-TEST(LibrariesParsingTest, ReverseTest) {
+TEST(BaseLibrariesParsingTest, ReverseTest) {
     Scope s;
     lexers::Lexer lex("(load \"Base.scm\")");
     lex.appendExp("(reverse (list 1 2 3))");
@@ -156,15 +156,19 @@ TEST(LibrariesParsingTest, ReverseTest) {
     ASSERT_STREQ("(3, (2, (1, '())))", exprPtr->display().c_str());
 }
 
-TEST(LibrariesParsingTest, AppendTest) {
+TEST(BaseLibrariesParsingTest, AppendTest) {
     Scope s;
     lexers::Lexer lex("(load \"Base.scm\")");
     lex.appendExp("(append (list 1 2 3) (list 4 5 6))");
     auto exprPtr = parseAllExpr(lex)->eval(s);
     ASSERT_STREQ("(1, (2, (3, (4, (5, (6, '()))))))", exprPtr->display().c_str());
+
+    lex.appendExp("(append (list 6 5) (list 4 3) (list 2 1 0))");
+    exprPtr = parseAllExpr(lex)->eval(s);
+    ASSERT_STREQ("(6, (5, (4, (3, (2, (1, (0, '())))))))", exprPtr->display().c_str());
 }
 
-TEST(LibrariesParsingTest, MapTest) {
+TEST(BaseLibrariesParsingTest, MapTest) {
     Scope s;
     lexers::Lexer lex("(load \"Base.scm\")");
     lex.appendExp("(map (list 1 2 3) (lambda (x) (+ x 1)))");
@@ -172,7 +176,7 @@ TEST(LibrariesParsingTest, MapTest) {
     ASSERT_STREQ("(2, (3, (4, '())))", exprPtr->display().c_str());
 }
 
-TEST(LibrariesParsingTest, ReduceTest) {
+TEST(BaseLibrariesParsingTest, ReduceTest) {
     Scope s;
     lexers::Lexer lex("(load \"Base.scm\")");
 
@@ -183,7 +187,7 @@ TEST(LibrariesParsingTest, ReduceTest) {
     ASSERT_EQ(6, numPtr->getValue());
 }
 
-TEST(LibrariesParsingTest, sqrtTest) {
+TEST(BaseLibrariesParsingTest, sqrtTest) {
     Scope s;
     lexers::Lexer lex("(load \"Base.scm\")");
 
@@ -194,7 +198,7 @@ TEST(LibrariesParsingTest, sqrtTest) {
     ASSERT_EQ(2, static_cast<int>(numPtr->getValue()));
 }
 
-TEST(LibrariesParsingTest, YcombinatorTest) {
+TEST(BaseLibrariesParsingTest, YcombinatorTest) {
     Scope s;
     lexers::Lexer lex("(load \"Base.scm\")");
 
