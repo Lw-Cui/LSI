@@ -63,6 +63,12 @@ Lexer::TokenType Lexer::stepForward() {
             goto Number;
         }
         currentType = (keyWord.count(strToken) ? keyWord[strToken] : TokIdentifier);
+        if (strToken == "#") {
+            do {
+                type = expressionBuf.get();
+            } while (type != EOF && type != '\n');
+            return stepForward();
+        }
     }
     return currentType;
 }

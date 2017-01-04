@@ -1,3 +1,5 @@
+# Basic function set
+
 (define (and expr . args)
     (define (list-and l)
         (cond ((null? l) #t)
@@ -82,9 +84,11 @@
     (define (sqrt-iter guess) (if (close-enough? guess) guess (sqrt-iter (improve guess))))
     (sqrt-iter 1.0))
 
+# Y-combinator
 (define Y
     (lambda (fn)
     ((lambda (f)
         (f f)) (lambda (f)
             (fn (lambda (s) ((f f) s)))))))
 
+# end basic function set

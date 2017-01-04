@@ -2,6 +2,7 @@
 (define xcor-point car)
 (define ycor-point cdr)
 
+# line-drawing routine
 (define (line begin end)
     (define (simple-line begin end)
         (define (line-iter cx cy ex d a2b2 a2 result)
@@ -30,9 +31,11 @@
                           ((merge reverse op dx dy) end))
              (merge op reverse dx dy))))
 
+# triangle-drawing routine
 (define (triangle p1 p2 p3)
     (reduce (list (line p1 p2) (line p2 p3) (line p3 p1)) append nil))
 
+# sierpinskiTrangle-drawing routine
 (define (sierpinskiTriangle p1 p2 p3 accuracy)
     (define (st-aux p1 p2 p3)
         (define (mid-point p1 p2)
@@ -50,7 +53,7 @@
             append nil))))
     (append (st-aux p1 p2 p3) (triangle p1 p2 p3)))
 
-
+# Circle-drawing routine
 (define (circle point radius)
     (define (eighth-circle radius)
         (define (circle-iter d x y l)
