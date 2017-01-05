@@ -1,9 +1,11 @@
 #include <memory>
 #include <gtest/gtest.h>
+#include <exception.h>
 #include <parser.h>
 
 using namespace lexers;
 using namespace parser;
+using namespace exception;
 
 TEST(KeywordParsingTest, IdentifierDefinitionTest) {
     Scope ss;
@@ -29,7 +31,7 @@ TEST(KeywordParsingTest, IdentifierDefinitionTest) {
     ASSERT_EQ(Lexer::TokEOF, lex.getTokType());
 
     lex.appendExp("(define)");
-    EXPECT_THROW(parseAllExpr(lex), std::logic_error);
+    EXPECT_THROW(parseAllExpr(lex), exception::DefinitionError);
 }
 
 
@@ -57,7 +59,7 @@ TEST(KeywordParsingTest, IfStatementTest) {
     ASSERT_EQ(2, numPtr->getValue());
 
     lex.appendExp("((if (= (add 0 0 1) bar foo) 0)");
-    EXPECT_THROW(parseAllExpr(lex), std::logic_error);
+    EXPECT_THROW(parseAllExpr(lex), RawExprError);
 }
 
 TEST(KeywordParsingTest, CondStatementTest) {
@@ -79,11 +81,6 @@ TEST(KeywordParsingTest, CondStatementTest) {
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
     numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
     ASSERT_EQ(2, numPtr->getValue());
-
-    lex.appendExp("(cond ((= (+ 5 6) 0) 1)"
-                          "       (= (+ 5 (- 5)) 0) 2)"
-                          "       (else 3))");
-    EXPECT_THROW(parseAllExpr(lex), std::logic_error);
 }
 
 

@@ -2,12 +2,14 @@
 #include <string>
 #include <Controller.h>
 #include <GUIbuiltinAST.h>
+#include <exception.h>
 
 using namespace std;
 using namespace sf;
 using namespace con;
 using namespace context;
 using namespace parser;
+using namespace exception;
 
 void Controller::appendChar(char c) {
     if (!toType.count(c))
@@ -71,6 +73,8 @@ con::Text Controller::evaluation() {
             pushString(resultText.formatString, "\'()");
         }
     } catch (std::logic_error &e) {
+        pushString(resultText.formatString, e.what());
+    } catch (RuntimeError &e) {
         pushString(resultText.formatString, e.what());
     }
 

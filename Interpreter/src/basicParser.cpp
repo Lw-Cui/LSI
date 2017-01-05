@@ -2,9 +2,10 @@
 #include <fstream>
 #include <lexers.h>
 #include <parser.h>
-
+#include <exception.h>
 
 using namespace lexers;
+using namespace exception;
 using namespace parser;
 using namespace std;
 
@@ -37,7 +38,7 @@ std::shared_ptr<ExprAST> parser::parseRawExpr(lexers::Lexer &lex) {
             return parseNilExpr(lex);
         default:
             CLOG(DEBUG, "exception");
-            throw logic_error("Cannot parse number/identifier.");
+            throw RawExprError("Cannot parse number/identifier/#f/#t/nil");
     }
 }
 
