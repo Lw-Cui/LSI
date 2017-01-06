@@ -75,7 +75,7 @@ std::shared_ptr<ExprAST> parser::parseBracketExpr(lexers::Lexer &lex) {
     }
     if (lex.getTokType() != Lexer::TokClosingBracket) {
         CLOG(DEBUG, "exception");
-        throw ("Format error: Token isn't close brace during parsing expression.");
+        throw BracketMatchError("Bracket doesn't match");
     } else {
         lex.stepForward(); // eat close brace
     }

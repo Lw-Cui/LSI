@@ -172,9 +172,9 @@ before_script:
 
 script:
   - cd Scheme
-  - ./../build/Interpreter/test/lexersTest
-  - ./../build/Interpreter/test/parserTest
-  - ./../build/Interpreter/test/lispLibTest
+  - ./../build/Interpreter/test/lexer/lexersTest
+  - ./../build/Interpreter/test/parser/parserTest
+  - ./../build/Interpreter/test/lisplib/lispLibTest
   - |
     if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
       ./../build/GUI/test/GUITest

@@ -30,6 +30,13 @@ namespace exception {
     public:
         explicit RawExprError(const std::string &what_arg) : RuntimeError(what_arg) {
         }
+
+    };
+
+    class BracketMatchError : public RuntimeError {
+    public:
+        explicit BracketMatchError(const std::string &what_arg) : RuntimeError(what_arg) {
+        }
     };
 }
 
