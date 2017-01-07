@@ -20,22 +20,27 @@ namespace exception {
         }
     };
 
-    class DefinitionError : public RuntimeError {
+    class NotAtomType : public RuntimeError {
     public:
-        explicit DefinitionError(const std::string &what_arg) : RuntimeError(what_arg) {
+        explicit NotAtomType(const std::string &what_arg) : RuntimeError(what_arg) {
         }
     };
 
-    class RawExprError : public RuntimeError {
+    class UnexpectedType : public RuntimeError {
     public:
-        explicit RawExprError(const std::string &what_arg) : RuntimeError(what_arg) {
+        explicit UnexpectedType(const std::string &what_arg) : RuntimeError(what_arg) {
         }
-
     };
 
-    class BracketMatchError : public RuntimeError {
+    class UnsupportedSyntax : public RuntimeError {
     public:
-        explicit BracketMatchError(const std::string &what_arg) : RuntimeError(what_arg) {
+        explicit UnsupportedSyntax(const std::string &what_arg) : RuntimeError(what_arg) {
+        }
+    };
+
+    class MissBracket : public RuntimeError {
+    public:
+        explicit MissBracket(const std::string &what_arg) : RuntimeError(what_arg) {
         }
     };
 }

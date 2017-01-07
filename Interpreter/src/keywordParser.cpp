@@ -18,7 +18,7 @@ shared_ptr<ExprAST> parser::parseDefinitionExpr(lexers::Lexer &lex) {
             return parseFunctionDefinitionExpr(lex);
         default:
             CLOG(DEBUG, "exception");
-            throw DefinitionError("Cannot parse definition: lexer return invalid type");
+            throw UnsupportedSyntax("Cannot parse definition: lexer return invalid type");
     }
 }
 

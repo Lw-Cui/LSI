@@ -29,11 +29,7 @@ TEST(KeywordParsingTest, IdentifierDefinitionTest) {
     numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
     ASSERT_EQ(5, numPtr->getValue());
     ASSERT_EQ(Lexer::TokEOF, lex.getTokType());
-
-    lex.appendExp("(define)");
-    EXPECT_THROW(parseAllExpr(lex), exception::DefinitionError);
 }
-
 
 TEST(KeywordParsingTest, IfStatementTest) {
     Scope ss;
@@ -57,9 +53,6 @@ TEST(KeywordParsingTest, IfStatementTest) {
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
     numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
     ASSERT_EQ(2, numPtr->getValue());
-
-    lex.appendExp("((if (= (add 0 0 1) bar foo) 0)");
-    EXPECT_THROW(parseAllExpr(lex), RawExprError);
 }
 
 TEST(KeywordParsingTest, CondStatementTest) {

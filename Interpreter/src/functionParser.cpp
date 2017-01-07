@@ -1,9 +1,11 @@
 #include <memory>
 #include <fstream>
 #include <lexers.h>
+#include <exception.h>
 #include <parser.h>
 
 using namespace lexers;
+using namespace exception;
 using namespace parser;
 using namespace std;
 
@@ -30,7 +32,7 @@ std::shared_ptr<ExprAST> parser::parseLambdaDefinitionExpr(lexers::Lexer &lex) {
     CLOG(DEBUG, "parser") << "Parse lambda Definition";
     if (lex.stepForward() != Lexer::TokOpeningBracket || lex.stepForward() != Lexer::TokIdentifier) {
         CLOG(DEBUG, "exception") << lex.getTokType();
-        throw logic_error("Lambda definition error.");
+        throw UnexpectedType("Lambda arguments type doesn't match.");
     }
     vector<string> args;
     while (lex.getTokType() == Lexer::TokIdentifier) {
