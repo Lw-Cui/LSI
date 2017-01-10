@@ -20,15 +20,27 @@ namespace exception {
         }
     };
 
+    class NotPair : public RuntimeError {
+    public:
+        explicit NotPair(const std::string &what_arg) : RuntimeError(what_arg) {
+        }
+    };
+
     class NotAtomType : public RuntimeError {
     public:
         explicit NotAtomType(const std::string &what_arg) : RuntimeError(what_arg) {
         }
     };
 
-    class UnexpectedType : public RuntimeError {
+    class NotNumber : public NotAtomType {
     public:
-        explicit UnexpectedType(const std::string &what_arg) : RuntimeError(what_arg) {
+        explicit NotNumber(const std::string &what_arg) : NotAtomType(what_arg) {
+        }
+    };
+
+    class UnboundIdentifier : public RuntimeError {
+    public:
+        explicit UnboundIdentifier(const std::string &what_arg) : RuntimeError(what_arg) {
         }
     };
 

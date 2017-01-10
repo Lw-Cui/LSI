@@ -30,5 +30,43 @@ TEST(ExceptionParsingTest, BracketTest) {
 TEST(ExceptionParsingTest, LambdaDefinitionTest) {
     lexers::Lexer lex;
     lex.appendExp("(lambda () (+ x 1))");
-    EXPECT_THROW(parseAllExpr(lex), UnexpectedType);
+    EXPECT_THROW(parseAllExpr(lex), UnsupportedSyntax);
+
+    lex.clear();
+    lex.appendExp("(lambda (x (+ x 1))");
+    EXPECT_THROW(parseAllExpr(lex), MissBracket);
+}
+
+TEST(ExceptionParsingTest, FunctionDefinitionTest) {
+    lexers::Lexer lex;
+    lex.appendExp("(define () (+ x 1))");
+    EXPECT_THROW(parseAllExpr(lex), UnsupportedSyntax);
+
+    lex.clear();
+    lex.appendExp("(define (x (+ x 1))");
+    EXPECT_THROW(parseAllExpr(lex), MissBracket);
+}
+
+TEST(ExceptionParsingTest, BuiltinLessThanASTTest) {
+    lexers::Lexer lex;
+    Scope ss;
+    lex.appendExp("(< 5 +)");
+    EXPECT_THROW(parseAllExpr(lex)->eval(ss), NotNumber);
+
+    lex.clear();
+    ss.clear();
+    lex.appendExp("x");
+    EXPECT_THROW(parseAllExpr(lex)->eval(ss), UnboundIdentifier);
+}
+
+TEST(ExceptionParsingTest, BuiltinConsTest) {
+    lexers::Lexer lex;
+    Scope ss;
+    lex.appendExp("(car 5)");
+    EXPECT_THROW(parseAllExpr(lex)->eval(ss), NotPair);
+
+    lex.clear();
+    ss.clear();
+    lex.appendExp("(cons 5)");
+    EXPECT_THROW(parseAllExpr(lex)->eval(ss), NotPair);
 }
