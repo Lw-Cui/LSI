@@ -2,9 +2,10 @@
 #include <fstream>
 #include <lexers.h>
 #include <parser.h>
-
+#include <exception.h>
 
 using namespace lexers;
+using namespace exception;
 using namespace parser;
 using namespace std;
 
@@ -37,7 +38,7 @@ std::shared_ptr<ExprAST> parser::parseRawExpr(lexers::Lexer &lex) {
             return parseNilExpr(lex);
         default:
             CLOG(DEBUG, "exception");
-            throw logic_error("Cannot parse number/identifier.");
+            throw NotAtomType("Cannot parse number/identifier/#f/#t/nil");
     }
 }
 
@@ -70,11 +71,11 @@ std::shared_ptr<ExprAST> parser::parseBracketExpr(lexers::Lexer &lex) {
             break;
         default:
             CLOG(DEBUG, "exception");
-            throw logic_error("Cannot parse token.");
+            throw UnsupportedSyntax("Unsupported bracket type");
     }
     if (lex.getTokType() != Lexer::TokClosingBracket) {
         CLOG(DEBUG, "exception");
-        throw ("Format error: Token isn't close brace during parsing expression.");
+        throw MissBracket("Bracket doesn't match");
     } else {
         lex.stepForward(); // eat close brace
     }

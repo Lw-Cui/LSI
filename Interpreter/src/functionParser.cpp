@@ -1,9 +1,11 @@
 #include <memory>
 #include <fstream>
 #include <lexers.h>
+#include <exception.h>
 #include <parser.h>
 
 using namespace lexers;
+using namespace exception;
 using namespace parser;
 using namespace std;
 
@@ -29,8 +31,8 @@ shared_ptr<ExprAST> parser::parseLambdaApplicationExpr(lexers::Lexer &lex) {
 std::shared_ptr<ExprAST> parser::parseLambdaDefinitionExpr(lexers::Lexer &lex) {
     CLOG(DEBUG, "parser") << "Parse lambda Definition";
     if (lex.stepForward() != Lexer::TokOpeningBracket || lex.stepForward() != Lexer::TokIdentifier) {
-        CLOG(DEBUG, "exception") << lex.getTokType();
-        throw logic_error("Lambda definition error.");
+        CLOG(DEBUG, "exception");
+        throw UnsupportedSyntax("Lambda definition needs argument(s)");
     }
     vector<string> args;
     while (lex.getTokType() == Lexer::TokIdentifier) {
@@ -39,7 +41,7 @@ std::shared_ptr<ExprAST> parser::parseLambdaDefinitionExpr(lexers::Lexer &lex) {
 
     if (lex.getTokType() != Lexer::TokClosingBracket) {
         CLOG(DEBUG, "exception");
-        throw logic_error("Token cannot end lambda arguments parsing.");
+        throw MissBracket("Lambda definition need ) to end argument declaration");
     } else {
         lex.stepForward();
     }
@@ -54,7 +56,7 @@ std::shared_ptr<ExprAST> parser::parseLambdaDefinitionExpr(lexers::Lexer &lex) {
 shared_ptr<ExprAST> parser::parseFunctionDefinitionExpr(lexers::Lexer &lex) {
     if (lex.stepForward() != Lexer::TokIdentifier) {
         CLOG(DEBUG, "exception");
-        throw logic_error("Token isn't open brace during parsing function definition.");
+        throw UnsupportedSyntax("Function definition needs argument(s)");
     }
 
     auto identifier = lex.getIdentifier();
@@ -65,7 +67,7 @@ shared_ptr<ExprAST> parser::parseFunctionDefinitionExpr(lexers::Lexer &lex) {
 
     if (lex.getTokType() != Lexer::TokClosingBracket) {
         CLOG(DEBUG, "exception");
-        throw logic_error("Token cannot end arguments parsing.");
+        throw MissBracket("Function definition need ) to end argument declaration");
     } else {
         lex.stepForward();
     }

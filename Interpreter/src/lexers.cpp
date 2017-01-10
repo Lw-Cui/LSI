@@ -3,7 +3,8 @@
 using namespace lexers;
 
 Lexer &Lexer::appendExp(const std::string &exp) {
-    expressionBuf.clear();
+    // Clear EOF, if stream has
+    if (getTokType() == TokEOF) expressionBuf.clear();
     expressionBuf << processExp(exp);
     if (getTokType() == TokEOF) stepForward();
     return *this;
@@ -86,6 +87,12 @@ std::string Lexer::processExp(const std::string exp) const {
         }
     });
     return std::move(tmp);
+}
+
+void Lexer::clear() {
+    expressionBuf.str("");
+    if (currentType == TokEOF) expressionBuf.clear();
+    currentType = TokEOF;
 }
 
 

@@ -1,9 +1,11 @@
 #include <memory>
 #include <gtest/gtest.h>
+#include <exception.h>
 #include <parser.h>
 
 using namespace lexers;
 using namespace parser;
+using namespace exception;
 
 TEST(KeywordParsingTest, IdentifierDefinitionTest) {
     Scope ss;
@@ -20,7 +22,6 @@ TEST(KeywordParsingTest, IdentifierDefinitionTest) {
 
     lex.appendExp("(define a n)");
     exprPtr = parseExpr(lex)->eval(ss);
-
     ASSERT_TRUE(ss.count("a"));
 
     exprPtr = ss["a"]->eval(ss);
@@ -29,7 +30,6 @@ TEST(KeywordParsingTest, IdentifierDefinitionTest) {
     ASSERT_EQ(5, numPtr->getValue());
     ASSERT_EQ(Lexer::TokEOF, lex.getTokType());
 }
-
 
 TEST(KeywordParsingTest, IfStatementTest) {
     Scope ss;

@@ -31,6 +31,8 @@ namespace lexers {
 
         virtual Lexer &appendExp(const std::string &exp);
 
+        void clear();
+
         Lexer() {}
 
         Lexer(const std::string &exp) {

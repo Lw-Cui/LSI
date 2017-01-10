@@ -1,25 +1,25 @@
 #include <fstream>
 #include <sstream>
 #include <parser.h>
-#include <lexers.h>
-#include <AST.h>
+#include <exception.h>
 
 using namespace parser;
+using namespace exception;
 using namespace ast;
 
 std::shared_ptr<ExprAST> ExprAST::eval(Scope &) const {
     CLOG(DEBUG, "exception");
-    throw std::logic_error("Expression cannot be evaluated.");
+    throw RuntimeError("Expression cannot be evaluated.");
 };
 
 std::shared_ptr<ExprAST> ExprAST::apply(const std::vector<std::shared_ptr<ExprAST>> &, Scope &) {
     CLOG(DEBUG, "exception");
-    throw std::logic_error("Expression cannot be applied.");
+    throw RuntimeError("Expression cannot be applied.");
 }
 
 std::string ExprAST::display() const {
     CLOG(DEBUG, "exception");
-    throw std::logic_error("Expression cannot be displayed.");
+    throw RuntimeError("Expression cannot be displayed.");
 }
 
 std::shared_ptr<ExprAST> LoadingFileAST::eval(Scope &s) const {
@@ -50,7 +50,7 @@ std::shared_ptr<ExprAST> BuiltinLessThanAST::apply(const std::vector<std::shared
                     return np1->getValue() <= np2->getValue();
                 } else {
                     CLOG(DEBUG, "exception");
-                    throw std::logic_error("The operands in less than operator cannot be converted to number");
+                    throw NotNumber("The operands in less than operator cannot be converted to number");
                 }
             });
     if (res) return std::make_shared<BooleansTrueAST>();
@@ -72,7 +72,7 @@ std::shared_ptr<ExprAST> IdentifierAST::eval(Scope &ss) const {
         return ss[getId()];
     } else {
         CLOG(DEBUG, "exception");
-        throw std::logic_error("Unbound identifier: " + getId());
+        throw UnboundIdentifier("Unbound identifier: " + getId());
     }
 }
 
@@ -125,7 +125,7 @@ std::shared_ptr<ExprAST> BuiltinOppositeAST::apply(const std::vector<std::shared
         return std::make_shared<NumberAST>(-p->getValue());
     } else {
         CLOG(DEBUG, "exception");
-        throw std::logic_error("The operands cannot be converted to number");
+        throw NotNumber("The operands cannot be converted to number");
     }
 }
 
@@ -208,7 +208,7 @@ std::shared_ptr<ExprAST> BuiltinCarAST::apply(const std::vector<std::shared_ptr<
         return p->data.first;
     } else {
         CLOG(DEBUG, "exception");
-        throw std::logic_error("Cannot convert to pair");
+        throw NotPair("Cannot convert to pair");
     }
 }
 
@@ -217,7 +217,7 @@ std::shared_ptr<ExprAST> BuiltinCdrAST::apply(const std::vector<std::shared_ptr<
         return p->data.second;
     } else {
         CLOG(DEBUG, "exception");
-        throw std::logic_error("Cannot convert to pair");
+        throw NotPair("Cannot convert to pair");
     }
 }
 
@@ -226,7 +226,7 @@ std::shared_ptr<ExprAST> BuiltinConsAST::apply(const std::vector<std::shared_ptr
         return std::make_shared<PairAST>(actualArgs[0]->eval(s), actualArgs[1]->eval(s));
     } else {
         CLOG(DEBUG, "exception");
-        throw std::logic_error("Builtin cons error.");
+        throw NotPair("Builtin cons error.");
     }
 }
 
@@ -238,7 +238,7 @@ std::shared_ptr<ExprAST> BuiltinAddAST::apply(const std::vector<std::shared_ptr<
             num += p->getValue();
         } else {
             CLOG(DEBUG, "exception");
-            throw std::logic_error("The operands cannot be converted to number");
+            throw NotNumber("The operands cannot be converted to number");
         }
     }
     return std::make_shared<NumberAST>(num);
@@ -252,7 +252,7 @@ std::shared_ptr<ExprAST> BuiltinMultiplyAST::apply(const std::vector<std::shared
             num *= p->getValue();
         } else {
             CLOG(DEBUG, "exception");
-            throw std::logic_error("The operands cannot be converted to number");
+            throw NotNumber("The operands cannot be converted to number");
         }
     }
     return std::make_shared<NumberAST>(num);
@@ -264,7 +264,7 @@ BuiltinReciprocalAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualA
         return std::make_shared<NumberAST>(1 / p->getValue());
     } else {
         CLOG(DEBUG, "exception");
-        throw std::logic_error("The operands cannot be converted to number");
+        throw NotNumber("The operands cannot be converted to number");
     }
 }
 
