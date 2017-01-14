@@ -75,6 +75,8 @@
         (if (null? seq) res (reduce-iter (cdr seq) (op res (car seq)))))
     (reduce-iter seq init))
 
+(define (half x) (/ x 2))
+
 (define (square x) (* x x))
 
 (define (sqrt x)

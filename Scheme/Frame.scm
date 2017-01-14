@@ -14,21 +14,24 @@
   (make-vect (* scale (xcor-vect vect))
              (* scale (ycor-vect vect))))
 
-(define (make-frame origin edge1 edge2)
-  (cons origin (cons edge1 edge2)))
+(define (make-frame origin edgeX edgeY)
+  (cons origin (cons edgeX edgeY)))
 
 (define (origin-frame frame) (car frame))
-(define (edge1-frame frame) (car (cdr frame)))
-(define (edge2-frame frame) (cdr (cdr frame)))
+(define (edgeX-frame frame) (car (cdr frame)))
+(define (edgeY-frame frame) (cdr (cdr frame)))
+(define (length-of-edgeX frame) (distance (edgeX-frame frame) (cons 0 0)))
+(define (length-of-edgeY frame) (distance (edgeY-frame frame) (cons 0 0)))
 
+# default drawing board
 (define default (make-frame (cons 0 0) (cons 1000 0) (cons 0 1000)))
 
 (define (frame-coord-map frame)
   (lambda (v)
     (add-vect
      (origin-frame frame)
-     (add-vect (scale-vect (/ (xcor-vect v) (xcor-vect (edge1-frame default))) (edge1-frame frame))
-               (scale-vect (/ (ycor-vect v) (ycor-vect (edge2-frame default))) (edge2-frame frame))))))
+     (add-vect (scale-vect (/ (xcor-vect v) (xcor-vect (edgeX-frame default))) (edgeX-frame frame))
+               (scale-vect (/ (ycor-vect v) (ycor-vect (edgeY-frame default))) (edgeY-frame frame))))))
 
 (define (transform-painter painter origin corner1 corner2)
   (lambda (frame)
@@ -39,12 +42,61 @@
                              (sub-vect (m corner2) new-origin)))))))
 
 
-(define (flip-vert painter) (transform-painter painter (make-vect 0 1000) (make-vect 1000 1000) (make-vect 0 0)))
-(define (shrink-to-upper-right painter) (transform-painter painter (make-vect 500 500) (make-vect 1000 500) (make-vect 500 1000)))
-(define (shrink-to-upper-left painter) (transform-painter painter (make-vect 0 500) (make-vect 500 500) (make-vect 0 1000)))
-(define (shrink-to-lower-right painter) (transform-painter painter (make-vect 500 0) (make-vect 1000 0) (make-vect 500 500)))
-(define (shrink-to-lower-left painter) (transform-painter painter (make-vect 0 0) (make-vect 500 0) (make-vect 0 500)))
-(define (rotate90 painter) (transform-painter painter (make-vect 1000 0) (make-vect 1000 1000) (make-vect 0 0)))
+(define (flip-vert painter) (transform-painter painter 
+    (make-vect 0 (length-of-edgeY default)) 
+    (make-vect (length-of-edgeX default) (length-of-edgeY default)) 
+    (make-vect 0 0)))
 
-(define (st-painter frame) (#painter (map (sierpinskiTriangle (cons 0 0) (cons 500 866) (cons 1000 0) 30) (frame-coord-map frame))))
+(define (flip-horiz painter) (transform-painter painter 
+    (make-vect (length-of-edgeX default) 0) 
+    (make-vect 0 0)
+    (make-vect (length-of-edgeX default) (length-of-edgeY default))))
+
+(define (shrink-to-upper-right painter) (transform-painter painter 
+    (make-vect (half (length-of-edgeX default)) (half (length-of-edgeY default)))
+    (make-vect (length-of-edgeX default) (half (length-of-edgeY default)))
+    (make-vect (half (length-of-edgeX default)) (length-of-edgeY default))))
+
+(define (shrink-to-upper-left painter) (transform-painter painter
+    (make-vect 0 (half (length-of-edgeY default)))
+    (make-vect (half (length-of-edgeX default)) (half (length-of-edgeY default)))
+    (make-vect 0 (length-of-edgeY default))))
+
+(define (shrink-to-lower-right painter) (transform-painter painter
+    (make-vect (half (length-of-edgeX default)) 0)
+    (make-vect (length-of-edgeX default) 0)
+    (make-vect (half (length-of-edgeX default)) (half (length-of-edgeY default)))))
+
+(define (shrink-to-lower-left painter) (transform-painter painter
+    (make-vect 0 0)
+    (make-vect (half (length-of-edgeX default)) 0)
+    (make-vect 0 (half (length-of-edgeY default)))))
+
+(define (rotate90 painter) (transform-painter painter
+    (make-vect (length-of-edgeX default) 0)
+    (make-vect (length-of-edgeX default) (length-of-edgeY default))
+    (make-vect 0 0)))
+
+(define (beside painter1 painter2)
+  (let ((split-point (make-vect (half (length-of-edgeX default)) 0)))
+    (let ((paint-left (transform-painter painter1 (make-vect 0 0) split-point (make-vect 0 (length-of-edgeY default))))
+          (paint-right (transform-painter painter2
+              split-point
+              (make-vect (length-of-edgeX default) 0)
+              (make-vect (half (length-of-edgeX default)) (length-of-edgeY default)))))
+      (lambda (frame) (paint-left frame) (paint-right frame)))))
+
+(define (below painter1 painter2)
+  (let ((split-point (make-vect 0 (half (length-of-edgeY default)))))
+    (let ((paint-up (transform-painter painter1
+            split-point
+            (make-vect (length-of-edgeX default) (half (length-of-edgeY default)))
+            (make-vect 0 (length-of-edgeY default))))
+          (paint-down (transform-painter painter2 (make-vect 0 0) (make-vect (length-of-edgeX default) 0) split-point)))
+      (lambda (frame) (paint-up frame) (paint-down frame)))))
+
+(define (st-painter frame)
+    (#painter (map (sierpinskiTriangle
+            (cons 0 0) (cons 500 866) (cons 1000 0)
+            (* 10 (/ (length-of-edgeX default) (length-of-edgeX frame)))) (frame-coord-map frame))))
 (define (line-painter frame) (#painter (map (line (cons 0 0) (cons 100 100)) (frame-coord-map frame))))
