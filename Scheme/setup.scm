@@ -1,2 +1,4 @@
+(load "stdlib/Base.scm")
+(load "stdlib/Shape.scm")
+(load "stdlib/Frame.scm")
 
-(load "demo/painter1.scm")
