@@ -58,19 +58,19 @@ TEST(FrameLibParsingTest, FrameBasicTest) {
 }
 
 TEST(FrameLibParsingTest, CoordinateMapTest) {
-    Scope s;
-    lexers::Lexer lex;
-    lex.appendExp("(load \"setup.scm\")");
-
-    lex.appendExp("(define frame (make-frame (cons 500 500) (cons -500 -500) (cons 500 -500)))")
-            .appendExp("(define coord-map (frame-coord-map frame))")
-            .appendExp("(coord-map (cons 500 500))");
     try {
-        auto ptr = parseAllExpr(lex)->eval(s);
-        ASSERT_STREQ("(500, 0)", ptr->display().c_str());
+        Scope s;
+        lexers::Lexer lex;
+        lex.appendExp("(load \"setup.scm\")");
 
-        lex.appendExp("(define frame2 (make-frame (cons 1000 1000) (cons 0 -1000) (cons -1000 0)))")
-                .appendExp("((frame-coord-map frame2) (cons 100 300))");
+        lex.appendExp("(define frame (make-frame (cons 0.5 0.5) (cons -0.5 -0.5) (cons 0.5 -0.5)))")
+                .appendExp("(define coord-map (frame-coord-map (ratio-to-reality frame)))")
+                .appendExp("(coord-map (cons 500 50))");
+        auto ptr = parseAllExpr(lex)->eval(s);
+        ASSERT_STREQ("(275, 225)", ptr->display().c_str());
+
+        lex.appendExp("(define frame2 (make-frame (cons 1 1) (cons 0 -1) (cons -1 0)))")
+                .appendExp("((frame-coord-map (ratio-to-reality frame2)) (cons 100 300))");
         ptr = parseAllExpr(lex)->eval(s);
         ASSERT_STREQ("(700, 900)", ptr->display().c_str());
     } catch (RuntimeError &e) {
@@ -80,15 +80,15 @@ TEST(FrameLibParsingTest, CoordinateMapTest) {
 }
 
 TEST(FrameLibParsingTest, transformPainterTest) {
-    Scope s;
-    lexers::Lexer lex;
-    lex.appendExp("(load \"setup.scm\")");
-
-    lex.appendExp("(define (painter frame)"
-                          "  (lambda (vect)"
-                          "    ((frame-coord-map frame) vect)))");
-    lex.appendExp("(((flip-vert painter) default) (cons 100 100))");
     try {
+        Scope s;
+        lexers::Lexer lex;
+        lex.appendExp("(load \"setup.scm\")");
+
+        lex.appendExp("(define (painter frame)"
+                              "  (lambda (vect)"
+                              "    ((frame-coord-map (ratio-to-reality frame)) vect)))");
+        lex.appendExp("(((flip-vert painter) default) (cons 100 100))");
         auto ptr = parseAllExpr(lex)->eval(s);
         ASSERT_STREQ("(100, 900)", ptr->display().c_str());
 
@@ -110,15 +110,15 @@ TEST(FrameLibParsingTest, transformPainterTest) {
 }
 
 TEST(FrameLibParsingTest, MultpletransformPainterTest) {
-    Scope s;
-    lexers::Lexer lex;
-    lex.appendExp("(load \"setup.scm\")");
-
-    lex.appendExp("(define (painter frame)"
-                          "  (lambda (vect)"
-                          "    ((frame-coord-map frame) vect)))");
-    lex.appendExp("(((rotate90 (flip-vert painter)) default) (cons 100 100))");
     try {
+        Scope s;
+        lexers::Lexer lex;
+        lex.appendExp("(load \"setup.scm\")");
+
+        lex.appendExp("(define (painter frame)"
+                              "  (lambda (vect)"
+                              "    ((frame-coord-map (ratio-to-reality frame)) vect)))");
+        lex.appendExp("(((rotate90 (flip-vert painter)) default) (cons 100 100))");
         auto ptr = parseAllExpr(lex)->eval(s);
         ASSERT_STREQ("(100, 100)", ptr->display().c_str());
 
