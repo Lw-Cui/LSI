@@ -97,7 +97,7 @@
     (let ((reality (ratio-to-reality frame)))
         (#painter (map (sierpinskiTriangle
                 (cons 0 0) (cons 500 866) (cons 1000 0)
-                (* 10 (/ (length-of-edgeX board) (length-of-edgeX reality))))
+                (* 40 (/ (length-of-edgeX board) (length-of-edgeX reality))))
                 (frame-coord-map reality)))))
 
 (define (line-painter frame)
