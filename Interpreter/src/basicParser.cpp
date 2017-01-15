@@ -37,7 +37,6 @@ std::shared_ptr<ExprAST> parser::parseRawExpr(lexers::Lexer &lex) {
         case Lexer::TokNil:
             return parseNilExpr(lex);
         default:
-            CLOG(DEBUG, "exception");
             throw NotAtomType("Cannot parse number/identifier/#f/#t/nil");
     }
 }
@@ -70,11 +69,9 @@ std::shared_ptr<ExprAST> parser::parseBracketExpr(lexers::Lexer &lex) {
             res = parseLambdaDefinitionExpr(lex);
             break;
         default:
-            CLOG(DEBUG, "exception");
             throw UnsupportedSyntax("Unsupported bracket type");
     }
     if (lex.getTokType() != Lexer::TokClosingBracket) {
-        CLOG(DEBUG, "exception");
         throw MissBracket("Bracket doesn't match");
     } else {
         lex.stepForward(); // eat close brace

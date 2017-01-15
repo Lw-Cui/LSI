@@ -2,6 +2,9 @@
 (define xcor-point car)
 (define ycor-point cdr)
 
+(define (distance p1 p2)
+    (sqrt (+ (square (- (xcor-point p1) (xcor-point p2))) (square (- (ycor-point p1) (ycor-point p2))))))
+
 # line-drawing routine
 (define (line begin end)
     (define (simple-line begin end)
@@ -41,8 +44,6 @@
         (define (mid-point p1 p2)
             (make-point (/ (+ (xcor-point p1) (xcor-point p2)) 2) (/ (+ (ycor-point p1) (ycor-point p2)) 2)))
         (define (close-enough? p1 p2)
-            (define (distance p1 p2)
-                (sqrt (+ (square (- (xcor-point p1) (xcor-point p2))) (square (- (ycor-point p1) (ycor-point p2))))))
             (if (< (distance p1 p2) accuracy) #t #f))
         (let ((m12 (mid-point p1 p2))
             (m23 (mid-point p2 p3))

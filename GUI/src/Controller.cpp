@@ -113,7 +113,7 @@ con::Controller::Controller(Window &text, Window &board)
         : textWindow{text}, drawingBoard{board} {
     lexers::Lexer lex;
     scope.addBuiltinFunc("#painter", std::make_shared<ast::BuiltinDrawAST>(*this));
-    lex.appendExp("(load \"Base.scm\")").appendExp("(load \"Shape.scm\")").appendExp("(load \"Frame.scm\")");
+    lex.appendExp("(load \"setup.scm\")");
     parser::parseAllExpr(lex)->eval(scope);
     pushString(currentText.formatString, "]=> ");
 }

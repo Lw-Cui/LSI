@@ -73,7 +73,7 @@ TEST(BuiltinFunctionTest, MinusTest) {
     Scope ss;
 
     lexers::Lexer lex;
-    lex.appendExp("(load \"Base.scm\")").appendExp("(- 5)");
+    lex.appendExp("(load \"setup.scm\")").appendExp("(- 5)");
     auto exprPtr = parseAllExpr(lex)->eval(ss);
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
     auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);

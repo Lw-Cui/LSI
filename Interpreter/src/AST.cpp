@@ -71,7 +71,6 @@ std::shared_ptr<ExprAST> IdentifierAST::eval(Scope &ss) const {
     if (ss.count(getId())) {
         return ss[getId()];
     } else {
-        CLOG(DEBUG, "exception");
         throw UnboundIdentifier("Unbound identifier: " + getId());
     }
 }
