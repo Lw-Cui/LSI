@@ -116,7 +116,7 @@ TEST(FunctionParsingTest, LambdaApplicationTest) {
 TEST(FunctionParsingTest, RecursiveTest) {
     Scope ss;
     lexers::Lexer lex;
-    lex.appendExp("(load \"Base.scm\")").appendExp("(define (add x y) (if (not (= x 0)) (+ 1 (add (- x 1) y)) y))")
+    lex.appendExp("(load \"setup.scm\")").appendExp("(define (add x y) (if (not (= x 0)) (+ 1 (add (- x 1) y)) y))")
             .appendExp("(add 5 6)");
 
     auto exprPtr = parseAllExpr(lex)->eval(ss);
@@ -192,7 +192,7 @@ TEST(FunctionParsingTest, NestedFunctionTest) {
 
 TEST(FunctionParsingTest, LambdaFunctionRecursiveTest) {
     Scope s;
-    lexers::Lexer lex("(load \"Base.scm\")");
+    lexers::Lexer lex("(load \"setup.scm\")");
 
     lex.appendExp("(((lambda (give-me-a-function)"
                           "   ((lambda (f) (f f))"
@@ -213,7 +213,7 @@ TEST(FunctionParsingTest, LambdaFunctionRecursiveTest) {
 
 TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV2) {
     Scope s;
-    lexers::Lexer lex("(load \"Base.scm\")");
+    lexers::Lexer lex("(load \"setup.scm\")");
     auto res = parseAllExpr(lex)->eval(s);
 
     lex.appendExp("(((lambda (fact-function-2)"
@@ -236,7 +236,7 @@ TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV2) {
 
 TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV3) {
     Scope s;
-    lexers::Lexer lex("(load \"Base.scm\")");
+    lexers::Lexer lex("(load \"setup.scm\")");
     auto res = parseAllExpr(lex)->eval(s);
 
     lex.appendExp("(((lambda (f) (f f))"
@@ -255,7 +255,7 @@ TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV3) {
 
 TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV4) {
     Scope s;
-    lexers::Lexer lex("(load \"Base.scm\")");
+    lexers::Lexer lex("(load \"setup.scm\")");
     auto res = parseAllExpr(lex)->eval(s);
 
     lex.appendExp("(((lambda (f) (f f))"
