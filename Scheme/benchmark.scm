@@ -5,4 +5,9 @@
                 (* 40 (/ (length-of-edgeX board) (length-of-edgeX reality))))
                 (frame-coord-map reality))))
 
-(length ((beside (below painter (flip-vert painter)) (below painter (flip-vert painter))) default)
+(define (l-painter frame)
+    (map (line (cons 100 100) (cons 200 0)) (frame-coord-map (ratio-to-reality frame))))
+
+
+
+
