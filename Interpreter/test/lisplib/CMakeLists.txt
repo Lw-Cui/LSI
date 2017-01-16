@@ -1,4 +1,5 @@
 set(LISP_LIB_TEST_FILES
+        libParsingTest.cpp
         BaselibParsingTest.cpp
         FramelibParsingTest.cpp)
 

@@ -7,60 +7,12 @@ using namespace lexers;
 using namespace parser;
 using namespace exception;
 
-TEST(BaseLibrariesParsingTest, BasicConsTest) {
-    Scope s;
-    lexers::Lexer lex;
-    lex.appendExp("(load \"setup.scm\")").appendExp("(load \"Test.scm\")");
-    try {
-        parseAllExpr(lex)->eval(s);
-        ASSERT_TRUE(s.count("Cons"));
-        ASSERT_TRUE(s.count("Car"));
-        ASSERT_TRUE(s.count("Cdr"));
-
-        lex.appendExp("(define p (Cons 1 2))").appendExp("(Cdr p)");
-        auto res = parseAllExpr(lex)->eval(s);
-        ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
-        auto numPtr = std::dynamic_pointer_cast<NumberAST>(res);
-        ASSERT_EQ(2, numPtr->getValue());
-
-        lex.appendExp("(Car p)");
-        res = parseAllExpr(lex)->eval(s);
-        ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
-        numPtr = std::dynamic_pointer_cast<NumberAST>(res);
-        ASSERT_EQ(1, numPtr->getValue());
-    } catch (RuntimeError &e) {
-        CLOG(DEBUG, "exception") << e.what();
-        throw;
-    }
-}
-
-TEST(BaseLibrariesParsingTest, AdvanceConsTest) {
-    Scope s;
-    lexers::Lexer lex;
-
-    lex.appendExp("(load \"setup.scm\")")
-            .appendExp("(load \"Test.scm\")")
-            .appendExp("(define p (Cons 1 2))")
-            .appendExp("(define pp (Cons 3 p))")
-            .appendExp("(Car (Cdr pp))");
-
-    try {
-        auto res = parseAllExpr(lex)->eval(s);
-        ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
-        auto numPtr = std::dynamic_pointer_cast<NumberAST>(res);
-        ASSERT_EQ(1, numPtr->getValue());
-    } catch (RuntimeError &e) {
-        CLOG(DEBUG, "exception") << e.what();
-        throw;
-    }
-}
-
 
 TEST(BaseLibrariesParsingTest, MinusTest) {
-    Scope s;
-    lexers::Lexer lex("(load \"setup.scm\")");
-
     try {
+        Scope s;
+        lexers::Lexer lex("(load \"setup.scm\")");
+
         lex.appendExp("(- 5 7 8 9)");
         auto res = parseAllExpr(lex)->eval(s);
         ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
@@ -73,11 +25,11 @@ TEST(BaseLibrariesParsingTest, MinusTest) {
 }
 
 TEST(BaseLibrariesParsingTest, NotTest) {
-    Scope s;
-    lexers::Lexer lex("(load \"setup.scm\")");
-
-    lex.appendExp("(not (- 10 4 6))");
     try {
+        Scope s;
+        lexers::Lexer lex("(load \"setup.scm\")");
+
+        lex.appendExp("(not (- 10 4 6))");
         auto res = parseAllExpr(lex)->eval(s);
         ASSERT_TRUE(std::dynamic_pointer_cast<BooleansFalseAST>(res));
 
@@ -91,11 +43,11 @@ TEST(BaseLibrariesParsingTest, NotTest) {
 }
 
 TEST(BaseLibrariesParsingTest, AndTest) {
-    Scope s;
-    lexers::Lexer lex("(load \"setup.scm\")");
-
-    lex.appendExp("(and (+ 10 4 6) (- 10 1) (+ 5 6))");
     try {
+        Scope s;
+        lexers::Lexer lex("(load \"setup.scm\")");
+
+        lex.appendExp("(and (+ 10 4 6) (- 10 1) (+ 5 6))");
         auto res = parseAllExpr(lex)->eval(s);
         ASSERT_TRUE(std::dynamic_pointer_cast<BooleansTrueAST>(res));
 
@@ -128,11 +80,11 @@ TEST(BaseLibrariesParsingTest, OrTest) {
 
 
 TEST(BaseLibrariesParsingTest, GreaterTest) {
-    Scope s;
-    lexers::Lexer lex("(load \"setup.scm\")");
-
-    lex.appendExp("(> (+ 10 (- 10)) 0)");
     try {
+        Scope s;
+        lexers::Lexer lex("(load \"setup.scm\")");
+
+        lex.appendExp("(> (+ 10 (- 10)) 0)");
         auto res = parseAllExpr(lex)->eval(s);
         ASSERT_TRUE(std::dynamic_pointer_cast<BooleansFalseAST>(res));
 
@@ -169,10 +121,10 @@ TEST(BaseLibrariesParsingTest, EqualTest) {
 }
 
 TEST(BaseLibrariesParsingTest, RemainderTest) {
-    Scope s;
-    lexers::Lexer lex("(load \"setup.scm\")");
-
     try {
+        Scope s;
+        lexers::Lexer lex("(load \"setup.scm\")");
+
         lex.appendExp("(remainder 5 2)");
         auto res = parseAllExpr(lex)->eval(s);
         ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
@@ -295,3 +247,18 @@ TEST(BaseLibrariesParsingTest, YcombinatorTest) {
     }
 }
 
+TEST(BaseLibrariesParsingTest, lengthTest) {
+    try {
+        Scope s;
+        lexers::Lexer lex("(load \"setup.scm\")");
+
+        lex.appendExp("(length (list 5 7 9 0))");
+        auto exprPtr = parseAllExpr(lex)->eval(s);
+        ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
+        auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
+        ASSERT_EQ(4, numPtr->getValue());
+    } catch (RuntimeError &e) {
+        CLOG(DEBUG, "exception") << e.what();
+        throw;
+    }
+}

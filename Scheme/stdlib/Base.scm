@@ -65,8 +65,13 @@
 
 (define (map seq op)
     (define (map-iter seq res)
-        (if (null? seq) res  (map-iter (cdr seq) (cons (op (car seq)) res))))
+        (if (null? seq) res (map-iter (cdr seq) (cons (op (car seq)) res))))
     (map-iter (reverse seq) nil))
+
+(define (length seq)
+    (define (length-iter seq n)
+        (if (null? seq) n (length-iter (cdr seq) (+ n 1))))
+    (length-iter seq 0))
 
 (define (abs x) ((if (< 0 x) + -) x))
 

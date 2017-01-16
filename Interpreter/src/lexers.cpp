@@ -5,7 +5,7 @@ using namespace lexers;
 Lexer &Lexer::appendExp(const std::string &exp) {
     // Clear EOF, if stream has
     if (getTokType() == TokEOF) expressionBuf.clear();
-    expressionBuf << processExp(exp);
+    expressionBuf << "\n" << processExp(exp);
     if (getTokType() == TokEOF) stepForward();
     return *this;
 }
