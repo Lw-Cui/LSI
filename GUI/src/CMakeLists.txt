@@ -2,7 +2,7 @@ set(CONTROL_LIB Contorller CACHE INTERNAL "text windows")
 set(CONTROL_SOURCE_FILES
         ../include/formatString.h formatString.cpp
         ../include/Controller.h Controller.cpp
-        ../include/GUIbuiltinAST.h GUIbuiltinAST.cpp)
+        ../include/GUIbuiltinDrawAST.h GUIbuiltinDrawAST.cpp)
 add_library(${CONTROL_LIB} ${CONTROL_SOURCE_FILES})
 
 set(GUI_SOURCE_FILES
