@@ -3,18 +3,22 @@
 
 #include <AST.h>
 
+#define cimg_display 0
+#include <CImg.h>
+
 namespace ast {
-    class CLIBuiltinDrawAST : public GUIBuiltinDrawAST {
+    class CLIBuiltinDrawAST : public BuiltinDrawAST {
     public:
-        BuiltinDrawAST();
+        CLIBuiltinDrawAST(cimg_library::CImg<float> &im);
 
         std::string display() const override;
 
         std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &) override;
 
     private:
+        std::pair<float, float> toPair(const std::shared_ptr<ExprAST> &);
 
-        con::Controller &controller;
+        cimg_library::CImg<float> &image;
     };
 }
 
