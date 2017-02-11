@@ -6,6 +6,7 @@ set(CONTROL_SOURCE_FILES
 add_library(${CONTROL_LIB} ${CONTROL_SOURCE_FILES})
 
 set(GUI_SOURCE_FILES
+        ../../external/easylogging/src/easylogging++.cc
         main.cpp)
 add_executable(${PROJECT_NAME} ${GUI_SOURCE_FILES})
 target_link_libraries(${PROJECT_NAME} ${CONTROL_LIB} ${INTERPRETER_LIB} ${SFML_LIB})

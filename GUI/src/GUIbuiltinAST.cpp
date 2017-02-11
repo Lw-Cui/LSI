@@ -3,7 +3,7 @@
 using namespace std;
 
 std::shared_ptr<ast::ExprAST>
-ast::BuiltinDrawAST::apply(const std::vector<std::shared_ptr<ast::ExprAST>> &actualArgs, context::Scope &s) {
+ast::GUIBuiltinDrawAST::apply(const std::vector<std::shared_ptr<ast::ExprAST>> &actualArgs, context::Scope &s) {
     con::VertexArray vertex;
     auto exprPtr = actualArgs.front()->eval(s);
     while (!dynamic_pointer_cast<NilAST>(exprPtr)) {
@@ -12,10 +12,10 @@ ast::BuiltinDrawAST::apply(const std::vector<std::shared_ptr<ast::ExprAST>> &act
         exprPtr = pairPtr->data.second;
     }
     controller.appendShape(vertex);
-    return std::make_shared<BuiltinDrawAST>(controller);
+    return std::make_shared<GUIBuiltinDrawAST>(controller);
 }
 
-sf::Vector2f ast::GUIBuiltinAST::toVec2f(const shared_ptr<ast::ExprAST> &ptr) const {
+sf::Vector2f ast::GUIBuiltinDrawAST::toVec2f(const shared_ptr<ast::ExprAST> &ptr) const {
     if (auto pairPtr = dynamic_pointer_cast<PairAST>(ptr)) {
         auto firstPtr = dynamic_pointer_cast<NumberAST>(pairPtr->data.first);
         auto secondPtr = dynamic_pointer_cast<NumberAST>(pairPtr->data.second);
@@ -30,12 +30,12 @@ sf::Vector2f ast::GUIBuiltinAST::toVec2f(const shared_ptr<ast::ExprAST> &ptr) co
     }
 }
 
-shared_ptr<ast::ExprAST> ast::GUIBuiltinAST::toPairAST(const sf::Vector2f &vec) const {
+shared_ptr<ast::ExprAST> ast::GUIBuiltinDrawAST::toPairAST(const sf::Vector2f &vec) const {
     return make_shared<PairAST>(make_shared<NumberAST>(vec.x), make_shared<NumberAST>(vec.y));
 }
 
-string ast::BuiltinDrawAST::display() const {
+string ast::GUIBuiltinDrawAST::display() const {
     return "Finished drawing.";
 }
 
-ast::BuiltinDrawAST::BuiltinDrawAST(con::Controller &c) : controller{c} {}
+ast::GUIBuiltinDrawAST::GUIBuiltinDrawAST(con::Controller &c) : controller{c} {}
