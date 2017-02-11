@@ -1,3 +1,9 @@
 [submodule "external/googletest"]
 	path = external/googletest
 	url = https://github.com/google/googletest.git
+[submodule "external/easylogging"]
+	path = external/easylogging
+	url = https://github.com/muflihun/easyloggingpp.git
+[submodule "external/CImg"]
+	path = external/CImg
+	url = https://github.com/dtschump/CImg.git

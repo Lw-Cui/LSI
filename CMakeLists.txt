@@ -8,7 +8,11 @@ if (NOT CMAKE_BUILD_TYPE)
 endif (NOT CMAKE_BUILD_TYPE)
 SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} --coverage")
 
-include_directories(external/easylogging)
+add_subdirectory(external/easylogging)
+include_directories(external/easylogging/src)
+
+include_directories(external/CImg)
+
 add_subdirectory(external/googletest)
 include_directories(${gtest_SOURCE_FILE}/include)
 include_directories(${gmock_SOURCE_FILE}/include)
