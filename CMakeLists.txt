@@ -11,6 +11,9 @@ SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} --coverage")
 add_subdirectory(external/easylogging)
 include_directories(external/easylogging/src)
 
+add_subdirectory(external/cxxopts)
+include_directories(external/cxxopts/include)
+
 include_directories(external/CImg)
 
 add_subdirectory(external/googletest)

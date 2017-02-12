@@ -6,3 +6,5 @@
 (define (Car pair) (pair 1))
 (define (Cdr pair) (pair 0))
 
+(+ 5 6)
+

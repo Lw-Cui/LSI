@@ -26,8 +26,7 @@ std::shared_ptr<ExprAST> LoadingFileAST::eval(Scope &s) const {
     std::ifstream fin{filename};
     std::string str{std::istreambuf_iterator<char>(fin), std::istreambuf_iterator<char>()};
     lexers::Lexer lex{str};
-    parseAllExpr(lex)->eval(s);
-    return nullptr;
+    return parseAllExpr(lex)->eval(s);
 }
 
 std::shared_ptr<ExprAST> IfStatementAST::eval(Scope &ss) const {
