@@ -1,7 +1,7 @@
 #include <stack>
 #include <string>
 #include <Controller.h>
-#include <GUIbuiltinAST.h>
+#include <GUIbuiltinDrawAST.h>
 #include <exception.h>
 
 using namespace std;
@@ -112,7 +112,7 @@ void con::Text::clearStr() {
 con::Controller::Controller(Window &text, Window &board)
         : textWindow{text}, drawingBoard{board} {
     lexers::Lexer lex;
-    scope.addBuiltinFunc("#painter", std::make_shared<ast::BuiltinDrawAST>(*this));
+    scope.addBuiltinFunc("#painter", std::make_shared<ast::GUIBuiltinDrawAST>(*this));
     lex.appendExp("(load \"setup.scm\")");
     parser::parseAllExpr(lex)->eval(scope);
     pushString(currentText.formatString, "]=> ");

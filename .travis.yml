@@ -175,6 +175,7 @@ script:
   - ./../build/Interpreter/test/lexer/lexersTest
   - ./../build/Interpreter/test/parser/parserTest
   - ./../build/Interpreter/test/lisplib/lispLibTest
+  - bash ../CLI/test/test.sh
   - |
     if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
       ./../build/GUI/test/GUITest

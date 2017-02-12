@@ -264,6 +264,11 @@ namespace ast {
         std::vector<std::shared_ptr<ExprAST>> actualArgs;
     };
 
+    class BuiltinDrawAST : public ExprAST {
+    public:
+        BuiltinDrawAST() {}
+    };
+
 }
 
 #endif //GI_AST_H
