@@ -1,5 +1,6 @@
 set(CLI_SOURCE_FILES
-        ../include/GUIbuiltinDrawAST.h CLIbuiltinDrawAST.cpp
+        ../include/CLIbuiltinDrawAST.h CLIbuiltinDrawAST.cpp
+        ../include/image.h image.cpp
         ../../external/easylogging/src/easylogging++.cc
         main.cpp)
 add_executable(${PROJECT_NAME}_CLI ${CLI_SOURCE_FILES})

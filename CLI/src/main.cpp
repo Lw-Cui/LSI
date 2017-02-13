@@ -3,9 +3,10 @@
 #include <vector>
 #include <context.h>
 #include <parser.h>
+#include <image.h>
 #include <exception.h>
 #include <cxxopts.hpp>
-#include <GUIbuiltinDrawAST.h>
+#include <CLIbuiltinDrawAST.h>
 
 using namespace std;
 using namespace ast;
@@ -14,7 +15,6 @@ using namespace lexers;
 using namespace cxxopts;
 using namespace context;
 using namespace exception;
-using namespace cimg_library;
 
 INITIALIZE_EASYLOGGINGPP
 
@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
         options.parse(argc, argv);
 
         Scope scope;
-        CImg<float> image(1000, 1000, 1, 3, 255);
+        Image image(1000, 1000);
         scope.addBuiltinFunc("#painter", std::make_shared<ast::CLIBuiltinDrawAST>(image));
         Lexer lex;
         lex.appendExp("(load \"setup.scm\")").appendExp(string("(load \"") + argv[argc - 1] + "\")");
