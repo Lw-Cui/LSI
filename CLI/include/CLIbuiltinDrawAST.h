@@ -1,15 +1,16 @@
 #ifndef CLI_BUILTINDRAW_H
 #define CLI_BUILTINDRAW_H
 
+#include <memory>
 #include <AST.h>
-
-#define cimg_display 0
-#include <CImg.h>
+#include <image.h>
 
 namespace ast {
+    class CLIBuiltinDrawImpl;
+
     class CLIBuiltinDrawAST : public BuiltinDrawAST {
     public:
-        CLIBuiltinDrawAST(cimg_library::CImg<float> &im);
+        CLIBuiltinDrawAST(Image &i);
 
         std::string display() const override;
 
@@ -18,7 +19,7 @@ namespace ast {
     private:
         std::pair<float, float> toPair(const std::shared_ptr<ExprAST> &);
 
-        cimg_library::CImg<float> &image;
+        Image &image;
     };
 }
 
