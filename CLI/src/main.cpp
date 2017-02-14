@@ -27,17 +27,24 @@ int main(int argc, char *argv[]) {
                                        "[%logger] %msg [%fbase:%line]");
     try {
         Options options(argv[0], " - command line options");
-        options.add_options()("o,output", "output filename", value<std::string>()->default_value("output.bmp"));
+        options.add_options()("o,output", "output filename", value<std::string>()->default_value("output.bmp"))
+                ("src", "src filename", cxxopts::value<std::vector<std::string>>());
+        options.parse_positional("src");
         options.parse(argc, argv);
 
+        Lexer lex;
         Scope scope;
         Image image(1000, 1000);
         scope.addBuiltinFunc("#painter", std::make_shared<ast::CLIBuiltinDrawAST>(image));
-        Lexer lex;
-        lex.appendExp("(load \"setup.scm\")").appendExp(string("(load \"") + argv[argc - 1] + "\")");
-        shared_ptr<ExprAST> ptr = parseAllExpr(lex)->eval(scope);
-        if (ptr) {
-            cout << ptr->display();
+        lex.appendExp("(load \"setup.scm\")");
+        parseAllExpr(lex)->eval(scope);
+        auto &v = options["src"].as<std::vector<std::string>>();
+        for (const auto &s : v) {
+            lex.appendExp(string("(load \"") + s + "\")");
+            shared_ptr<ExprAST> ptr = parseAllExpr(lex)->eval(scope);
+            if (ptr) {
+                cout << ptr->display();
+            }
         }
         image.save(options["output"].as<string>().c_str());
     } catch (RuntimeError &e) {
