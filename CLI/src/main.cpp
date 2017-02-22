@@ -26,9 +26,13 @@ int main(int argc, char *argv[]) {
     el::Loggers::reconfigureAllLoggers(el::ConfigurationType::Format,
                                        "[%logger] %msg [%fbase:%line]");
     try {
-        Options options(argv[0], " - command line options");
-        options.add_options()("o,output", "output filename", value<std::string>()->default_value("output.bmp"))
-                ("src", "src filename", cxxopts::value<std::vector<std::string>>())("h,help", "Print help");
+        Options options(argv[0], " - Scheme Interpreter/painter command line options");
+        options.add_options()("o,output", "output image", value<std::string>()->default_value("output.bmp"))
+                ("src", "src filename", cxxopts::value<std::vector<std::string>>())
+                ("p,path", "stdlib path", cxxopts::value<std::string>())
+                ("nostdlib", "Do not use stdlib")
+                ("nopainter", "Do not use painter-related lib")
+                ("h,help", "Print help");
         options.parse_positional("src");
         options.parse(argc, argv);
 
@@ -36,11 +40,22 @@ int main(int argc, char *argv[]) {
             cout << options.help({""}) << endl;
             return 0;
         }
+        if (!options.count("nostdlib") && !options.count("path")) {
+            cout << "You must specify -nostdlib or -path" << endl;
+            return 0;
+        }
         Lexer lex;
         Scope scope;
+        auto path = options["path"].as<std::string>();
         Image image(1000, 1000);
-        scope.addBuiltinFunc("#painter", std::make_shared<ast::CLIBuiltinDrawAST>(image));
-        lex.appendExp("(load \"setup.scm\")");
+        if (!options.count("nostdlib")) {
+            lex.appendExp("(load \"" + path + "/Base.scm\")");
+        }
+        if (!options.count("nopainter") && !options.count("nostdlib")) {
+            scope.addBuiltinFunc("#painter", std::make_shared<ast::CLIBuiltinDrawAST>(image));
+            lex.appendExp("(load \"" + path + "/Shape.scm\")");
+            lex.appendExp("(load \"" + path + "/Frame.scm\")");
+        }
         parseAllExpr(lex)->eval(scope);
         auto &v = options["src"].as<std::vector<std::string>>();
         for (const auto &s : v) {
@@ -50,7 +65,9 @@ int main(int argc, char *argv[]) {
                 cout << ptr->display();
             }
         }
-        image.save(options["output"].as<string>().c_str());
+        if (!options.count("nopainter") && !options.count("nostdlib")) {
+            image.save(options["output"].as<string>().c_str());
+        }
     } catch (RuntimeError &e) {
         cout << e.what() << endl;
         throw;
