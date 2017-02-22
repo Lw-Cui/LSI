@@ -28,10 +28,14 @@ int main(int argc, char *argv[]) {
     try {
         Options options(argv[0], " - command line options");
         options.add_options()("o,output", "output filename", value<std::string>()->default_value("output.bmp"))
-                ("src", "src filename", cxxopts::value<std::vector<std::string>>());
+                ("src", "src filename", cxxopts::value<std::vector<std::string>>())("h,help", "Print help");
         options.parse_positional("src");
         options.parse(argc, argv);
 
+        if (options.count("h")) {
+            cout << options.help({""}) << endl;
+            return 0;
+        }
         Lexer lex;
         Scope scope;
         Image image(1000, 1000);
