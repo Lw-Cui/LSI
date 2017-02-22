@@ -35,7 +35,7 @@ make GI_CLI
 
 即可依次读取并执行 test/CLITest.scm 和 Test.scm文件，并将生成的图片储存为 outout.bmp。
 
-更多的demo 见 [gallary](./gallary) 
+更多的demo 见 [gallery](./gallery) 
 
 ### 图形交互
 
