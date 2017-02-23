@@ -11,7 +11,6 @@ INITIALIZE_EASYLOGGINGPP
 using namespace std;
 using namespace con;
 
-/*
 void setStack(rlim_t stackSize) {
     struct rlimit rl;
     if (getrlimit(RLIMIT_STACK, &rl) == 0) {
@@ -27,7 +26,6 @@ void setStack(rlim_t stackSize) {
         throw std::logic_error("Cannot get resource info.");
     }
 }
-*/
 
 int main(int argc, char *argv[]) {
     START_EASYLOGGINGPP(argc, argv);
