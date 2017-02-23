@@ -1,6 +1,8 @@
 #include <exception>
 #include <iostream>
 #include <vector>
+#include <sys/time.h>
+#include <sys/resource.h>
 #include <context.h>
 #include <parser.h>
 #include <image.h>
