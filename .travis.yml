@@ -169,7 +169,7 @@ script:
   - ./../build/Interpreter/test/parser/parserTest
   - ./../build/Interpreter/test/lisplib/lispLibTest
   - |
-    if [[ $BUILD_TYPE == "osx" ]]; then
+    if [[ $BUILD_TYPE == "Release" ]]; then
     bash ../CLI/test/test.sh
     fi
   - |
