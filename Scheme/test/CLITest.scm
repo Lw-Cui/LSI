@@ -1,4 +1,3 @@
 # ONLY USE FOR TEST
-(define rhombus-painter (below line-painter (flip-vert line-painter)))
+(define rhombus-painter (below st-painter (flip-vert st-painter)))
 ((beside rhombus-painter rhombus-painter) default)
-(+ 5 6)
