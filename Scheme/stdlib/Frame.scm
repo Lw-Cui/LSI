@@ -20,14 +20,12 @@
 (define (origin-frame frame) (car frame))
 (define (edgeX-frame frame) (car (cdr frame)))
 (define (edgeY-frame frame) (cdr (cdr frame)))
-(define (length-of-edgeX frame) (distance (edgeX-frame frame) (cons 0 0)))
-(define (length-of-edgeY frame) (distance (edgeY-frame frame) (cons 0 0)))
 
 # default drawing board
 (define default (make-frame (cons 0 0) (cons 1 0) (cons 0 1)))
-(define board (make-frame (cons 0 0) (cons 1000 0) (cons 0 1000)))
 
-(define (frame-coord-map-ratio frame)
+# v in unit rectangle --> frame
+(define (frame-coord-map frame)
   (lambda (v)
     (add-vect
      (origin-frame frame)
@@ -36,7 +34,7 @@
 
 (define (transform-painter painter origin corner1 corner2)
   (lambda (frame)
-    (let ((m (frame-coord-map-ratio frame)))
+    (let ((m (frame-coord-map frame)))
       (let ((new-origin (m origin)))
         (painter (make-frame new-origin
                              (sub-vect (m corner1) new-origin)
@@ -76,30 +74,19 @@
           (paint-down (transform-painter painter2 (make-vect 0 0) (make-vect 1 0) split-point)))
       (lambda (frame) (paint-up frame) (paint-down frame)))))
 
-(define (frame-coord-map frame)
+(define board (make-frame (cons 0 0) (cons 1000 0) (cons 0 1000)))
+(define (frame-real-coord-map frame)
   (lambda (v)
     (add-vect
-     (origin-frame frame)
-     (add-vect (scale-vect (/ (xcor-vect v) (length-of-edgeX board)) (edgeX-frame frame))
-               (scale-vect (/ (ycor-vect v) (length-of-edgeY board)) (edgeY-frame frame))))))
-
-(define (ratio-to-reality frame)
-  (define (scaleXY-vect scaleX scaleY vect)
-    (make-vect (* scaleX (xcor-vect vect))
-               (* scaleY (ycor-vect vect))))
-  (let ((lenX (length-of-edgeX board))
-        (lenY (length-of-edgeY board)))
-    (make-frame (scaleXY-vect lenX lenY (origin-frame frame))
-                (scaleXY-vect lenX lenY (edgeX-frame frame))
-                (scaleXY-vect lenX lenY (edgeY-frame frame)))))
+     ((frame-coord-map board) (origin-frame frame))
+     (add-vect (scale-vect (xcor-vect v) (edgeX-frame frame))
+               (scale-vect (ycor-vect v) (edgeY-frame frame))))))
 
 (define (st-painter frame)
-    (let ((reality (ratio-to-reality frame)))
-        (#painter (map (sierpinskiTriangle
-                (cons 0 0) (cons 500 866) (cons 1000 0)
-                (* 40 (/ (length-of-edgeX board) (length-of-edgeX reality))))
-                (frame-coord-map reality)))))
+        (#painter (map (sierpinskiTriangle (cons 0 0) (cons 500 866) (cons 1000 0)
+                (/ (* 50 (sqrt 2)) (distance (add-vect (edgeY-frame frame) (edgeX-frame frame)) (cons 0 0))))
+                (frame-real-coord-map frame))))
 
 (define (line-painter frame)
-    (#painter (map (line (cons 0 0) (cons 100 100)) (frame-coord-map (ratio-to-reality frame))))
-    (#painter (map (line (cons 100 100) (cons 200 0)) (frame-coord-map (ratio-to-reality frame)))))
+    (#painter (map (line (cons 0 0) (cons 100 100)) (frame-real-coord-map frame)))
+    (#painter (map (line (cons 100 100) (cons 200 0)) (frame-real-coord-map frame))))

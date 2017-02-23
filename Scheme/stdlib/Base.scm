@@ -51,8 +51,8 @@
   (if (< a b) a (remainder (- a b) b)))
 
 (define (reverse l)
-    (define (reverse-iter l1 res)
-        (if (null? l1) res (reverse-iter (cdr l1) (cons (car l1) res))))
+    (define (reverse-iter li res)
+        (if (null? li) res (reverse-iter (cdr li) (cons (car li) res))))
     (reverse-iter l nil))
 
 (define (append l1 . more)
