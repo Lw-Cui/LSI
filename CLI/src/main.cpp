@@ -18,6 +18,22 @@ using namespace exception;
 
 INITIALIZE_EASYLOGGINGPP
 
+void setStack(rlim_t stackSize) {
+    struct rlimit rl;
+    if (getrlimit(RLIMIT_STACK, &rl) == 0) {
+        if (rl.rlim_cur < stackSize) {
+            rl.rlim_cur = stackSize;
+            if (setrlimit(RLIMIT_STACK, &rl) != 0) {
+                CLOG(DEBUG, "exception");
+                throw std::logic_error("Cannot set resource info.");
+            }
+        }
+    } else {
+        CLOG(DEBUG, "exception");
+        throw std::logic_error("Cannot get resource info.");
+    }
+}
+
 int main(int argc, char *argv[]) {
     START_EASYLOGGINGPP(argc, argv);
     el::Logger *parserLogger = el::Loggers::getLogger("parser");
@@ -26,6 +42,7 @@ int main(int argc, char *argv[]) {
     el::Loggers::reconfigureAllLoggers(el::ConfigurationType::Format,
                                        "[%logger] %msg [%fbase:%line]");
     try {
+        setStack(48 * 1024 * 1024);   // 48MB
         Options options(argv[0], " - Scheme Interpreter/painter command line options");
         options.add_options()("o,output", "output image", value<std::string>()->default_value("output.bmp"))
                 ("src", "src filename", cxxopts::value<std::vector<std::string>>())
