@@ -6,11 +6,11 @@
 using namespace lexers;
 using namespace parser;
 using namespace exception;
-
+using std::make_shared;
 
 TEST(BaseLibrariesParsingTest, MinusTest) {
     try {
-        Scope s;
+        auto s = make_shared<Scope>();
         lexers::Lexer lex("(load \"setup.scm\")");
 
         lex.appendExp("(- 5 7 8 9)");
@@ -26,7 +26,7 @@ TEST(BaseLibrariesParsingTest, MinusTest) {
 
 TEST(BaseLibrariesParsingTest, NotTest) {
     try {
-        Scope s;
+        auto s = make_shared<Scope>();
         lexers::Lexer lex("(load \"setup.scm\")");
 
         lex.appendExp("(not (- 10 4 6))");
@@ -44,7 +44,7 @@ TEST(BaseLibrariesParsingTest, NotTest) {
 
 TEST(BaseLibrariesParsingTest, AndTest) {
     try {
-        Scope s;
+        auto s = make_shared<Scope>();
         lexers::Lexer lex("(load \"setup.scm\")");
 
         lex.appendExp("(and (+ 10 4 6) (- 10 1) (+ 5 6))");
@@ -61,7 +61,7 @@ TEST(BaseLibrariesParsingTest, AndTest) {
 }
 
 TEST(BaseLibrariesParsingTest, OrTest) {
-    Scope s;
+    auto s = make_shared<Scope>();
     lexers::Lexer lex("(load \"setup.scm\")");
 
     lex.appendExp("(or (+ 10 (#opposite 10)) (- 10 1) (- 1 10))");
@@ -81,7 +81,7 @@ TEST(BaseLibrariesParsingTest, OrTest) {
 
 TEST(BaseLibrariesParsingTest, GreaterTest) {
     try {
-        Scope s;
+        auto s = make_shared<Scope>();
         lexers::Lexer lex("(load \"setup.scm\")");
 
         lex.appendExp("(> (+ 10 (- 10)) 0)");
@@ -103,7 +103,7 @@ TEST(BaseLibrariesParsingTest, GreaterTest) {
 
 TEST(BaseLibrariesParsingTest, EqualTest) {
     try {
-        Scope s;
+        auto s = make_shared<Scope>();
         lexers::Lexer lex("(load \"setup.scm\")");
 
         lex.appendExp("(= (+ 10 (- 10)) 0)");
@@ -122,7 +122,7 @@ TEST(BaseLibrariesParsingTest, EqualTest) {
 
 TEST(BaseLibrariesParsingTest, RemainderTest) {
     try {
-        Scope s;
+        auto s = make_shared<Scope>();
         lexers::Lexer lex("(load \"setup.scm\")");
 
         lex.appendExp("(remainder 5 2)");
@@ -137,7 +137,7 @@ TEST(BaseLibrariesParsingTest, RemainderTest) {
 }
 
 TEST(BaseLibrariesParsingTest, DivideTest) {
-    Scope s;
+    auto s = make_shared<Scope>();
     lexers::Lexer lex("(load \"setup.scm\")");
 
     try {
@@ -153,7 +153,7 @@ TEST(BaseLibrariesParsingTest, DivideTest) {
 }
 
 TEST(BaseLibrariesParsingTest, ReverseTest) {
-    Scope s;
+    auto s = make_shared<Scope>();
     try {
         lexers::Lexer lex("(load \"setup.scm\")");
         lex.appendExp("(reverse (list 1 2 3))");
@@ -166,7 +166,7 @@ TEST(BaseLibrariesParsingTest, ReverseTest) {
 }
 
 TEST(BaseLibrariesParsingTest, AppendTest) {
-    Scope s;
+    auto s = make_shared<Scope>();
     lexers::Lexer lex("(load \"setup.scm\")");
     try {
         lex.appendExp("(append (list 1 2 3) (list 4 5 6))");
@@ -183,7 +183,7 @@ TEST(BaseLibrariesParsingTest, AppendTest) {
 }
 
 TEST(BaseLibrariesParsingTest, MapTest) {
-    Scope s;
+    auto s = make_shared<Scope>();
     try {
         lexers::Lexer lex("(load \"setup.scm\")");
         lex.appendExp("(map (list 1 2 3) (lambda (x) (+ x 1)))");
@@ -196,7 +196,7 @@ TEST(BaseLibrariesParsingTest, MapTest) {
 }
 
 TEST(BaseLibrariesParsingTest, ReduceTest) {
-    Scope s;
+    auto s = make_shared<Scope>();
     lexers::Lexer lex("(load \"setup.scm\")");
 
     lex.appendExp("(reduce (list 1 2 3) (lambda (res x) (+ res x)) 0)");
@@ -212,7 +212,7 @@ TEST(BaseLibrariesParsingTest, ReduceTest) {
 }
 
 TEST(BaseLibrariesParsingTest, sqrtTest) {
-    Scope s;
+    auto s = make_shared<Scope>();
     lexers::Lexer lex("(load \"setup.scm\")");
 
     try {
@@ -228,7 +228,7 @@ TEST(BaseLibrariesParsingTest, sqrtTest) {
 }
 
 TEST(BaseLibrariesParsingTest, YcombinatorTest) {
-    Scope s;
+    auto s = make_shared<Scope>();
     lexers::Lexer lex("(load \"setup.scm\")");
 
     lex.appendExp(""
@@ -249,7 +249,7 @@ TEST(BaseLibrariesParsingTest, YcombinatorTest) {
 
 TEST(BaseLibrariesParsingTest, lengthTest) {
     try {
-        Scope s;
+        auto s = make_shared<Scope>();
         lexers::Lexer lex("(load \"setup.scm\")");
 
         lex.appendExp("(length (list 5 7 9 0))");

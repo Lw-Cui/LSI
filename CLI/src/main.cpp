@@ -64,14 +64,14 @@ int main(int argc, char *argv[]) {
             return 0;
         }
         Lexer lex;
-        Scope scope;
+        auto scope = std::make_shared<Scope>();
         auto path = options["path"].as<std::string>();
         Image image(1000, 1000);
         if (!options.count("nostdlib")) {
             lex.appendExp("(load \"" + path + "/Base.scm\")");
         }
         if (!options.count("nopainter") && !options.count("nostdlib")) {
-            scope.addBuiltinFunc("#painter", std::make_shared<ast::CLIBuiltinDrawAST>(image));
+            scope->addBuiltinFunc("#painter", std::make_shared<ast::CLIBuiltinDrawAST>(image));
             lex.appendExp("(load \"" + path + "/Shape.scm\")");
             lex.appendExp("(load \"" + path + "/Frame.scm\")");
         }

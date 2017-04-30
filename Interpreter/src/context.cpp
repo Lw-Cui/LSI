@@ -47,7 +47,7 @@ namespace context {
         }
 
         bool addName(const std::string &id, pExpr ptr) {
-            if (impl.count(id)) return false;
+            //if (impl.count(id)) return false;
             impl[id] = ptr;
             return true;
         }
@@ -55,7 +55,7 @@ namespace context {
         pExpr searchName(const std::string &id) const {
             if (impl.count(id)) return impl.find(id)->second;
             pExpr ret = nullptr;
-            for (const auto &sptr: nameDomain)
+            for (auto sptr: nameDomain)
                 if ((ret = sptr->searchName(id)) != nullptr)
                     return ret;
             return ret;
@@ -97,7 +97,7 @@ namespace context {
         p->setSearchDomain(tmp);
     }
 
-    Scope::Scope(std::shared_ptr<ScopeImpl> ptr) : impl(ptr) {
+    Scope::Scope(const Scope &other) : impl(new ScopeImpl(*other.impl)) {
     }
 }
 

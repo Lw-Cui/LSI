@@ -13,9 +13,9 @@ TEST(LibrariesParsingTest, BasicConsTest) {
         lexers::Lexer lex;
         lex.appendExp("(load \"setup.scm\")").appendExp("(load \"Test.scm\")");
         parseAllExpr(lex)->eval(s);
-        ASSERT_TRUE(s.count("Cons"));
-        ASSERT_TRUE(s.count("Car"));
-        ASSERT_TRUE(s.count("Cdr"));
+        ASSERT_TRUE(s->count("Cons"));
+        ASSERT_TRUE(s->count("Car"));
+        ASSERT_TRUE(s->count("Cdr"));
 
         lex.appendExp("(define p (Cons 1 2))").appendExp("(Cdr p)");
         auto res = parseAllExpr(lex)->eval(s);

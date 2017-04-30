@@ -80,6 +80,7 @@ std::shared_ptr<ExprAST> LambdaAST::apply(const std::vector<std::shared_ptr<Expr
     tmp->setSearchDomain(context);
     // If external scope contains some identifier needed by this lambda, update it.
     tmp->setSearchDomain(ss);
+
     for (size_t i = 0; i < actualArgs.size(); i++) {
         if (formalArgs[i] != ".") {
             // Evaluate value from current scope and set them into scope of lambda
@@ -96,22 +97,35 @@ std::shared_ptr<ExprAST> LambdaAST::apply(const std::vector<std::shared_ptr<Expr
         tmp->addName(formalArgs[2], std::make_shared<NilAST>()->eval(ss));
 
     for (int i = 0; i < expression.size() - 1; i++)
-        // Don't eval sub-routine
-        if (!std::dynamic_pointer_cast<LambdaBindingAST>(expression[i])) expression[i]->eval(tmp);
+        // Don't eval sub-routine. We've done it in LambdaAST::eval
+        if (!std::dynamic_pointer_cast<LambdaBindingAST>(expression[i]))
+            expression[i]->eval(tmp);
     return expression.back()->eval(tmp);
 }
 
 std::shared_ptr<ExprAST> LambdaAST::eval(std::shared_ptr<Scope> &ss) const {
-    // Set closure.
-    context->setSearchDomain(ss);
-    ss->openNewScope(ss);
-    // Set sub-routine closure.
     for (auto expr: expression)
-        if (std::shared_ptr<LambdaBindingAST> ptr = std::dynamic_pointer_cast<LambdaBindingAST>(expr)) {
+        if (std::shared_ptr<LambdaBindingAST> ptr = std::dynamic_pointer_cast<LambdaBindingAST>(expr))
+            // Here we evaluate the sub-routine.
             expr->eval(context);
-            LOG(DEBUG) << "Set closure of sub-routine: " << ptr->getIdentifier();
-        }
-    return std::make_shared<LambdaAST>(*this);
+
+    // Set closure. We operate in a copy of this LambdaAST otherwise all share same context.
+    auto lambda = std::make_shared<LambdaAST>(*this);
+    lambda->context->setSearchDomain(ss);
+    ss->openNewScope(ss);
+    return lambda;
+}
+
+std::shared_ptr<ExprAST> ValueBindingAST::eval(std::shared_ptr<Scope> &ss) const {
+    ss->addName(getIdentifier(), value->eval(ss));
+    return nullptr;
+}
+
+std::shared_ptr<ExprAST> LambdaBindingAST::eval(std::shared_ptr<Scope> &ss) const {
+    ss->addName(getIdentifier(), lambda);
+    // Set closure.
+    lambda->eval(ss);
+    return nullptr;
 }
 
 std::string LambdaAST::display() const {
@@ -132,18 +146,6 @@ std::shared_ptr<ExprAST> BuiltinListAST::apply(const std::vector<std::shared_ptr
     for (int i = static_cast<int>(actualArgs.size() - 1); i >= 0; i--)
         list = std::make_shared<PairAST>(actualArgs[i]->eval(s), list);
     return list;
-}
-
-std::shared_ptr<ExprAST> ValueBindingAST::eval(std::shared_ptr<Scope> &ss) const {
-    ss->addName(getIdentifier(), value->eval(ss));
-    return nullptr;
-}
-
-std::shared_ptr<ExprAST> LambdaBindingAST::eval(std::shared_ptr<Scope> &ss) const {
-    ss->addName(getIdentifier(), lambda);
-    // Set closure.
-    lambda->eval(ss);
-    return nullptr;
 }
 
 std::shared_ptr<ExprAST> LambdaApplicationAST::eval(std::shared_ptr<Scope> &ss) const {

@@ -6,6 +6,7 @@
 using namespace lexers;
 using namespace parser;
 using namespace exception;
+using std::make_shared;
 
 TEST(FrameLibParsingTest, VectorTest) {
     auto s = std::make_shared<Scope>();
@@ -34,7 +35,7 @@ TEST(FrameLibParsingTest, VectorTest) {
 }
 
 TEST(FrameLibParsingTest, FrameBasicTest) {
-    Scope s;
+    auto s = make_shared<Scope>();
     lexers::Lexer lex;
     lex.appendExp("(load \"setup.scm\")");
     lex.appendExp("(define frame (make-frame (cons 50 40) (cons 5 4) (cons 4 5)))");
@@ -59,7 +60,7 @@ TEST(FrameLibParsingTest, FrameBasicTest) {
 
 TEST(FrameLibParsingTest, CoordinateMapTest) {
     try {
-        Scope s;
+        auto s = make_shared<Scope>();
         lexers::Lexer lex;
         lex.appendExp("(load \"setup.scm\")");
 
@@ -81,7 +82,7 @@ TEST(FrameLibParsingTest, CoordinateMapTest) {
 
 TEST(FrameLibParsingTest, transformPainterTest) {
     try {
-        Scope s;
+        auto s = make_shared<Scope>();
         lexers::Lexer lex;
         lex.appendExp("(load \"setup.scm\")");
 
@@ -111,7 +112,7 @@ TEST(FrameLibParsingTest, transformPainterTest) {
 
 TEST(FrameLibParsingTest, MultpletransformPainterTest) {
     try {
-        Scope s;
+        auto s = make_shared<Scope>();
         lexers::Lexer lex;
         lex.appendExp("(load \"setup.scm\")");
 

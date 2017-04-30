@@ -23,7 +23,7 @@ namespace context {
     public:
         Scope();
 
-        Scope(std::shared_ptr<ScopeImpl>);
+        Scope(const Scope &);
 
         bool addName(const std::string &id, pExpr ptr);
 

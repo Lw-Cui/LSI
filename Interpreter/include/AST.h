@@ -180,6 +180,9 @@ namespace ast {
                   std::vector<std::shared_ptr<ExprAST>> expr)
                 : formalArgs{v}, expression{expr}, context{new Scope} {}
 
+        LambdaAST(const LambdaAST &other) : formalArgs(other.formalArgs), expression(other.expression),
+                                            context(new Scope(*other.context)) {}
+
         std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, pScope &) override;
 
         std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &ss) const override;
