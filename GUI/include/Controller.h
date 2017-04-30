@@ -131,7 +131,7 @@ namespace con {
         Window &textWindow;
         mutable Text currentText;
         std::vector<Text> history;
-        context::Scope scope;
+        context::pScope scope;
 
         Window &drawingBoard;
         std::vector<con::VertexArray> shapes;

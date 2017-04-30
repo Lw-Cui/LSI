@@ -4,21 +4,22 @@
 
 using namespace lexers;
 using namespace parser;
+using namespace std;
 
 TEST(FunctionParsingTest, FunctionDefinitionTest) {
-    Scope ss;
+    auto ss = std::make_shared<Scope>();
     lexers::Lexer lex{"(define (foo x) x)"};
     auto exprPtr = parser::parseExpr(lex)->eval(ss);
-    ASSERT_TRUE(ss.count("foo"));
-    ASSERT_STREQ("#proceduce", ss["foo"]->display().c_str());
+    ASSERT_TRUE(ss->count("foo"));
+    ASSERT_STREQ("#proceduce", ss->searchName("foo")->display().c_str());
 }
 
 TEST(FunctionParsingTest, FunctionApplicationTest) {
-    Scope ss;
+    auto ss = std::make_shared<Scope>();
     lexers::Lexer lex{"(define (foo x) x)"};
     auto exprPtr = parser::parseExpr(lex)->eval(ss);
-    ASSERT_TRUE(ss.count("foo"));
-    ASSERT_STREQ("#proceduce", ss["foo"]->display().c_str());
+    ASSERT_TRUE(ss->count("foo"));
+    ASSERT_STREQ("#proceduce", ss->searchName("foo")->display().c_str());
 
     lex.appendExp("(foo 5)");
     exprPtr = parseExpr(lex)->eval(ss);
@@ -28,8 +29,8 @@ TEST(FunctionParsingTest, FunctionApplicationTest) {
 
     lex.appendExp("(define (bar x) (+ x 1))");
     exprPtr = parseExpr(lex)->eval(ss);
-    ASSERT_TRUE(ss.count("bar"));
-    ASSERT_STREQ("#proceduce", ss["bar"]->display().c_str());
+    ASSERT_TRUE(ss->count("bar"));
+    ASSERT_STREQ("#proceduce", ss->searchName("bar")->display().c_str());
 
     lex.appendExp("(bar 4)");
     exprPtr = parseExpr(lex)->eval(ss);
@@ -39,7 +40,7 @@ TEST(FunctionParsingTest, FunctionApplicationTest) {
 
     lex.appendExp("(define n 4)");
     exprPtr = parseExpr(lex)->eval(ss);
-    ASSERT_TRUE(ss.count("n"));
+    ASSERT_TRUE(ss->count("n"));
 
     lex.appendExp("(bar n)");
     exprPtr = parseExpr(lex)->eval(ss);
@@ -49,18 +50,18 @@ TEST(FunctionParsingTest, FunctionApplicationTest) {
 
     lex.appendExp("(define b (foo (bar n)))");
     exprPtr = parseExpr(lex)->eval(ss);
-    ASSERT_TRUE(ss.count("b"));
-    exprPtr = ss["b"];
+    ASSERT_TRUE(ss->count("b"));
+    exprPtr = ss->searchName("b");
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
     numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
     ASSERT_EQ(5, numPtr->getValue());
 }
 
 TEST(FunctionParsingTest, FunctionWithMultipleArgumentsTest) {
-    Scope ss;
+    auto ss = std::make_shared<Scope>();
     lexers::Lexer lex("(define (bar x y) (+ x y 1))");
     auto exprPtr = parseExpr(lex)->eval(ss);
-    ASSERT_TRUE(ss.count("bar"));
+    ASSERT_TRUE(ss->count("bar"));
 
     lex.appendExp("(define n 5)");
     parseExpr(lex)->eval(ss);
@@ -73,7 +74,7 @@ TEST(FunctionParsingTest, FunctionWithMultipleArgumentsTest) {
 }
 
 TEST(FunctionParsingTest, HighOrderFunctionTEST) {
-    Scope ss;
+    auto ss = std::make_shared<Scope>();
     lexers::Lexer lex;
     lex.appendExp("(define (bar f x) (+ (f x) 1))")
             .appendExp("(define (foo x) (+ x 1))")
@@ -88,7 +89,7 @@ TEST(FunctionParsingTest, HighOrderFunctionTEST) {
 }
 
 TEST(FunctionParsingTest, LambdaDefintionTest) {
-    Scope ss;
+    auto ss = std::make_shared<Scope>();
     lexers::Lexer lex;
     lex.appendExp("((lambda (x) (+ x 1)) 5)");
     auto exprPtr = parseAllExpr(lex)->eval(ss);
@@ -100,7 +101,7 @@ TEST(FunctionParsingTest, LambdaDefintionTest) {
 }
 
 TEST(FunctionParsingTest, LambdaApplicationTest) {
-    Scope ss;
+    auto ss = std::make_shared<Scope>();
     lexers::Lexer lex;
     lex.appendExp("(define (bar f y) (+ (f y) 1))")
             .appendExp("(define n 4)")
@@ -114,7 +115,7 @@ TEST(FunctionParsingTest, LambdaApplicationTest) {
 }
 
 TEST(FunctionParsingTest, RecursiveTest) {
-    Scope ss;
+    auto ss = std::make_shared<Scope>();
     lexers::Lexer lex;
     lex.appendExp("(load \"setup.scm\")").appendExp("(define (add x y) (if (not (= x 0)) (+ 1 (add (- x 1) y)) y))")
             .appendExp("(add 5 6)");
@@ -135,7 +136,7 @@ TEST(FunctionParsingTest, RecursiveTest) {
 }
 
 TEST(FunctionParsingTest, VariableArgumentsTest) {
-    Scope ss;
+    auto ss = std::make_shared<Scope>();
     lexers::Lexer lex;
     lex.appendExp("(define (add-list l) (if (null? l) 0 (+ (car l) (add-list (cdr l)))))")
             .appendExp("(add-list (list 5 6 7 8))");
@@ -155,7 +156,7 @@ TEST(FunctionParsingTest, VariableArgumentsTest) {
 }
 
 TEST(FunctionParsingTest, MultipleExpressionTest) {
-    Scope ss;
+    auto ss = std::make_shared<Scope>();
     lexers::Lexer lex;
     lex.appendExp("(define (getNum) (+ 5 6) (+ 7 8))")
             .appendExp("(getNum)");
@@ -179,7 +180,7 @@ TEST(FunctionParsingTest, MultipleExpressionTest) {
 }
 
 TEST(FunctionParsingTest, NestedFunctionTest) {
-    Scope ss;
+    auto ss = std::make_shared<Scope>();
     lexers::Lexer lex;
     lex.appendExp("(define (and expr . args)"
                           "(define (list-and l)"
@@ -191,7 +192,7 @@ TEST(FunctionParsingTest, NestedFunctionTest) {
 }
 
 TEST(FunctionParsingTest, LambdaFunctionRecursiveTest) {
-    Scope s;
+    auto s = std::make_shared<Scope>();
     lexers::Lexer lex("(load \"setup.scm\")");
 
     lex.appendExp("(((lambda (give-me-a-function)"
@@ -212,7 +213,7 @@ TEST(FunctionParsingTest, LambdaFunctionRecursiveTest) {
 }
 
 TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV2) {
-    Scope s;
+    auto s = std::make_shared<Scope>();
     lexers::Lexer lex("(load \"setup.scm\")");
     auto res = parseAllExpr(lex)->eval(s);
 
@@ -235,7 +236,7 @@ TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV2) {
 }
 
 TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV3) {
-    Scope s;
+    auto s = std::make_shared<Scope>();
     lexers::Lexer lex("(load \"setup.scm\")");
     auto res = parseAllExpr(lex)->eval(s);
 
@@ -254,7 +255,7 @@ TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV3) {
 }
 
 TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV4) {
-    Scope s;
+    auto s = std::make_shared<Scope>();
     lexers::Lexer lex("(load \"setup.scm\")");
     auto res = parseAllExpr(lex)->eval(s);
 

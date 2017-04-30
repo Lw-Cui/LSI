@@ -33,57 +33,71 @@ namespace context {
             addBuiltinFunc("else", make_shared<BooleansTrueAST>());
         }
 
-        shared_ptr<parser::ExprAST> &operator[](const std::string &str) {
-            return impl[str];
-        }
-
         void clear() {
             impl.clear();
             addAllBuiltinFunc();
         }
 
-        size_t count(const std::string &str) const {
-            return impl.count(str);
+        bool count(const std::string &str) const {
+            return searchName(str) != nullptr;
         }
 
-        Iter begin() const {
-            return impl.begin();
+        void setSearchDomain(const pScope &s) {
+            nameDomain.push_back(s);
         }
 
-        Iter end() const {
-            return impl.end();
+        bool addName(const std::string &id, pExpr ptr) {
+            if (impl.count(id)) return false;
+            impl[id] = ptr;
+            return true;
+        }
+
+        pExpr searchName(const std::string &id) const {
+            if (impl.count(id)) return impl.find(id)->second;
+            pExpr ret = nullptr;
+            for (const auto &sptr: nameDomain)
+                if ((ret = sptr->searchName(id)) != nullptr)
+                    return ret;
+            return ret;
         }
 
     private:
         std::unordered_map<std::string, std::shared_ptr<ast::ExprAST>> impl;
+
+        std::vector<pScope> nameDomain;
     };
 
-    shared_ptr<parser::ExprAST> &Scope::operator[](const std::string &str) {
-        return impl->operator[](str);
-    }
-
-    size_t Scope::count(const std::string &str) const {
+    bool Scope::count(const std::string &str) const {
         return impl->count(str);
     }
 
     Scope::Scope() : impl{new ScopeImpl} {}
 
-    Scope::Scope(const Scope &s) : impl{make_shared<ScopeImpl>(*s.impl)} {
-    }
-
-    Scope &Scope::operator=(const Scope &s) {
-        impl = make_shared<ScopeImpl>(*s.impl);
-        return *this;
-    }
-
-    Iter Scope::begin() const { return impl->begin(); }
-
-    Iter Scope::end() const { return impl->end(); }
-
     void Scope::clear() { impl->clear(); }
 
     void Scope::addBuiltinFunc(const std::string &name, const std::shared_ptr<ast::ExprAST> &expr) const {
         impl->addBuiltinFunc(name, expr);
+    }
+
+    void Scope::setSearchDomain(const pScope &s) {
+        impl->setSearchDomain(s);
+    }
+
+    pExpr Scope::searchName(const std::string &id) const {
+        return impl->searchName(id);
+    }
+
+    bool Scope::addName(const std::string &id, pExpr ptr) {
+        return impl->addName(id, ptr);
+    }
+
+    void Scope::openNewScope(pScope &p) {
+        auto tmp = p;
+        p = make_shared<Scope>();
+        p->setSearchDomain(tmp);
+    }
+
+    Scope::Scope(std::shared_ptr<ScopeImpl> ptr) : impl(ptr) {
     }
 }
 

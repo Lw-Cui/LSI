@@ -45,7 +45,7 @@ void Controller::moveScreen(float delta) {
 void Controller::clearScreen() {
     history.clear();
     currentText.clearStr();
-    scope.clear();
+    scope->clear();
 }
 
 void Controller::execute() {
@@ -110,9 +110,9 @@ void con::Text::clearStr() {
 }
 
 con::Controller::Controller(Window &text, Window &board)
-        : textWindow{text}, drawingBoard{board} {
+        : textWindow{text}, drawingBoard{board}, scope{new Scope} {
     lexers::Lexer lex;
-    scope.addBuiltinFunc("#painter", std::make_shared<ast::GUIBuiltinDrawAST>(*this));
+    scope->addBuiltinFunc("#painter", std::make_shared<ast::GUIBuiltinDrawAST>(*this));
     lex.appendExp("(load \"setup.scm\")");
     parser::parseAllExpr(lex)->eval(scope);
     pushString(currentText.formatString, "]=> ");

@@ -8,7 +8,7 @@ using namespace parser;
 using namespace exception;
 
 TEST(FrameLibParsingTest, VectorTest) {
-    Scope s;
+    auto s = std::make_shared<Scope>();
     lexers::Lexer lex;
     lex.appendExp("(load \"setup.scm\")");
 

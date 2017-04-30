@@ -9,7 +9,7 @@ using namespace exception;
 
 TEST(LibrariesParsingTest, BasicConsTest) {
     try {
-        Scope s;
+        auto s = std::make_shared<Scope>();
         lexers::Lexer lex;
         lex.appendExp("(load \"setup.scm\")").appendExp("(load \"Test.scm\")");
         parseAllExpr(lex)->eval(s);
@@ -36,7 +36,7 @@ TEST(LibrariesParsingTest, BasicConsTest) {
 
 TEST(LibrariesParsingTest, AdvanceConsTest) {
     try {
-        Scope s;
+        auto s = std::make_shared<Scope>();
         lexers::Lexer lex;
 
         lex.appendExp("(load \"setup.scm\")")

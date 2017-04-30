@@ -6,7 +6,7 @@ using namespace lexers;
 using namespace parser;
 
 TEST(BuiltinFunctionTest, BuiltinConsTest) {
-    Scope s;
+    auto s = std::make_shared<Scope>();
     lexers::Lexer lex("(define p (cons 1 2))");
 
     lex.appendExp("(cdr p)");
@@ -33,7 +33,7 @@ TEST(BuiltinFunctionTest, BuiltinConsTest) {
 }
 
 TEST(BuiltinFunctionTest, NullTest) {
-    Scope s;
+    auto s = std::make_shared<Scope>();
     lexers::Lexer lex("(define p (cons 1 nil))");
 
     lex.appendExp("(null? (cdr p))");
@@ -50,7 +50,7 @@ TEST(BuiltinFunctionTest, NullTest) {
 }
 
 TEST(BuiltinFunctionTest, AddTest) {
-    Scope ss;
+    auto ss = std::make_shared<Scope>();
     lexers::Lexer lex{"(+ 5 6 7)"};
     auto exprPtr = parseExpr(lex)->eval(ss);
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
@@ -60,7 +60,7 @@ TEST(BuiltinFunctionTest, AddTest) {
 }
 
 TEST(BuiltinFunctionTest, MultiplyTest) {
-    Scope ss;
+    auto ss = std::make_shared<Scope>();
     lexers::Lexer lex{"(* 5 6 7)"};
     auto exprPtr = parseExpr(lex)->eval(ss);
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
@@ -70,7 +70,7 @@ TEST(BuiltinFunctionTest, MultiplyTest) {
 }
 
 TEST(BuiltinFunctionTest, MinusTest) {
-    Scope ss;
+    auto ss = std::make_shared<Scope>();
 
     lexers::Lexer lex;
     lex.appendExp("(load \"setup.scm\")").appendExp("(- 5)");
@@ -89,7 +89,7 @@ TEST(BuiltinFunctionTest, MinusTest) {
 }
 
 TEST(BuiltinFunctionTest, LessThanTest) {
-    Scope ss;
+    auto ss = std::make_shared<Scope>();
     lexers::Lexer lex("(< 5 6 7)");
     auto exprPtr = parseExpr(lex)->eval(ss);
     ASSERT_TRUE(std::dynamic_pointer_cast<BooleansTrueAST>(exprPtr));
@@ -114,7 +114,7 @@ TEST(BuiltinFunctionTest, LessThanTest) {
 }
 
 TEST(BuiltinFunctionTest, NilTest) {
-    Scope ss;
+    auto ss = std::make_shared<Scope>();
     lexers::Lexer lex;
     lex.appendExp("(null? (list 1 2 3))");
     auto exprPtr = parseAllExpr(lex)->eval(ss);
@@ -135,7 +135,7 @@ TEST(BuiltinFunctionTest, NilTest) {
 }
 
 TEST(BuiltinFunctionTest, ListTest) {
-    Scope ss;
+    auto ss = std::make_shared<Scope>();
     lexers::Lexer lex;
     lex.appendExp("(define seq (list 1 2 3))").appendExp("(car seq)");
     auto exprPtr = parseAllExpr(lex)->eval(ss);

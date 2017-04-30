@@ -7,36 +7,45 @@
 
 namespace ast {
     class ExprAST;
+
 }
 
 namespace context {
+
+    using Iter = std::unordered_map<std::string, std::shared_ptr<ast::ExprAST>>::const_iterator;
+    using pExpr = std::shared_ptr<ast::ExprAST>;
+
     class ScopeImpl;
 
-    typedef std::unordered_map<std::string, std::shared_ptr<ast::ExprAST>>::const_iterator Iter;
-
     class Scope {
+        friend class ScopeImpl;
+
     public:
         Scope();
 
-        Scope(const Scope &);
+        Scope(std::shared_ptr<ScopeImpl>);
 
-        Scope &operator=(const Scope &);
+        bool addName(const std::string &id, pExpr ptr);
 
-        std::shared_ptr<ast::ExprAST> &operator[](const std::string &str);
+        pExpr searchName(const std::string &) const;
 
-        size_t count(const std::string &str) const;
+        void setSearchDomain(const std::shared_ptr<Scope> &);
+
+        bool count(const std::string &str) const;
+
+        void openNewScope(std::shared_ptr<Scope> &);
 
         void addBuiltinFunc(const std::string &name, const std::shared_ptr<ast::ExprAST> &) const;
 
         void clear();
 
-        Iter begin() const;
-
-        Iter end() const;
-
     private:
+
         std::shared_ptr<ScopeImpl> impl;
+
     };
+
+    using pScope = std::shared_ptr<Scope>;
 }
 
 #endif //GI_CONTEXT_H

@@ -8,12 +8,12 @@ using namespace parser;
 using namespace exception;
 
 TEST(KeywordParsingTest, IdentifierDefinitionTest) {
-    Scope ss;
+    auto ss = std::make_shared<Scope>();
     lexers::Lexer lex{"(define n 5)"};
 
     auto exprPtr = parser::parseExpr(lex)->eval(ss);
-    ASSERT_TRUE(ss.count("n"));
-    exprPtr = ss["n"]->eval(ss);
+    ASSERT_TRUE(ss->count("n"));
+    exprPtr = ss->searchName("n")->eval(ss);
 
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
     auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
@@ -22,9 +22,9 @@ TEST(KeywordParsingTest, IdentifierDefinitionTest) {
 
     lex.appendExp("(define a n)");
     exprPtr = parseExpr(lex)->eval(ss);
-    ASSERT_TRUE(ss.count("a"));
+    ASSERT_TRUE(ss->count("a"));
 
-    exprPtr = ss["a"]->eval(ss);
+    exprPtr = ss->searchName("a")->eval(ss);
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
     numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
     ASSERT_EQ(5, numPtr->getValue());
@@ -32,7 +32,7 @@ TEST(KeywordParsingTest, IdentifierDefinitionTest) {
 }
 
 TEST(KeywordParsingTest, IfStatementTest) {
-    Scope ss;
+    auto ss = std::make_shared<Scope>();
     lexers::Lexer lex;
     lex.appendExp("(load \"setup.scm\")").appendExp("(if (+ 5 6) 5 6)");
     auto exprPtr = parseAllExpr(lex)->eval(ss);
@@ -46,7 +46,7 @@ TEST(KeywordParsingTest, IfStatementTest) {
     parseExpr(lex)->eval(ss);
     lex.appendExp("(define (foo x) (+ x 2))");
     parseExpr(lex)->eval(ss);
-    ASSERT_TRUE(ss.count("foo"));
+    ASSERT_TRUE(ss->count("foo"));
 
     lex.appendExp("((if (= (add 0 0) 1) bar foo) 0)");
     exprPtr = parseExpr(lex)->eval(ss);
@@ -56,7 +56,7 @@ TEST(KeywordParsingTest, IfStatementTest) {
 }
 
 TEST(KeywordParsingTest, CondStatementTest) {
-    Scope ss;
+    auto ss = std::make_shared<Scope>();
     lexers::Lexer lex;
     lex.appendExp("(load \"setup.scm\")")
             .appendExp("(cond ((= (+ 5 6) 0) 1)"
@@ -78,7 +78,7 @@ TEST(KeywordParsingTest, CondStatementTest) {
 
 
 TEST(KeywordParsingTest, LetStatementTest) {
-    Scope ss;
+    auto ss = std::make_shared<Scope>();
     lexers::Lexer lex;
     lex.appendExp("(load \"setup.scm\")")
             .appendExp("(let((x 5)"
@@ -92,7 +92,7 @@ TEST(KeywordParsingTest, LetStatementTest) {
 }
 
 TEST(KeywordParsingTest, BooleansTest) {
-    Scope ss;
+    auto ss = std::make_shared<Scope>();
     lexers::Lexer lex("#t");
     ASSERT_TRUE(std::dynamic_pointer_cast<BooleansTrueAST>(parseExpr(lex)->eval(ss)));
     lex.appendExp("#f");
@@ -100,11 +100,11 @@ TEST(KeywordParsingTest, BooleansTest) {
 }
 
 TEST(KeywordParsingTest, LoadingFileTest) {
-    Scope s;
+    auto s = std::make_shared<Scope>();
     lexers::Lexer lex("(load \"Test.scm\")");
     parseExpr(lex)->eval(s);
-    ASSERT_TRUE(s.count("foo"));
-    ASSERT_TRUE(s.count("add"));
+    ASSERT_TRUE(s->count("foo"));
+    ASSERT_TRUE(s->count("add"));
 
     lex.appendExp("(foo 5)");
     auto res = parseExpr(lex)->eval(s);
@@ -121,7 +121,7 @@ TEST(KeywordParsingTest, LoadingFileTest) {
 }
 
 TEST(KeywordParsingTest, NilTest) {
-    Scope s;
+    auto s = std::make_shared<Scope>();
     lexers::Lexer lex;
     lex.appendExp("(define p (cons 1 nil))").appendExp("(cdr p)");
 

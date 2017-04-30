@@ -3,7 +3,7 @@
 using namespace std;
 
 std::shared_ptr<ast::ExprAST>
-ast::GUIBuiltinDrawAST::apply(const std::vector<std::shared_ptr<ast::ExprAST>> &actualArgs, context::Scope &s) {
+ast::GUIBuiltinDrawAST::apply(const std::vector<std::shared_ptr<ast::ExprAST>> &actualArgs, pScope &s) {
     con::VertexArray vertex;
     auto exprPtr = actualArgs.front()->eval(s);
     while (!dynamic_pointer_cast<NilAST>(exprPtr)) {

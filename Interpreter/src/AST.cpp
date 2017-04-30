@@ -7,12 +7,12 @@ using namespace parser;
 using namespace exception;
 using namespace ast;
 
-std::shared_ptr<ExprAST> ExprAST::eval(Scope &) const {
+std::shared_ptr<ExprAST> ExprAST::eval(std::shared_ptr<Scope> &) const {
     CLOG(DEBUG, "exception");
     throw RuntimeError("Expression cannot be evaluated.");
 };
 
-std::shared_ptr<ExprAST> ExprAST::apply(const std::vector<std::shared_ptr<ExprAST>> &, Scope &) {
+std::shared_ptr<ExprAST> ExprAST::apply(const std::vector<std::shared_ptr<ExprAST>> &, pScope &) {
     CLOG(DEBUG, "exception");
     throw RuntimeError("Expression cannot be applied.");
 }
@@ -22,14 +22,14 @@ std::string ExprAST::display() const {
     throw RuntimeError("Expression cannot be displayed.");
 }
 
-std::shared_ptr<ExprAST> LoadingFileAST::eval(Scope &s) const {
+std::shared_ptr<ExprAST> LoadingFileAST::eval(std::shared_ptr<Scope> &s) const {
     std::ifstream fin{filename};
     std::string str{std::istreambuf_iterator<char>(fin), std::istreambuf_iterator<char>()};
     lexers::Lexer lex{str};
     return parseAllExpr(lex)->eval(s);
 }
 
-std::shared_ptr<ExprAST> IfStatementAST::eval(Scope &ss) const {
+std::shared_ptr<ExprAST> IfStatementAST::eval(std::shared_ptr<Scope> &ss) const {
     auto ptr = condition->eval(ss);
     if (auto boolFalsePtr = std::dynamic_pointer_cast<BooleansFalseAST>(ptr)) {
         return falseClause->eval(ss);
@@ -37,7 +37,7 @@ std::shared_ptr<ExprAST> IfStatementAST::eval(Scope &ss) const {
     return trueClause->eval(ss);
 }
 
-std::shared_ptr<ExprAST> BuiltinLessThanAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
+std::shared_ptr<ExprAST> BuiltinLessThanAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, pScope &s) {
     bool res = std::is_sorted(
             std::begin(actualArgs), std::end(actualArgs),
             [&](std::shared_ptr<ExprAST> p1, std::shared_ptr<ExprAST> p2) {
@@ -56,7 +56,7 @@ std::shared_ptr<ExprAST> BuiltinLessThanAST::apply(const std::vector<std::shared
     else return std::make_shared<BooleansFalseAST>();
 }
 
-std::shared_ptr<ExprAST> NumberAST::eval(Scope &) const {
+std::shared_ptr<ExprAST> NumberAST::eval(std::shared_ptr<Scope> &) const {
     return std::make_shared<NumberAST>(getValue());
 }
 
@@ -66,35 +66,34 @@ std::string NumberAST::display() const {
     return ss.str();
 }
 
-std::shared_ptr<ExprAST> IdentifierAST::eval(Scope &ss) const {
-    if (ss.count(getId())) {
-        return ss[getId()];
+std::shared_ptr<ExprAST> IdentifierAST::eval(std::shared_ptr<Scope> &ss) const {
+    if (ss->count(getId())) {
+        return ss->searchName(getId());
     } else {
         throw UnboundIdentifier("Unbound identifier: " + getId());
     }
 }
 
-std::shared_ptr<ExprAST> LambdaAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &ss) {
+std::shared_ptr<ExprAST> LambdaAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, pScope &ss) {
     // Backup scope of lambda. If not, recursive calls will destroy scope by binding arguments.
-    Scope tmp = context;
+    auto tmp = std::make_shared<Scope>();
+    tmp->setSearchDomain(context);
     // If external scope contains some identifier needed by this lambda, update it.
-    for (auto iter: ss)
-        if (!tmp.count(iter.first))
-            tmp[iter.first] = iter.second;
+    tmp->setSearchDomain(ss);
     for (size_t i = 0; i < actualArgs.size(); i++) {
         if (formalArgs[i] != ".") {
             // Evaluate value from current scope and set them into scope of lambda
-            tmp[formalArgs[i]] = actualArgs[i]->eval(ss);
+            tmp->addName(formalArgs[i], actualArgs[i]->eval(ss));
         } else {
-            tmp[formalArgs[i + 1]] =
-                    std::make_shared<BuiltinListAST>()->apply(
-                            std::vector<std::shared_ptr<ExprAST>>{actualArgs.begin() + i, actualArgs.end()},
-                            ss);
+            tmp->addName(formalArgs[i + 1],
+                         std::make_shared<BuiltinListAST>()->apply(
+                                 std::vector<std::shared_ptr<ExprAST>>{actualArgs.begin() + i, actualArgs.end()},
+                                 ss));
             break;
         }
     }
     if (actualArgs.size() == 1 && formalArgs.size() > 1 && formalArgs[1] == ".")
-        tmp[formalArgs[2]] = std::make_shared<NilAST>()->eval(ss);
+        tmp->addName(formalArgs[2], std::make_shared<NilAST>()->eval(ss));
 
     for (int i = 0; i < expression.size() - 1; i++)
         // Don't eval sub-routine
@@ -102,9 +101,10 @@ std::shared_ptr<ExprAST> LambdaAST::apply(const std::vector<std::shared_ptr<Expr
     return expression.back()->eval(tmp);
 }
 
-std::shared_ptr<ExprAST> LambdaAST::eval(Scope &ss) const {
+std::shared_ptr<ExprAST> LambdaAST::eval(std::shared_ptr<Scope> &ss) const {
     // Set closure.
-    context = ss;
+    context->setSearchDomain(ss);
+    ss->openNewScope(ss);
     // Set sub-routine closure.
     for (auto expr: expression)
         if (std::shared_ptr<LambdaBindingAST> ptr = std::dynamic_pointer_cast<LambdaBindingAST>(expr)) {
@@ -118,7 +118,7 @@ std::string LambdaAST::display() const {
     return "#proceduce";
 }
 
-std::shared_ptr<ExprAST> BuiltinOppositeAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
+std::shared_ptr<ExprAST> BuiltinOppositeAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, pScope &s) {
     if (auto p = std::dynamic_pointer_cast<NumberAST>(actualArgs.front()->eval(s))) {
         return std::make_shared<NumberAST>(-p->getValue());
     } else {
@@ -127,27 +127,26 @@ std::shared_ptr<ExprAST> BuiltinOppositeAST::apply(const std::vector<std::shared
     }
 }
 
-std::shared_ptr<ExprAST> BuiltinListAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
+std::shared_ptr<ExprAST> BuiltinListAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, pScope &s) {
     std::shared_ptr<ExprAST> list = std::make_shared<NilAST>();
     for (int i = static_cast<int>(actualArgs.size() - 1); i >= 0; i--)
         list = std::make_shared<PairAST>(actualArgs[i]->eval(s), list);
     return list;
 }
 
-std::shared_ptr<ExprAST> ValueBindingAST::eval(Scope &ss) const {
-    ss[getIdentifier()] = value->eval(ss);
+std::shared_ptr<ExprAST> ValueBindingAST::eval(std::shared_ptr<Scope> &ss) const {
+    ss->addName(getIdentifier(), value->eval(ss));
     return nullptr;
 }
 
-std::shared_ptr<ExprAST> LambdaBindingAST::eval(Scope &ss) const {
+std::shared_ptr<ExprAST> LambdaBindingAST::eval(std::shared_ptr<Scope> &ss) const {
+    ss->addName(getIdentifier(), lambda);
     // Set closure.
     lambda->eval(ss);
-    // Set its identifier into its context to support recursion. Cannot assign lambda->eval(ss) to others!
-    ss[getIdentifier()] = lambda->upgradeScope()[getIdentifier()] = lambda;
     return nullptr;
 }
 
-std::shared_ptr<ExprAST> LambdaApplicationAST::eval(Scope &ss) const {
+std::shared_ptr<ExprAST> LambdaApplicationAST::eval(std::shared_ptr<Scope> &ss) const {
     if (std::dynamic_pointer_cast<LambdaAST>(lambdaOrIdentifier)) {
         return lambdaOrIdentifier->apply(actualArgs, ss);
     } else {
@@ -155,7 +154,7 @@ std::shared_ptr<ExprAST> LambdaApplicationAST::eval(Scope &ss) const {
     }
 }
 
-std::shared_ptr<ExprAST> BooleansTrueAST::eval(Scope &) const {
+std::shared_ptr<ExprAST> BooleansTrueAST::eval(std::shared_ptr<Scope> &) const {
     return std::make_shared<BooleansTrueAST>();
 }
 
@@ -163,7 +162,7 @@ std::string BooleansTrueAST::display() const {
     return "#t";
 }
 
-std::shared_ptr<ExprAST> BooleansFalseAST::eval(Scope &) const {
+std::shared_ptr<ExprAST> BooleansFalseAST::eval(std::shared_ptr<Scope> &) const {
     return std::make_shared<BooleansFalseAST>();
 }
 
@@ -171,14 +170,14 @@ std::string BooleansFalseAST::display() const {
     return "#f";
 }
 
-std::shared_ptr<ExprAST> AllExprAST::eval(Scope &s) const {
+std::shared_ptr<ExprAST> AllExprAST::eval(std::shared_ptr<Scope> &s) const {
     std::shared_ptr<ExprAST> res;
     for (auto ptr : exprVec)
         res = ptr->eval(s);
     return res;
 }
 
-std::shared_ptr<ExprAST> PairAST::eval(Scope &s) const {
+std::shared_ptr<ExprAST> PairAST::eval(std::shared_ptr<Scope> &s) const {
     return std::make_shared<PairAST>(data.first->eval(s), data.second->eval(s));
 }
 
@@ -186,14 +185,14 @@ std::string PairAST::display() const {
     return "(" + data.first->display() + ", " + data.second->display() + ")";
 }
 
-std::shared_ptr<ExprAST> BuiltinNullAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
+std::shared_ptr<ExprAST> BuiltinNullAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, pScope &s) {
     if (auto p = std::dynamic_pointer_cast<NilAST>(actualArgs.front()->eval(s)))
         return std::make_shared<BooleansTrueAST>();
     else
         return std::make_shared<BooleansFalseAST>();
 }
 
-std::shared_ptr<ExprAST> NilAST::eval(Scope &s) const {
+std::shared_ptr<ExprAST> NilAST::eval(std::shared_ptr<Scope> &s) const {
     return std::make_shared<NilAST>(*this);
 }
 
@@ -201,7 +200,7 @@ std::string NilAST::display() const {
     return "\'()";
 }
 
-std::shared_ptr<ExprAST> BuiltinCarAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
+std::shared_ptr<ExprAST> BuiltinCarAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, pScope &s) {
     if (auto p = std::dynamic_pointer_cast<PairAST>(actualArgs.front()->eval(s))) {
         return p->data.first;
     } else {
@@ -210,7 +209,7 @@ std::shared_ptr<ExprAST> BuiltinCarAST::apply(const std::vector<std::shared_ptr<
     }
 }
 
-std::shared_ptr<ExprAST> BuiltinCdrAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
+std::shared_ptr<ExprAST> BuiltinCdrAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, pScope &s) {
     if (auto p = std::dynamic_pointer_cast<PairAST>(actualArgs.front()->eval(s))) {
         return p->data.second;
     } else {
@@ -219,7 +218,7 @@ std::shared_ptr<ExprAST> BuiltinCdrAST::apply(const std::vector<std::shared_ptr<
     }
 }
 
-std::shared_ptr<ExprAST> BuiltinConsAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
+std::shared_ptr<ExprAST> BuiltinConsAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, pScope &s) {
     if (actualArgs.size() == 2) {
         return std::make_shared<PairAST>(actualArgs[0]->eval(s), actualArgs[1]->eval(s));
     } else {
@@ -228,7 +227,7 @@ std::shared_ptr<ExprAST> BuiltinConsAST::apply(const std::vector<std::shared_ptr
     }
 }
 
-std::shared_ptr<ExprAST> BuiltinAddAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
+std::shared_ptr<ExprAST> BuiltinAddAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, pScope &s) {
     double num = 0;
     for (auto element: actualArgs) {
         std::shared_ptr<ExprAST> res = element->eval(s);
@@ -242,7 +241,7 @@ std::shared_ptr<ExprAST> BuiltinAddAST::apply(const std::vector<std::shared_ptr<
     return std::make_shared<NumberAST>(num);
 }
 
-std::shared_ptr<ExprAST> BuiltinMultiplyAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
+std::shared_ptr<ExprAST> BuiltinMultiplyAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, pScope &s) {
     double num = 1;
     for (auto element: actualArgs) {
         std::shared_ptr<ExprAST> res = element->eval(s);
@@ -257,7 +256,7 @@ std::shared_ptr<ExprAST> BuiltinMultiplyAST::apply(const std::vector<std::shared
 }
 
 std::shared_ptr<ExprAST>
-BuiltinReciprocalAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &s) {
+BuiltinReciprocalAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, pScope &s) {
     if (auto p = std::dynamic_pointer_cast<NumberAST>(actualArgs.front()->eval(s))) {
         return std::make_shared<NumberAST>(1 / p->getValue());
     } else {
@@ -273,15 +272,16 @@ CondStatementAST::CondStatementAST(const std::vector<std::shared_ptr<ExprAST>> &
         ifStatement = std::make_shared<IfStatementAST>(condition[index], result[index], ifStatement);
 }
 
-std::shared_ptr<ExprAST> CondStatementAST::eval(Scope &s) const {
+std::shared_ptr<ExprAST> CondStatementAST::eval(std::shared_ptr<Scope> &s) const {
     return ifStatement->eval(s);
 }
 
-std::shared_ptr<ExprAST> LetStatementAST::eval(Scope &s) const {
-    Scope tmp = s;
+std::shared_ptr<ExprAST> LetStatementAST::eval(std::shared_ptr<Scope> &s) const {
+    auto tmp = std::make_shared<Scope>();
+    tmp->setSearchDomain(s);
     for (auto index = 0; index < identifier.size(); index++) {
         auto id = std::dynamic_pointer_cast<IdentifierAST>(identifier[index])->getId();
-        tmp[id] = value[index]->eval(s);
+        tmp->addName(id, value[index]->eval(s));
     }
     return expr->eval(tmp);
 }
