@@ -9,7 +9,7 @@ using namespace exception;
 
 int main() {
     try {
-        Scope s;
+        auto s = make_shared<Scope>();
         lexers::Lexer lex;
         lex.appendExp("(load \"setup.scm\")").appendExp("(load \"benchmark.scm\")");
         lex.appendExp("#(length (l-painter default))");

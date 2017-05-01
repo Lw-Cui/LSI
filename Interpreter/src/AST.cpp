@@ -7,6 +7,62 @@ using namespace parser;
 using namespace exception;
 using namespace ast;
 
+std::shared_ptr<ExprAST> LambdaAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, pScope &ss) {
+    // Backup scope of lambda. If not, recursive calls will destroy scope by binding arguments.
+    auto tmp = std::make_shared<Scope>();
+    tmp->setSearchDomain(context);
+    // If external scope contains some identifier needed by this lambda, update it.
+    tmp->setSearchDomain(ss);
+
+    for (size_t i = 0; i < actualArgs.size(); i++) {
+        if (formalArgs[i] != ".") {
+            // Evaluate value from current scope and set them into scope of lambda
+            tmp->addName(formalArgs[i], actualArgs[i]->eval(ss));
+        } else {
+            tmp->addName(formalArgs[i + 1],
+                         std::make_shared<BuiltinListAST>()->apply(
+                                 std::vector<std::shared_ptr<ExprAST>>{actualArgs.begin() + i, actualArgs.end()},
+                                 ss));
+            break;
+        }
+    }
+    if (actualArgs.size() == 1 && formalArgs.size() > 1 && formalArgs[1] == ".")
+        tmp->addName(formalArgs[2], std::make_shared<NilAST>()->eval(ss));
+
+    for (int i = 0; i < expression.size() - 1; i++)
+        // Don't eval sub-routine. We've done it (it could be only evaluated once) in LambdaAST::eval
+        if (!std::dynamic_pointer_cast<LambdaBindingAST>(expression[i]))
+            expression[i]->eval(tmp);
+    return expression.back()->eval(tmp);
+}
+
+std::shared_ptr<ExprAST> LambdaAST::eval(std::shared_ptr<Scope> &ss) const {
+    // Here we evaluate the sub-routine.
+    for (auto expr: expression)
+        if (std::shared_ptr<LambdaBindingAST> ptr = std::dynamic_pointer_cast<LambdaBindingAST>(expr))
+            // Add sub-routine into original context of this lambda
+            expr->eval(context);
+
+    // Set closure. We operate in a copy of this LambdaAST otherwise all share same context.
+    // context of lambda will be copy fully.
+    auto lambda = std::make_shared<LambdaAST>(*this);
+    lambda->context->setSearchDomain(ss);
+    ss->openNewScope(ss);
+
+    return lambda;
+}
+
+std::shared_ptr<ExprAST> LambdaBindingAST::eval(std::shared_ptr<Scope> &ss) const {
+    // Set closure.
+    ss->addName(getIdentifier(), lambda->eval(ss));
+    return nullptr;
+}
+
+std::shared_ptr<ExprAST> ValueBindingAST::eval(std::shared_ptr<Scope> &ss) const {
+    ss->addName(getIdentifier(), value->eval(ss));
+    return nullptr;
+}
+
 std::shared_ptr<ExprAST> ExprAST::eval(std::shared_ptr<Scope> &) const {
     CLOG(DEBUG, "exception");
     throw RuntimeError("Expression cannot be evaluated.");
@@ -74,59 +130,6 @@ std::shared_ptr<ExprAST> IdentifierAST::eval(std::shared_ptr<Scope> &ss) const {
     }
 }
 
-std::shared_ptr<ExprAST> LambdaAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, pScope &ss) {
-    // Backup scope of lambda. If not, recursive calls will destroy scope by binding arguments.
-    auto tmp = std::make_shared<Scope>();
-    tmp->setSearchDomain(context);
-    // If external scope contains some identifier needed by this lambda, update it.
-    tmp->setSearchDomain(ss);
-
-    for (size_t i = 0; i < actualArgs.size(); i++) {
-        if (formalArgs[i] != ".") {
-            // Evaluate value from current scope and set them into scope of lambda
-            tmp->addName(formalArgs[i], actualArgs[i]->eval(ss));
-        } else {
-            tmp->addName(formalArgs[i + 1],
-                         std::make_shared<BuiltinListAST>()->apply(
-                                 std::vector<std::shared_ptr<ExprAST>>{actualArgs.begin() + i, actualArgs.end()},
-                                 ss));
-            break;
-        }
-    }
-    if (actualArgs.size() == 1 && formalArgs.size() > 1 && formalArgs[1] == ".")
-        tmp->addName(formalArgs[2], std::make_shared<NilAST>()->eval(ss));
-
-    for (int i = 0; i < expression.size() - 1; i++)
-        // Don't eval sub-routine. We've done it in LambdaAST::eval
-        if (!std::dynamic_pointer_cast<LambdaBindingAST>(expression[i]))
-            expression[i]->eval(tmp);
-    return expression.back()->eval(tmp);
-}
-
-std::shared_ptr<ExprAST> LambdaAST::eval(std::shared_ptr<Scope> &ss) const {
-    for (auto expr: expression)
-        if (std::shared_ptr<LambdaBindingAST> ptr = std::dynamic_pointer_cast<LambdaBindingAST>(expr))
-            // Here we evaluate the sub-routine.
-            expr->eval(context);
-
-    // Set closure. We operate in a copy of this LambdaAST otherwise all share same context.
-    auto lambda = std::make_shared<LambdaAST>(*this);
-    lambda->context->setSearchDomain(ss);
-    ss->openNewScope(ss);
-    return lambda;
-}
-
-std::shared_ptr<ExprAST> ValueBindingAST::eval(std::shared_ptr<Scope> &ss) const {
-    ss->addName(getIdentifier(), value->eval(ss));
-    return nullptr;
-}
-
-std::shared_ptr<ExprAST> LambdaBindingAST::eval(std::shared_ptr<Scope> &ss) const {
-    ss->addName(getIdentifier(), lambda);
-    // Set closure.
-    lambda->eval(ss);
-    return nullptr;
-}
 
 std::string LambdaAST::display() const {
     return "#proceduce";
