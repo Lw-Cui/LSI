@@ -15,7 +15,8 @@ int main() {
         lex.appendExp("#(length (l-painter default))");
         lex.appendExp(
                 "(length ((beside (below painter (flip-vert painter)) (below painter (flip-vert painter))) default))");
-        auto res = parseAllExpr(lex)->eval(s);
+        auto ast = parseAllExpr(lex);
+        auto res = ast->eval(s, ast);
         auto numPtr = std::dynamic_pointer_cast<NumberAST>(res);
         if (numPtr) {
             cout << numPtr->getValue() << endl;

@@ -18,15 +18,18 @@ TEST(FrameLibParsingTest, VectorTest) {
 
     lex.appendExp("(xcor-vect vect1)");
     try {
-        auto ptr = parseAllExpr(lex)->eval(s);
+        auto ast = parseAllExpr(lex);
+        auto ptr = ast->eval(s, ast);
         ASSERT_STREQ("5", ptr->display().c_str());
 
         lex.appendExp("(add-vect vect1 vect2)");
-        ptr = parseAllExpr(lex)->eval(s);
+        ast = parseAllExpr(lex);
+        ptr = ast->eval(s, ast);
         ASSERT_STREQ("(7, 8)", ptr->display().c_str());
 
         lex.appendExp("(sub-vect (scale-vect 3 vect2) vect1)");
-        ptr = parseAllExpr(lex)->eval(s);
+        ast = parseAllExpr(lex);
+        ptr = ast->eval(s, ast);
         ASSERT_STREQ("(1, 4)", ptr->display().c_str());
     } catch (RuntimeError &e) {
         CLOG(DEBUG, "exception") << e.what();
@@ -42,15 +45,18 @@ TEST(FrameLibParsingTest, FrameBasicTest) {
 
     lex.appendExp("(origin-frame frame)");
     try {
-        auto ptr = parseAllExpr(lex)->eval(s);
+        auto ast = parseAllExpr(lex);
+        auto ptr = ast->eval(s, ast);
         ASSERT_STREQ("(50, 40)", ptr->display().c_str());
 
         lex.appendExp("(edgeX-frame frame)");
-        ptr = parseAllExpr(lex)->eval(s);
+        ast = parseAllExpr(lex);
+        ptr = ast->eval(s, ast);
         ASSERT_STREQ("(5, 4)", ptr->display().c_str());
 
         lex.appendExp("(edgeY-frame frame)");
-        ptr = parseAllExpr(lex)->eval(s);
+        ast = parseAllExpr(lex);
+        ptr = ast->eval(s, ast);
         ASSERT_STREQ("(4, 5)", ptr->display().c_str());
     } catch (RuntimeError &e) {
         CLOG(DEBUG, "exception") << e.what();
@@ -67,12 +73,14 @@ TEST(FrameLibParsingTest, CoordinateMapTest) {
         lex.appendExp("(define frame (make-frame (cons 0.5 0.5) (cons -0.5 -0.5) (cons 0.5 -0.5)))")
                 .appendExp("(define coord-map (frame-coord-map frame))")
                 .appendExp("(coord-map (cons 500 50))");
-        auto ptr = parseAllExpr(lex)->eval(s);
+        auto ast = parseAllExpr(lex);
+        auto ptr = ast->eval(s, ast);
         ASSERT_STREQ("(-224.5, -274.5)", ptr->display().c_str());
 
         lex.appendExp("(define frame2 (make-frame (cons 1 1) (cons 0 -1) (cons -1 0)))")
                 .appendExp("((frame-coord-map frame2) (cons 100 300))");
-        ptr = parseAllExpr(lex)->eval(s);
+        ast = parseAllExpr(lex);
+        ptr = ast->eval(s, ast);
         ASSERT_STREQ("(-299, -99)", ptr->display().c_str());
     } catch (RuntimeError &e) {
         CLOG(DEBUG, "exception") << e.what();
@@ -90,19 +98,23 @@ TEST(FrameLibParsingTest, transformPainterTest) {
                               "  (lambda (vect)"
                               "    ((frame-coord-map frame) vect)))");
         lex.appendExp("(((flip-vert painter) default) (cons 100 100))");
-        auto ptr = parseAllExpr(lex)->eval(s);
+        auto ast = parseAllExpr(lex);
+        auto ptr = ast->eval(s, ast);
         ASSERT_STREQ("(100, -99)", ptr->display().c_str());
 
         lex.appendExp("(((shrink-to-upper-right painter) default) (cons 100 100))");
-        ptr = parseAllExpr(lex)->eval(s);
+        ast = parseAllExpr(lex);
+        ptr = ast->eval(s, ast);
         ASSERT_STREQ("(50.5, 50.5)", ptr->display().c_str());
 
         lex.appendExp("(((shrink-to-upper-left painter) default) (cons 100 100))");
-        ptr = parseAllExpr(lex)->eval(s);
+        ast = parseAllExpr(lex);
+        ptr = ast->eval(s, ast);
         ASSERT_STREQ("(50, 50.5)", ptr->display().c_str());
 
         lex.appendExp("(((rotate90 painter) default) (cons -100 100))");
-        ptr = parseAllExpr(lex)->eval(s);
+        ast = parseAllExpr(lex);
+        ptr = ast->eval(s, ast);
         ASSERT_STREQ("(-99, -100)", ptr->display().c_str());
     } catch (RuntimeError &e) {
         CLOG(DEBUG, "exception") << e.what();
@@ -120,11 +132,13 @@ TEST(FrameLibParsingTest, MultpletransformPainterTest) {
                               "  (lambda (vect)"
                               "    ((frame-coord-map frame) vect)))");
         lex.appendExp("(((rotate90 (flip-vert painter)) default) (cons 100 100))");
-        auto ptr = parseAllExpr(lex)->eval(s);
+        auto ast = parseAllExpr(lex);
+        auto ptr = ast->eval(s, ast);
         ASSERT_STREQ("(100, 100)", ptr->display().c_str());
 
         lex.appendExp("(((shrink-to-upper-left(rotate90 (flip-vert painter))) default) (cons 100 100))");
-        ptr = parseAllExpr(lex)->eval(s);
+        ast = parseAllExpr(lex);
+        ptr = ast->eval(s, ast);
         ASSERT_STREQ("(50, 50.5)", ptr->display().c_str());
     } catch (RuntimeError &e) {
         CLOG(DEBUG, "exception") << e.what();

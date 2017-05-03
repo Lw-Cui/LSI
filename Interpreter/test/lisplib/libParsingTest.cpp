@@ -12,19 +12,22 @@ TEST(LibrariesParsingTest, BasicConsTest) {
         auto s = std::make_shared<Scope>();
         lexers::Lexer lex;
         lex.appendExp("(load \"setup.scm\")").appendExp("(load \"Test.scm\")");
-        parseAllExpr(lex)->eval(s);
+        auto ast = parseAllExpr(lex);
+        ast->eval(s, ast);
         ASSERT_TRUE(s->count("Cons"));
         ASSERT_TRUE(s->count("Car"));
         ASSERT_TRUE(s->count("Cdr"));
 
         lex.appendExp("(define p (Cons 1 2))").appendExp("(Cdr p)");
-        auto res = parseAllExpr(lex)->eval(s);
+        ast = parseAllExpr(lex);
+        auto res = ast->eval(s, ast);
         ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
         auto numPtr = std::dynamic_pointer_cast<NumberAST>(res);
         ASSERT_EQ(2, numPtr->getValue());
 
         lex.appendExp("(Car p)");
-        res = parseAllExpr(lex)->eval(s);
+        ast = parseAllExpr(lex);
+        res = ast->eval(s, ast);
         ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
         numPtr = std::dynamic_pointer_cast<NumberAST>(res);
         ASSERT_EQ(1, numPtr->getValue());
@@ -45,7 +48,8 @@ TEST(LibrariesParsingTest, AdvanceConsTest) {
                 .appendExp("(define pp (Cons 3 p))")
                 .appendExp("(Car (Cdr pp))");
 
-        auto res = parseAllExpr(lex)->eval(s);
+        auto ast = parseAllExpr(lex);
+        auto res = ast->eval(s, ast);
         ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
         auto numPtr = std::dynamic_pointer_cast<NumberAST>(res);
         ASSERT_EQ(1, numPtr->getValue());

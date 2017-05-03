@@ -75,11 +75,13 @@ int main(int argc, char *argv[]) {
             lex.appendExp("(load \"" + path + "/Shape.scm\")");
             lex.appendExp("(load \"" + path + "/Frame.scm\")");
         }
-        parseAllExpr(lex)->eval(scope);
+        auto ast = parseAllExpr(lex);
+        ast->eval(scope, ast);
         auto &v = options["src"].as<std::vector<std::string>>();
         for (const auto &s : v) {
             lex.appendExp(string("(load \"") + s + "\")");
-            shared_ptr<ExprAST> ptr = parseAllExpr(lex)->eval(scope);
+            auto ast = parseAllExpr(lex);
+            shared_ptr<ExprAST> ptr = ast->eval(scope, ast);
             if (ptr) {
                 cout << ptr->display();
             }
@@ -87,9 +89,9 @@ int main(int argc, char *argv[]) {
         if (!options.count("nopainter") && !options.count("nostdlib")) {
             image.save(options["output"].as<string>().c_str());
         }
-    } catch (RuntimeError &e) {
-        cout << e.what() << endl;
-        throw;
+    //} catch (RuntimeError &e) {
+        //cout << e.what() << endl;
+        //throw;
     } catch (const OptionException &e) {
         cout << "error parsing options: " << e.what()
              << "Try \' --help\' for more information." << endl;

@@ -19,7 +19,7 @@ namespace ast {
 
     class ExprAST {
     public:
-        virtual pExpr eval(pScope &) const;
+        virtual pExpr eval(pScope &, const pExpr &) const;
 
         virtual pExpr apply(const std::vector<pExpr> &, pScope &);
 
@@ -32,7 +32,7 @@ namespace ast {
     public:
         AllExprAST(const std::vector<std::shared_ptr<ExprAST>> &v) : exprVec{v} {}
 
-        virtual std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &) const override;
+        virtual std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &, const pExpr &) const override;
 
     private:
         std::vector<std::shared_ptr<ExprAST>> exprVec;
@@ -42,16 +42,12 @@ namespace ast {
     public:
         BooleansFalseAST() {}
 
-        virtual std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &) const override;
-
         virtual std::string display() const override;
     };
 
     class BooleansTrueAST : public ExprAST {
     public:
         BooleansTrueAST() {}
-
-        virtual std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &) const override;
 
         virtual std::string display() const override;
     };
@@ -61,8 +57,6 @@ namespace ast {
         NumberAST(double n) : value{n} {}
 
         double getValue() const { return value; }
-
-        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &) const override;
 
         virtual std::string display() const override;
 
@@ -76,7 +70,7 @@ namespace ast {
 
         std::string getId() const { return id; }
 
-        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &ss) const override;
+        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &ss, const pExpr &) const override;
 
     private:
         std::string id;
@@ -87,7 +81,7 @@ namespace ast {
         IfStatementAST(std::shared_ptr<ExprAST> c, std::shared_ptr<ExprAST> t, std::shared_ptr<ExprAST> f) :
                 condition{c}, trueClause{t}, falseClause{f} {}
 
-        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &) const override;
+        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &, const pExpr &) const override;
 
     private:
         std::shared_ptr<ExprAST> condition;
@@ -98,7 +92,7 @@ namespace ast {
     public:
         CondStatementAST(const std::vector<std::shared_ptr<ExprAST>> &, const std::vector<std::shared_ptr<ExprAST>> &);
 
-        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &) const override;
+        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &, const pExpr &) const override;
 
     private:
         std::shared_ptr<ExprAST> ifStatement;
@@ -109,7 +103,7 @@ namespace ast {
         LetStatementAST(const std::vector<std::shared_ptr<ExprAST>> &id, const std::vector<std::shared_ptr<ExprAST>> &v,
                         const std::shared_ptr<ExprAST> &e) : identifier{id}, value{v}, expr{e} {}
 
-        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &) const override;
+        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &, const pExpr &) const override;
 
     private:
         std::vector<std::shared_ptr<ExprAST>> identifier, value;
@@ -120,7 +114,7 @@ namespace ast {
     public:
         LoadingFileAST(const std::string &f) : filename{f} {}
 
-        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &) const override;
+        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &, const pExpr &) const override;
 
     private:
         std::string filename;
@@ -131,19 +125,17 @@ namespace ast {
     public:
         PairAST(std::shared_ptr<ExprAST> f, std::shared_ptr<ExprAST> s) : data{f, s} {}
 
-        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &s) const override;
+        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &s, const pExpr &) const override;
 
         virtual std::string display() const override;
 
-        std::pair<std::shared_ptr<ExprAST>, std::shared_ptr<ExprAST>> data;
+        mutable std::pair<std::shared_ptr<ExprAST>, std::shared_ptr<ExprAST>> data;
 
     };
 
     class NilAST : public ExprAST {
     public:
         NilAST() {}
-
-        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &s) const override;
 
         virtual std::string display() const override;
     };
@@ -166,7 +158,7 @@ namespace ast {
         ValueBindingAST(const std::string &id, std::shared_ptr<ExprAST> v)
                 : BindingAST(id), value{v} {}
 
-        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &ss) const override;
+        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &ss, const pExpr &) const override;
 
     private:
         std::shared_ptr<ExprAST> value;
@@ -183,9 +175,9 @@ namespace ast {
         LambdaAST(const LambdaAST &other) : formalArgs(other.formalArgs), expression(other.expression),
                                             context(new Scope(*other.context)) {}
 
-        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
 
-        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &ss) const override;
+        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &ss, const pExpr &) const override;
 
         virtual std::string display() const override;
 
@@ -193,56 +185,57 @@ namespace ast {
         std::vector<std::string> formalArgs;
         std::vector<std::shared_ptr<ExprAST>> expression;
         mutable pScope context;
+        mutable bool isSubRoutineEvaluated = false;
     };
 
     class BuiltinConsAST : public ExprAST {
     public:
-        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
     };
 
     class BuiltinCarAST : public ExprAST {
     public:
-        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
     };
 
     class BuiltinCdrAST : public ExprAST {
     public:
-        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
     };
 
     class BuiltinAddAST : public ExprAST {
     public:
-        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
     };
 
     class BuiltinMultiplyAST : public ExprAST {
     public:
-        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
     };
 
     class BuiltinListAST : public ExprAST {
     public:
-        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
     };
 
     class BuiltinNullAST : public ExprAST {
     public:
-        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
     };
 
     class BuiltinLessThanAST : public ExprAST {
     public:
-        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
     };
 
     class BuiltinOppositeAST : public ExprAST {
     public:
-        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
     };
 
     class BuiltinReciprocalAST : public ExprAST {
     public:
-        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
     };
 
     class LambdaBindingAST : public BindingAST {
@@ -252,7 +245,7 @@ namespace ast {
                          const std::vector<std::shared_ptr<ExprAST>> expr) :
                 BindingAST(id), lambda{std::make_shared<LambdaAST>(v, expr)} {}
 
-        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &ss) const override;
+        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &ss, const pExpr &) const override;
 
     private:
         std::shared_ptr<LambdaAST> lambda;
@@ -264,7 +257,7 @@ namespace ast {
                 : lambdaOrIdentifier{lam}, actualArgs{args} {
         }
 
-        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &ss) const override;
+        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &ss, const pExpr &) const override;
 
     private:
         std::shared_ptr<ExprAST> lambdaOrIdentifier;

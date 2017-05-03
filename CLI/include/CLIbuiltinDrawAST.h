@@ -14,7 +14,7 @@ namespace ast {
 
         std::string display() const override;
 
-        std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
 
     private:
         std::pair<float, float> toPair(const std::shared_ptr<ExprAST> &);

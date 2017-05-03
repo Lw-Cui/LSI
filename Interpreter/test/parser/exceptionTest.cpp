@@ -51,22 +51,26 @@ TEST(ExceptionParsingTest, BuiltinLessThanASTTest) {
     lexers::Lexer lex;
     auto ss = std::make_shared<Scope>();
     lex.appendExp("(< 5 +)");
-    EXPECT_THROW(parseAllExpr(lex)->eval(ss), NotNumber);
+    auto ast = parseAllExpr(lex);
+    EXPECT_THROW(ast->eval(ss, ast), NotNumber);
 
     lex.clear();
     ss->clear();
     lex.appendExp("x");
-    EXPECT_THROW(parseAllExpr(lex)->eval(ss), UnboundIdentifier);
+    ast = parseAllExpr(lex);
+    EXPECT_THROW(ast->eval(ss, ast), UnboundIdentifier);
 }
 
 TEST(ExceptionParsingTest, BuiltinConsTest) {
     lexers::Lexer lex;
     auto ss = std::make_shared<Scope>();
     lex.appendExp("(car 5)");
-    EXPECT_THROW(parseAllExpr(lex)->eval(ss), NotPair);
+    auto ast = parseAllExpr(lex);
+    EXPECT_THROW(ast->eval(ss,ast), NotPair);
 
     lex.clear();
     ss->clear();
     lex.appendExp("(cons 5)");
-    EXPECT_THROW(parseAllExpr(lex)->eval(ss), NotPair);
+    ast = parseAllExpr(lex);
+    EXPECT_THROW(ast->eval(ss, ast), NotPair);
 }

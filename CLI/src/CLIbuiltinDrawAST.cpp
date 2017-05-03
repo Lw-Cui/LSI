@@ -20,8 +20,8 @@ std::pair<float, float> ast::CLIBuiltinDrawAST::toPair(const std::shared_ptr<Exp
 }
 
 std::shared_ptr<ast::ExprAST>
-ast::CLIBuiltinDrawAST::apply(const std::vector<std::shared_ptr<ast::ExprAST>> &actualArgs, pScope &s) {
-    auto exprPtr = actualArgs.front()->eval(s);
+ast::CLIBuiltinDrawAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) {
+    auto exprPtr = actualArgs.front()->eval(s, actualArgs.front());
     while (!dynamic_pointer_cast<NilAST>(exprPtr)) {
         auto pairPtr = dynamic_pointer_cast<PairAST>(exprPtr);
         auto pair = toPair(pairPtr->data.first);

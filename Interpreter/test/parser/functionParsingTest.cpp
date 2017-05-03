@@ -9,7 +9,8 @@ using namespace std;
 TEST(FunctionParsingTest, FunctionDefinitionTest) {
     auto ss = std::make_shared<Scope>();
     lexers::Lexer lex{"(define (foo x) x)"};
-    auto exprPtr = parser::parseExpr(lex)->eval(ss);
+    auto ast = parser::parseExpr(lex);
+    auto exprPtr = ast->eval(ss, ast);
     ASSERT_TRUE(ss->count("foo"));
     ASSERT_STREQ("#proceduce", ss->searchName("foo")->display().c_str());
 }
@@ -17,39 +18,46 @@ TEST(FunctionParsingTest, FunctionDefinitionTest) {
 TEST(FunctionParsingTest, FunctionApplicationTest) {
     auto ss = std::make_shared<Scope>();
     lexers::Lexer lex{"(define (foo x) x)"};
-    auto exprPtr = parser::parseExpr(lex)->eval(ss);
+    auto ast = parser::parseExpr(lex);
+    auto exprPtr = ast->eval(ss, ast);
     ASSERT_TRUE(ss->count("foo"));
     ASSERT_STREQ("#proceduce", ss->searchName("foo")->display().c_str());
 
     lex.appendExp("(foo 5)");
-    exprPtr = parseExpr(lex)->eval(ss);
+    ast = parseExpr(lex);
+    exprPtr = ast->eval(ss, ast);
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
     auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
     ASSERT_EQ(5, numPtr->getValue());
 
     lex.appendExp("(define (bar x) (+ x 1))");
-    exprPtr = parseExpr(lex)->eval(ss);
+    ast = parseExpr(lex);
+    exprPtr = ast->eval(ss, ast);
     ASSERT_TRUE(ss->count("bar"));
     ASSERT_STREQ("#proceduce", ss->searchName("bar")->display().c_str());
 
     lex.appendExp("(bar 4)");
-    exprPtr = parseExpr(lex)->eval(ss);
+    ast = parseExpr(lex);
+    exprPtr = ast->eval(ss, ast);
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
     numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
     ASSERT_EQ(5, numPtr->getValue());
 
     lex.appendExp("(define n 4)");
-    exprPtr = parseExpr(lex)->eval(ss);
+    ast = parseExpr(lex);
+    exprPtr = ast->eval(ss, ast);
     ASSERT_TRUE(ss->count("n"));
 
     lex.appendExp("(bar n)");
-    exprPtr = parseExpr(lex)->eval(ss);
+    ast = parseExpr(lex);
+    exprPtr = ast->eval(ss, ast);
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
     numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
     ASSERT_EQ(5, numPtr->getValue());
 
     lex.appendExp("(define b (foo (bar n)))");
-    exprPtr = parseExpr(lex)->eval(ss);
+    ast = parseExpr(lex);
+    exprPtr = ast->eval(ss, ast);
     ASSERT_TRUE(ss->count("b"));
     exprPtr = ss->searchName("b");
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
@@ -60,14 +68,17 @@ TEST(FunctionParsingTest, FunctionApplicationTest) {
 TEST(FunctionParsingTest, FunctionWithMultipleArgumentsTest) {
     auto ss = std::make_shared<Scope>();
     lexers::Lexer lex("(define (bar x y) (+ x y 1))");
-    auto exprPtr = parseExpr(lex)->eval(ss);
+    auto ast = parseExpr(lex);
+    auto exprPtr = ast->eval(ss, ast);
     ASSERT_TRUE(ss->count("bar"));
 
     lex.appendExp("(define n 5)");
-    parseExpr(lex)->eval(ss);
+    ast = parseExpr(lex);
+    exprPtr = ast->eval(ss, ast);
 
     lex.appendExp("(bar n 4)");
-    exprPtr = parseExpr(lex)->eval(ss);
+    ast = parseExpr(lex);
+    exprPtr = ast->eval(ss, ast);
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
     auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
     ASSERT_EQ(10, numPtr->getValue());
@@ -81,7 +92,8 @@ TEST(FunctionParsingTest, HighOrderFunctionTEST) {
             .appendExp("(define n 4)")
             .appendExp("(bar foo n)");
 
-    auto exprPtr = parseAllExpr(lex)->eval(ss);
+    auto ast = parseAllExpr(lex);
+    auto exprPtr = ast->eval(ss, ast);
 
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
     auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
@@ -92,7 +104,8 @@ TEST(FunctionParsingTest, LambdaDefintionTest) {
     auto ss = std::make_shared<Scope>();
     lexers::Lexer lex;
     lex.appendExp("((lambda (x) (+ x 1)) 5)");
-    auto exprPtr = parseAllExpr(lex)->eval(ss);
+    auto ast = parseAllExpr(lex);
+    auto exprPtr = ast->eval(ss, ast);
 
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
     auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
@@ -107,7 +120,8 @@ TEST(FunctionParsingTest, LambdaApplicationTest) {
             .appendExp("(define n 4)")
             .appendExp("(bar (lambda (x) (+ x 2 1)) n)");
 
-    auto exprPtr = parseAllExpr(lex)->eval(ss);
+    auto ast = parseAllExpr(lex);
+    auto exprPtr = ast->eval(ss, ast);
 
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
     auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
@@ -120,7 +134,8 @@ TEST(FunctionParsingTest, RecursiveTest) {
     lex.appendExp("(load \"setup.scm\")").appendExp("(define (add x y) (if (not (= x 0)) (+ 1 (add (- x 1) y)) y))")
             .appendExp("(add 5 6)");
 
-    auto exprPtr = parseAllExpr(lex)->eval(ss);
+    auto ast = parseAllExpr(lex);
+    auto exprPtr = ast->eval(ss, ast);
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
     auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
     ASSERT_EQ(11, numPtr->getValue());
@@ -128,7 +143,8 @@ TEST(FunctionParsingTest, RecursiveTest) {
 
     lex.appendExp("(define (add2 x y) (if (not (= x 0)) (+ (add2 y (- x 1)) 1) y))")
             .appendExp("(add2 5 6)");
-    exprPtr = parseAllExpr(lex)->eval(ss);
+    ast = parseAllExpr(lex);
+    exprPtr = ast->eval(ss, ast);
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
     numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
     ASSERT_EQ(11, numPtr->getValue());
@@ -140,7 +156,8 @@ TEST(FunctionParsingTest, VariableArgumentsTest) {
     lexers::Lexer lex;
     lex.appendExp("(define (add-list l) (if (null? l) 0 (+ (car l) (add-list (cdr l)))))")
             .appendExp("(add-list (list 5 6 7 8))");
-    auto exprPtr = parseAllExpr(lex)->eval(ss);
+    auto ast = parseAllExpr(lex);
+    auto exprPtr = ast->eval(ss, ast);
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
     auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
     ASSERT_EQ(26, numPtr->getValue());
@@ -148,7 +165,8 @@ TEST(FunctionParsingTest, VariableArgumentsTest) {
 
     lex.appendExp("(define (add x . args) (+ (add-list args) x))")
             .appendExp("(add 5 6 7 8)");
-    exprPtr = parseAllExpr(lex)->eval(ss);
+    ast = parseAllExpr(lex);
+    exprPtr = ast->eval(ss, ast);
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
     numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
     ASSERT_EQ(26, numPtr->getValue());
@@ -160,7 +178,8 @@ TEST(FunctionParsingTest, MultipleExpressionTest) {
     lexers::Lexer lex;
     lex.appendExp("(define (getNum) (+ 5 6) (+ 7 8))")
             .appendExp("(getNum)");
-    auto exprPtr = parseAllExpr(lex)->eval(ss);
+    auto ast = parseAllExpr(lex);
+    auto exprPtr = ast->eval(ss, ast);
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
     auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
     ASSERT_EQ(15, numPtr->getValue());
@@ -172,7 +191,8 @@ TEST(FunctionParsingTest, MultipleExpressionTest) {
                           "  (add 7 8)"
                           "  (add-and-plus2 5 6))").appendExp("(getNumV2)");
 
-    exprPtr = parseAllExpr(lex)->eval(ss);
+    ast = parseAllExpr(lex);
+    exprPtr = ast->eval(ss, ast);
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
     numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
     ASSERT_EQ(13, numPtr->getValue());
@@ -187,7 +207,8 @@ TEST(FunctionParsingTest, NestedFunctionTest) {
                           "(if (null? l) #t (if (car l) (list-and (cdr l)) #f)))"
                           "(if expr (list-and args) #f))")
             .appendExp("(and 5 6 7 8)");
-    auto exprPtr = parseAllExpr(lex)->eval(ss);
+    auto ast = parseAllExpr(lex);
+    auto exprPtr = ast->eval(ss, ast);
     ASSERT_TRUE(std::dynamic_pointer_cast<BooleansTrueAST>(exprPtr));
 }
 
@@ -205,7 +226,8 @@ TEST(FunctionParsingTest, LambdaFunctionRecursiveTest) {
                           "     (if (= x 0)"
                           "         1"
                           "         (* x (graceful-fact-function (- x 1))))))) 5)");
-    auto res = parseAllExpr(lex)->eval(s);
+    auto ast = parseAllExpr(lex);
+    auto res = ast->eval(s, ast);
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
     auto numPtr = std::dynamic_pointer_cast<NumberAST>(res);
     ASSERT_EQ(120, numPtr->getValue());
@@ -215,7 +237,8 @@ TEST(FunctionParsingTest, LambdaFunctionRecursiveTest) {
 TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV2) {
     auto s = std::make_shared<Scope>();
     lexers::Lexer lex("(load \"setup.scm\")");
-    auto res = parseAllExpr(lex)->eval(s);
+    auto ast = parseAllExpr(lex);
+    auto res = ast->eval(s, ast);
 
     lex.appendExp("(((lambda (fact-function-2)"
                           " (lambda (x)"
@@ -228,7 +251,8 @@ TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV2) {
                           "         1"
                           "         (* x ((fact-function-2 fact-function-2) (- x 1))))))) 5)");
 
-    res = parseAllExpr(lex)->eval(s);
+    ast = parseAllExpr(lex);
+    res = ast->eval(s, ast);
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
     auto numPtr = std::dynamic_pointer_cast<NumberAST>(res);
     ASSERT_EQ(120, numPtr->getValue());
@@ -238,7 +262,8 @@ TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV2) {
 TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV3) {
     auto s = std::make_shared<Scope>();
     lexers::Lexer lex("(load \"setup.scm\")");
-    auto res = parseAllExpr(lex)->eval(s);
+    auto ast = parseAllExpr(lex);
+    auto res = ast->eval(s, ast);
 
     lex.appendExp("(((lambda (f) (f f))"
                           " (lambda (fact-function-3)"
@@ -247,7 +272,8 @@ TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV3) {
                           "         1"
                           "         (* x ((fact-function-3 fact-function-3) (- x 1))))))) 5)");
 
-    res = parseAllExpr(lex)->eval(s);
+    ast = parseAllExpr(lex);
+    res = ast->eval(s, ast);
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
     auto numPtr = std::dynamic_pointer_cast<NumberAST>(res);
     ASSERT_EQ(120, numPtr->getValue());
@@ -257,7 +283,8 @@ TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV3) {
 TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV4) {
     auto s = std::make_shared<Scope>();
     lexers::Lexer lex("(load \"setup.scm\")");
-    auto res = parseAllExpr(lex)->eval(s);
+    auto ast = parseAllExpr(lex);
+    auto res = ast->eval(s, ast);
 
     lex.appendExp("(((lambda (f) (f f))"
                           " (lambda (fact-function-4)"
@@ -268,7 +295,8 @@ TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV4) {
                           "            (* x (graceful-fact-function (- x 1))))))"
                           "    (lambda (x) ((fact-function-4 fact-function-4) x))))) 5)");
 
-    res = parseAllExpr(lex)->eval(s);
+    ast = parseAllExpr(lex);
+    res = ast->eval(s, ast);
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
     auto numPtr = std::dynamic_pointer_cast<NumberAST>(res);
     ASSERT_EQ(120, numPtr->getValue());

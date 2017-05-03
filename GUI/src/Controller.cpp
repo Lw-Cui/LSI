@@ -67,7 +67,8 @@ con::Text Controller::evaluation() {
 
     try {
         lexers::Lexer lex(currentText.formatString.toString().substr(4));
-        if (auto ptr = parseAllExpr(lex)->eval(scope)) {
+        auto ast = parseAllExpr(lex);
+        if (auto ptr = ast->eval(scope, ast)) {
             pushString(resultText.formatString, ptr->display());
         } else {
             pushString(resultText.formatString, "\'()");
@@ -114,7 +115,8 @@ con::Controller::Controller(Window &text, Window &board)
     lexers::Lexer lex;
     scope->addBuiltinFunc("#painter", std::make_shared<ast::GUIBuiltinDrawAST>(*this));
     lex.appendExp("(load \"setup.scm\")");
-    parser::parseAllExpr(lex)->eval(scope);
+    auto ast = parser::parseAllExpr(lex);
+    ast->eval(scope, ast);
     pushString(currentText.formatString, "]=> ");
 }
 

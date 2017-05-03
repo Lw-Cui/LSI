@@ -3,9 +3,9 @@
 using namespace std;
 
 std::shared_ptr<ast::ExprAST>
-ast::GUIBuiltinDrawAST::apply(const std::vector<std::shared_ptr<ast::ExprAST>> &actualArgs, pScope &s) {
+ast::GUIBuiltinDrawAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) {
     con::VertexArray vertex;
-    auto exprPtr = actualArgs.front()->eval(s);
+    auto exprPtr = actualArgs.front()->eval(s, actualArgs.front());
     while (!dynamic_pointer_cast<NilAST>(exprPtr)) {
         auto pairPtr = dynamic_pointer_cast<PairAST>(exprPtr);
         vertex.append(sf::Vertex{toVec2f(pairPtr->data.first), sf::Color::Black});
