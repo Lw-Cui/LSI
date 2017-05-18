@@ -3,7 +3,8 @@ set(PARSER_TEST_FILES
         basicParserTest.cpp
         functionParsingTest.cpp
         keywordTest.cpp
-        builtinFunctionTest.cpp)
+        builtinFunctionTest.cpp
+        ../../include/testMacro.h)
 
 set(PARSER_TEST parserTest)
 add_executable(${PARSER_TEST} ${PARSER_TEST_FILES} ${TEST_MAIN})
