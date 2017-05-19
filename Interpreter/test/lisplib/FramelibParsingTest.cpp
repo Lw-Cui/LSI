@@ -2,6 +2,7 @@
 #include <gtest/gtest.h>
 #include <parser.h>
 #include <exception.h>
+#include <testMacro.h>
 
 using namespace lexers;
 using namespace parser;
@@ -9,139 +10,85 @@ using namespace exception;
 using std::make_shared;
 
 TEST(FrameLibParsingTest, VectorTest) {
-    auto s = std::make_shared<Scope>();
-    lexers::Lexer lex;
-    lex.appendExp("(load \"setup.scm\")");
+    BEG_TRY
+        CREATE_CONTEXT();
+        lex.appendExp("(load \"setup.scm\")");
+        REPL_COND("(define vect1 (make-vect 5 5))"
+                          "(define vect2 (make-vect 2 3))"
+                          "(xcor-vect vect1)", true);
+        ASSERT_STREQ("5", res->display().c_str());
 
-    lex.appendExp("(define vect1 (make-vect 5 5))")
-            .appendExp("(define vect2 (make-vect 2 3))");
+        REPL_COND("(add-vect vect1 vect2)", true);
+        ASSERT_STREQ("(7, 8)", res->display().c_str());
 
-    lex.appendExp("(xcor-vect vect1)");
-    try {
-        auto ast = parseAllExpr(lex);
-        auto ptr = ast->eval(s, ast);
-        ASSERT_STREQ("5", ptr->display().c_str());
-
-        lex.appendExp("(add-vect vect1 vect2)");
-        ast = parseAllExpr(lex);
-        ptr = ast->eval(s, ast);
-        ASSERT_STREQ("(7, 8)", ptr->display().c_str());
-
-        lex.appendExp("(sub-vect (scale-vect 3 vect2) vect1)");
-        ast = parseAllExpr(lex);
-        ptr = ast->eval(s, ast);
-        ASSERT_STREQ("(1, 4)", ptr->display().c_str());
-    } catch (RuntimeError &e) {
-        CLOG(DEBUG, "exception") << e.what();
-        throw;
-    }
+        REPL_COND("(sub-vect (scale-vect 3 vect2) vect1)", true);
+        ASSERT_STREQ("(1, 4)", res->display().c_str());
+    END_TRY
 }
 
 TEST(FrameLibParsingTest, FrameBasicTest) {
-    auto s = make_shared<Scope>();
-    lexers::Lexer lex;
-    lex.appendExp("(load \"setup.scm\")");
-    lex.appendExp("(define frame (make-frame (cons 50 40) (cons 5 4) (cons 4 5)))");
+    BEG_TRY
+        CREATE_CONTEXT()
+        lex.appendExp("(load \"setup.scm\")");
+        REPL_COND("(define frame (make-frame (cons 50 40) (cons 5 4) (cons 4 5)))"
+                          "(origin-frame frame)", true);
+        ASSERT_STREQ("(50, 40)", res->display().c_str());
 
-    lex.appendExp("(origin-frame frame)");
-    try {
-        auto ast = parseAllExpr(lex);
-        auto ptr = ast->eval(s, ast);
-        ASSERT_STREQ("(50, 40)", ptr->display().c_str());
+        REPL_COND("(edgeX-frame frame)", true);
+        ASSERT_STREQ("(5, 4)", res->display().c_str());
 
-        lex.appendExp("(edgeX-frame frame)");
-        ast = parseAllExpr(lex);
-        ptr = ast->eval(s, ast);
-        ASSERT_STREQ("(5, 4)", ptr->display().c_str());
-
-        lex.appendExp("(edgeY-frame frame)");
-        ast = parseAllExpr(lex);
-        ptr = ast->eval(s, ast);
-        ASSERT_STREQ("(4, 5)", ptr->display().c_str());
-    } catch (RuntimeError &e) {
-        CLOG(DEBUG, "exception") << e.what();
-        throw;
-    }
+        REPL_COND("(edgeY-frame frame)", true);
+        ASSERT_STREQ("(4, 5)", res->display().c_str());
+    END_TRY
 }
 
 TEST(FrameLibParsingTest, CoordinateMapTest) {
-    try {
-        auto s = make_shared<Scope>();
-        lexers::Lexer lex;
-        lex.appendExp("(load \"setup.scm\")");
+    BEG_TRY
+        CREATE_CONTEXT()
+        REPL_COND("(load \"setup.scm\")"
+                          "(define frame (make-frame (cons 0.5 0.5) (cons -0.5 -0.5) (cons 0.5 -0.5)))"
+                          "(define coord-map (frame-coord-map frame))"
+                          "(coord-map (cons 500 50))", true);
+        ASSERT_STREQ("(-224.5, -274.5)", res->display().c_str());
 
-        lex.appendExp("(define frame (make-frame (cons 0.5 0.5) (cons -0.5 -0.5) (cons 0.5 -0.5)))")
-                .appendExp("(define coord-map (frame-coord-map frame))")
-                .appendExp("(coord-map (cons 500 50))");
-        auto ast = parseAllExpr(lex);
-        auto ptr = ast->eval(s, ast);
-        ASSERT_STREQ("(-224.5, -274.5)", ptr->display().c_str());
-
-        lex.appendExp("(define frame2 (make-frame (cons 1 1) (cons 0 -1) (cons -1 0)))")
-                .appendExp("((frame-coord-map frame2) (cons 100 300))");
-        ast = parseAllExpr(lex);
-        ptr = ast->eval(s, ast);
-        ASSERT_STREQ("(-299, -99)", ptr->display().c_str());
-    } catch (RuntimeError &e) {
-        CLOG(DEBUG, "exception") << e.what();
-        throw;
-    }
+        REPL_COND("(define frame2 (make-frame (cons 1 1) (cons 0 -1) (cons -1 0)))"
+                          "((frame-coord-map frame2) (cons 100 300))", true);
+        ASSERT_STREQ("(-299, -99)", res->display().c_str());
+    END_TRY
 }
 
 TEST(FrameLibParsingTest, transformPainterTest) {
-    try {
-        auto s = make_shared<Scope>();
-        lexers::Lexer lex;
-        lex.appendExp("(load \"setup.scm\")");
+    BEG_TRY
+        CREATE_CONTEXT();
+        REPL_COND("(load \"setup.scm\")"
+                          "(define (painter frame)"
+                          "  (lambda (vect)"
+                          "    ((frame-coord-map frame) vect)))"
+                          "(((flip-vert painter) default) (cons 100 100))", true);
+        ASSERT_STREQ("(100, -99)", res->display().c_str());
 
-        lex.appendExp("(define (painter frame)"
-                              "  (lambda (vect)"
-                              "    ((frame-coord-map frame) vect)))");
-        lex.appendExp("(((flip-vert painter) default) (cons 100 100))");
-        auto ast = parseAllExpr(lex);
-        auto ptr = ast->eval(s, ast);
-        ASSERT_STREQ("(100, -99)", ptr->display().c_str());
+        REPL_COND("(((shrink-to-upper-right painter) default) (cons 100 100))", true);
+        ASSERT_STREQ("(50.5, 50.5)", res->display().c_str());
 
-        lex.appendExp("(((shrink-to-upper-right painter) default) (cons 100 100))");
-        ast = parseAllExpr(lex);
-        ptr = ast->eval(s, ast);
-        ASSERT_STREQ("(50.5, 50.5)", ptr->display().c_str());
+        REPL_COND("(((shrink-to-upper-left painter) default) (cons 100 100))", true);
+        ASSERT_STREQ("(50, 50.5)", res->display().c_str());
 
-        lex.appendExp("(((shrink-to-upper-left painter) default) (cons 100 100))");
-        ast = parseAllExpr(lex);
-        ptr = ast->eval(s, ast);
-        ASSERT_STREQ("(50, 50.5)", ptr->display().c_str());
-
-        lex.appendExp("(((rotate90 painter) default) (cons -100 100))");
-        ast = parseAllExpr(lex);
-        ptr = ast->eval(s, ast);
-        ASSERT_STREQ("(-99, -100)", ptr->display().c_str());
-    } catch (RuntimeError &e) {
-        CLOG(DEBUG, "exception") << e.what();
-        throw;
-    }
+        REPL_COND("(((rotate90 painter) default) (cons -100 100))", true);
+        ASSERT_STREQ("(-99, -100)", res->display().c_str());
+    END_TRY
 }
 
 TEST(FrameLibParsingTest, MultpletransformPainterTest) {
-    try {
-        auto s = make_shared<Scope>();
-        lexers::Lexer lex;
-        lex.appendExp("(load \"setup.scm\")");
+    BEG_TRY
+        CREATE_CONTEXT();
+        REPL_COND("(load \"setup.scm\")"
+                          "(define (painter frame)"
+                          "  (lambda (vect)"
+                          "    ((frame-coord-map frame) vect)))"
+                          "(((rotate90 (flip-vert painter)) default) (cons 100 100))", true);
+        ASSERT_STREQ("(100, 100)", res->display().c_str());
 
-        lex.appendExp("(define (painter frame)"
-                              "  (lambda (vect)"
-                              "    ((frame-coord-map frame) vect)))");
-        lex.appendExp("(((rotate90 (flip-vert painter)) default) (cons 100 100))");
-        auto ast = parseAllExpr(lex);
-        auto ptr = ast->eval(s, ast);
-        ASSERT_STREQ("(100, 100)", ptr->display().c_str());
-
-        lex.appendExp("(((shrink-to-upper-left(rotate90 (flip-vert painter))) default) (cons 100 100))");
-        ast = parseAllExpr(lex);
-        ptr = ast->eval(s, ast);
-        ASSERT_STREQ("(50, 50.5)", ptr->display().c_str());
-    } catch (RuntimeError &e) {
-        CLOG(DEBUG, "exception") << e.what();
-        throw;
-    }
+        REPL_COND("(((shrink-to-upper-left(rotate90 (flip-vert painter))) default) (cons 100 100))", true);
+        ASSERT_STREQ("(50, 50.5)", res->display().c_str());
+    END_TRY
 }
