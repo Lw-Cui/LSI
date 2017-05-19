@@ -26,5 +26,14 @@
     numPtr = TO_NUM_PTR(res);\
     trueBool = TO_TRUE_PTR(res);\
     falseBool = TO_FALSE_PTR(res);
-    
+
+#define BEG_TRY\
+    try {
+
+#define END_TRY\
+    } catch (RuntimeError &e) {\
+        CLOG(DEBUG, "exception") << e.what();\
+        throw;\
+    }
+
 #endif
