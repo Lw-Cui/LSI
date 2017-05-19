@@ -10,6 +10,10 @@
 #include <easylogging++.h>
 #include <context.h>
 
+namespace visitor {
+    class NodeVisitor;
+}
+
 namespace ast {
     using context::Scope;
 
@@ -23,7 +27,7 @@ namespace ast {
 
         virtual pExpr apply(const std::vector<pExpr> &, pScope &);
 
-        virtual std::string display() const;
+        virtual void accept(visitor::NodeVisitor &) const;
 
         virtual ~ExprAST() {}
     };
@@ -31,6 +35,8 @@ namespace ast {
     class AllExprAST : public ExprAST {
     public:
         AllExprAST(const std::vector<std::shared_ptr<ExprAST>> &v) : exprVec{v} {}
+
+        virtual void accept(visitor::NodeVisitor &) const override;
 
         virtual std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &, const pExpr &) const override;
 
@@ -42,23 +48,23 @@ namespace ast {
     public:
         BooleansFalseAST() {}
 
-        virtual std::string display() const override;
+        virtual void accept(visitor::NodeVisitor &visitor) const override;
     };
 
     class BooleansTrueAST : public ExprAST {
     public:
         BooleansTrueAST() {}
 
-        virtual std::string display() const override;
+        virtual void accept(visitor::NodeVisitor &visitor) const override;
     };
 
     class NumberAST : public ExprAST {
     public:
         NumberAST(double n) : value{n} {}
 
-        double getValue() const { return value; }
+        virtual void accept(visitor::NodeVisitor &visitor) const override;
 
-        virtual std::string display() const override;
+        double getValue() const { return value; }
 
     private:
         double value;
@@ -67,6 +73,8 @@ namespace ast {
     class IdentifierAST : public ExprAST {
     public:
         IdentifierAST(const std::string &tid) : id{tid} {}
+
+        virtual void accept(visitor::NodeVisitor &visitor) const override;
 
         std::string getId() const { return id; }
 
@@ -83,6 +91,8 @@ namespace ast {
 
         std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &, const pExpr &) const override;
 
+        virtual void accept(visitor::NodeVisitor &visitor) const override;
+
     private:
         std::shared_ptr<ExprAST> condition;
         std::shared_ptr<ExprAST> trueClause, falseClause;
@@ -94,6 +104,8 @@ namespace ast {
 
         std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &, const pExpr &) const override;
 
+        virtual void accept(visitor::NodeVisitor &visitor) const override;
+
     private:
         std::shared_ptr<ExprAST> ifStatement;
     };
@@ -102,6 +114,8 @@ namespace ast {
     public:
         LetStatementAST(const std::vector<std::shared_ptr<ExprAST>> &id, const std::vector<std::shared_ptr<ExprAST>> &v,
                         const std::shared_ptr<ExprAST> &e) : identifier{id}, value{v}, expr{e} {}
+
+        virtual void accept(visitor::NodeVisitor &visitor) const override;
 
         std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &, const pExpr &) const override;
 
@@ -114,6 +128,8 @@ namespace ast {
     public:
         LoadingFileAST(const std::string &f) : filename{f} {}
 
+        virtual void accept(visitor::NodeVisitor &visitor) const override;
+
         std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &, const pExpr &) const override;
 
     private:
@@ -125,9 +141,9 @@ namespace ast {
     public:
         PairAST(std::shared_ptr<ExprAST> f, std::shared_ptr<ExprAST> s) : data{f, s} {}
 
-        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &s, const pExpr &) const override;
+        virtual void accept(visitor::NodeVisitor &visitor) const override;
 
-        virtual std::string display() const override;
+        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &s, const pExpr &) const override;
 
         mutable std::pair<std::shared_ptr<ExprAST>, std::shared_ptr<ExprAST>> data;
 
@@ -137,13 +153,15 @@ namespace ast {
     public:
         NilAST() {}
 
-        virtual std::string display() const override;
+        virtual void accept(visitor::NodeVisitor &visitor) const override;
     };
 
 
     class BindingAST : public ExprAST {
     public:
         BindingAST(const std::string &id) : identifier{id} {}
+
+        virtual void accept(visitor::NodeVisitor &visitor) const override;
 
         const std::string &getIdentifier() const {
             return identifier;
@@ -160,6 +178,8 @@ namespace ast {
 
         std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &ss, const pExpr &) const override;
 
+        virtual void accept(visitor::NodeVisitor &visitor) const override;
+
     private:
         std::shared_ptr<ExprAST> value;
     };
@@ -172,14 +192,14 @@ namespace ast {
                   std::vector<std::shared_ptr<ExprAST>> expr)
                 : formalArgs{v}, expression{expr}, context{new Scope} {}
 
+        virtual void accept(visitor::NodeVisitor &visitor) const override;
+
         LambdaAST(const LambdaAST &other) : formalArgs(other.formalArgs), expression(other.expression),
                                             context(new Scope(*other.context)) {}
 
         pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
 
         std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &ss, const pExpr &) const override;
-
-        virtual std::string display() const override;
 
     private:
         std::vector<std::string> formalArgs;
@@ -191,55 +211,78 @@ namespace ast {
     class BuiltinConsAST : public ExprAST {
     public:
         pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
+
+        virtual void accept(visitor::NodeVisitor &visitor) const override;
     };
 
     class BuiltinCarAST : public ExprAST {
     public:
+
+        virtual void accept(visitor::NodeVisitor &visitor) const override;
+
         pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
     };
 
     class BuiltinCdrAST : public ExprAST {
     public:
+        virtual void accept(visitor::NodeVisitor &visitor) const override;
+
         pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
     };
 
     class BuiltinAddAST : public ExprAST {
     public:
+        virtual void accept(visitor::NodeVisitor &visitor) const override;
+
         pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
     };
 
     class BuiltinMultiplyAST : public ExprAST {
     public:
+        virtual void accept(visitor::NodeVisitor &visitor) const override;
+
         pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
     };
 
     class BuiltinListAST : public ExprAST {
     public:
+        virtual void accept(visitor::NodeVisitor &visitor) const override;
+
         pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
     };
 
     class BuiltinNullAST : public ExprAST {
     public:
+        virtual void accept(visitor::NodeVisitor &visitor) const override;
+
         pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
     };
 
     class BuiltinLessThanAST : public ExprAST {
     public:
+        virtual void accept(visitor::NodeVisitor &visitor) const override;
+
         pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
     };
 
     class BuiltinOppositeAST : public ExprAST {
     public:
+        virtual void accept(visitor::NodeVisitor &visitor) const override;
+
         pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
     };
 
     class BuiltinReciprocalAST : public ExprAST {
     public:
+        virtual void accept(visitor::NodeVisitor &visitor) const override;
+
         pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
     };
 
     class LambdaBindingAST : public BindingAST {
     public:
+        virtual void accept(visitor::NodeVisitor &visitor) const override;
+
         LambdaBindingAST(const std::string &id,
                          const std::vector<std::string> &v,
                          const std::vector<std::shared_ptr<ExprAST>> expr) :
@@ -251,8 +294,11 @@ namespace ast {
         std::shared_ptr<LambdaAST> lambda;
     };
 
+
     class LambdaApplicationAST : public ExprAST {
     public:
+        virtual void accept(visitor::NodeVisitor &visitor) const override;
+
         LambdaApplicationAST(const std::shared_ptr<ExprAST> &lam, const std::vector<std::shared_ptr<ExprAST>> &args)
                 : lambdaOrIdentifier{lam}, actualArgs{args} {
         }
@@ -266,6 +312,8 @@ namespace ast {
 
     class BuiltinDrawAST : public ExprAST {
     public:
+        virtual void accept(visitor::NodeVisitor &visitor) const override;
+
         BuiltinDrawAST() {}
     };
 

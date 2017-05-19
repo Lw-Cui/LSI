@@ -10,19 +10,22 @@ using namespace std;
 TEST(FunctionParsingTest, FunctionDefinitionTest) {
     CREATE_CONTEXT();
     REPL_COND("(define (foo x) x)", s->count("foo"));
-    ASSERT_STREQ("#proceduce", s->searchName("foo")->display().c_str());
+    s->searchName("foo")->accept(disp);
+    ASSERT_STREQ("#proceduce", disp.to_string().c_str());
 }
 
 TEST(FunctionParsingTest, FunctionApplicationTest) {
     CREATE_CONTEXT();
     REPL_COND("(define (foo x) x)", s->count("foo"));
-    ASSERT_STREQ("#proceduce", s->searchName("foo")->display().c_str());
+    s->searchName("foo")->accept(disp);
+    ASSERT_STREQ("#proceduce", disp.to_string().c_str());
 
     REPL_COND("(foo 5)", TO_NUM_PTR(res));
     ASSERT_EQ(5, numPtr->getValue());
 
     REPL_COND("(define (bar x) (+ x 1))", s->count("bar"));
-    ASSERT_STREQ("#proceduce", s->searchName("bar")->display().c_str());
+    s->searchName("bar")->accept(disp);
+    ASSERT_STREQ("#proceduce", disp.to_string().c_str());
 
     REPL_COND("(bar 4)", TO_NUM_PTR(res));
     ASSERT_EQ(5, numPtr->getValue());
@@ -62,7 +65,7 @@ TEST(FunctionParsingTest, LambdaDefintionTest) {
     CREATE_CONTEXT();
     REPL_COND("((lambda (x) (+ x 1)) 5)", TO_NUM_PTR(res));
     ASSERT_EQ(6, numPtr->getValue());
-    ASSERT_STREQ("6", numPtr->display().c_str());
+    ASSERT_STREQ("6", disp.to_string().c_str());
 }
 
 TEST(FunctionParsingTest, LambdaApplicationTest) {
@@ -79,12 +82,12 @@ TEST(FunctionParsingTest, RecursiveTest) {
     lex.appendExp("(load \"setup.scm\")").appendExp("(define (add x y) (if (not (= x 0)) (+ 1 (add (- x 1) y)) y))");
     REPL_COND("(add 5 6)", TO_NUM_PTR(res));
     ASSERT_EQ(11, numPtr->getValue());
-    ASSERT_STREQ("11", numPtr->display().c_str());
+    ASSERT_STREQ("11", disp.to_string().c_str());
 
     lex.appendExp("(define (add2 x y) (if (not (= x 0)) (+ (add2 y (- x 1)) 1) y))");
     REPL_COND("(add2 5 6)", TO_NUM_PTR(res));
     ASSERT_EQ(11, numPtr->getValue());
-    ASSERT_STREQ("11", numPtr->display().c_str());
+    ASSERT_STREQ("11", disp.to_string().c_str());
 }
 
 TEST(FunctionParsingTest, VariableArgumentsTest) {
@@ -92,12 +95,12 @@ TEST(FunctionParsingTest, VariableArgumentsTest) {
     lex.appendExp("(define (add-list l) (if (null? l) 0 (+ (car l) (add-list (cdr l)))))");
     REPL_COND("(add-list (list 5 6 7 8))", TO_NUM_PTR(res));
     ASSERT_EQ(26, numPtr->getValue());
-    ASSERT_STREQ("26", numPtr->display().c_str());
+    ASSERT_STREQ("26", disp.to_string().c_str());
 
     lex.appendExp("(define (add x . args) (+ (add-list args) x))");
     REPL_COND("(add 5 6 7 8)", TO_NUM_PTR(res));
     ASSERT_EQ(26, numPtr->getValue());
-    ASSERT_STREQ("26", numPtr->display().c_str());
+    ASSERT_STREQ("26", disp.to_string().c_str());
 }
 
 TEST(FunctionParsingTest, MultipleExpressionTest) {
@@ -105,7 +108,7 @@ TEST(FunctionParsingTest, MultipleExpressionTest) {
     lex.appendExp("(define (getNum) (+ 5 6) (+ 7 8))");
     REPL_COND("(getNum)", TO_NUM_PTR(res));
     ASSERT_EQ(15, numPtr->getValue());
-    ASSERT_STREQ("15", numPtr->display().c_str());
+    ASSERT_STREQ("15", disp.to_string().c_str());
 
     lex.appendExp("(define (getNumV2)"
                           "  (define (add-and-plus2 x y) (add (add x y) 2))"
@@ -115,7 +118,7 @@ TEST(FunctionParsingTest, MultipleExpressionTest) {
 
     REPL_COND("(getNumV2)", TO_NUM_PTR(res));
     ASSERT_EQ(13, numPtr->getValue());
-    ASSERT_STREQ("13", numPtr->display().c_str());
+    ASSERT_STREQ("13", disp.to_string().c_str());
 }
 
 TEST(FunctionParsingTest, NestedFunctionTest) {
@@ -141,7 +144,7 @@ TEST(FunctionParsingTest, LambdaFunctionRecursiveTest) {
                       "         1"
                       "         (* x (graceful-fact-function (- x 1))))))) 5)", TO_NUM_PTR(res));
     ASSERT_EQ(120, numPtr->getValue());
-    ASSERT_STREQ("120", numPtr->display().c_str());
+    ASSERT_STREQ("120", disp.to_string().c_str());
 }
 
 TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV2) {
@@ -158,7 +161,7 @@ TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV2) {
                       "         1"
                       "         (* x ((fact-function-2 fact-function-2) (- x 1))))))) 5)", TO_NUM_PTR(res));
     ASSERT_EQ(120, numPtr->getValue());
-    ASSERT_STREQ("120", numPtr->display().c_str());
+    ASSERT_STREQ("120", disp.to_string().c_str());
 }
 
 TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV3) {
@@ -171,7 +174,7 @@ TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV3) {
                       "         1"
                       "         (* x ((fact-function-3 fact-function-3) (- x 1))))))) 5)", TO_NUM_PTR(res));
     ASSERT_EQ(120, numPtr->getValue());
-    ASSERT_STREQ("120", numPtr->display().c_str());
+    ASSERT_STREQ("120", disp.to_string().c_str());
 }
 
 TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV4) {
@@ -186,5 +189,5 @@ TEST(FunctionParsingTest, LambdaFunctionRecursiveTestV4) {
                       "            (* x (graceful-fact-function (- x 1))))))"
                       "    (lambda (x) ((fact-function-4 fact-function-4) x))))) 5)", TO_NUM_PTR(res));
     ASSERT_EQ(120, numPtr->getValue());
-    ASSERT_STREQ("120", numPtr->display().c_str());
+    ASSERT_STREQ("120", disp.to_string().c_str());
 }

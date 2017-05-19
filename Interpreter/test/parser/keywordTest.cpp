@@ -85,6 +85,6 @@ TEST(KeywordParsingTest, NilTest) {
     lex.appendExp("(define p (cons 1 nil))");
     REPL_COND("(cdr p)", std::dynamic_pointer_cast<NilAST>(res));
     auto nil = std::dynamic_pointer_cast<NilAST>(res);
-    ASSERT_STREQ("\'()", nil->display().c_str());
+    ASSERT_STREQ("\'()", disp.to_string().c_str());
 }
 

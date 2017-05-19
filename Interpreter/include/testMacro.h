@@ -1,13 +1,16 @@
 #ifndef GI_TEST_MACRO_H
 #define GI_TEST_MACRO_H
 
+#include <visitor.h>
+
 #define CREATE_CONTEXT() \
     auto s = std::make_shared<Scope>();\
     lexers::Lexer lex;\
     pExpr ast, res;\
     std::shared_ptr<NumberAST> numPtr;\
     std::shared_ptr<BooleansTrueAST> trueBool;\
-    std::shared_ptr<BooleansFalseAST> falseBool;
+    std::shared_ptr<BooleansFalseAST> falseBool;\
+    visitor::DisplayVisitor disp;
 
 #define TO_NUM_PTR(res)\
     std::dynamic_pointer_cast<NumberAST>(res)
@@ -25,7 +28,8 @@
     ASSERT_TRUE(condition);\
     numPtr = TO_NUM_PTR(res);\
     trueBool = TO_TRUE_PTR(res);\
-    falseBool = TO_FALSE_PTR(res);
+    falseBool = TO_FALSE_PTR(res);\
+    if (res) {disp.clear(); res->accept(disp);}
 
 #define BEG_TRY\
     try {

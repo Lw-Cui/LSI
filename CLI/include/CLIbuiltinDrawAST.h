@@ -4,6 +4,7 @@
 #include <memory>
 #include <AST.h>
 #include <image.h>
+#include <visitor.h>
 
 namespace ast {
     class CLIBuiltinDrawImpl;
@@ -12,7 +13,7 @@ namespace ast {
     public:
         CLIBuiltinDrawAST(Image &i);
 
-        std::string display() const override;
+        virtual void accept(visitor::NodeVisitor &visitor) const override;
 
         pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
 

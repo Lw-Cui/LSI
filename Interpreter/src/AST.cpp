@@ -2,10 +2,12 @@
 #include <sstream>
 #include <parser.h>
 #include <exception.h>
+#include <visitor.h>
 
 using namespace parser;
 using namespace exception;
 using namespace ast;
+using namespace visitor;
 
 pExpr LambdaAST::apply(const std::vector<pExpr> &actualArgs, pScope &ss) {
     // Backup scope of lambda. If not, recursive calls will destroy scope by binding arguments.
@@ -62,9 +64,17 @@ std::shared_ptr<ExprAST> LambdaBindingAST::eval(std::shared_ptr<Scope> &ss, cons
     return nullptr;
 }
 
+void LambdaBindingAST::accept(visitor::NodeVisitor &visitor) const {
+    visitor.visitLambdaBindingAST(*this);
+}
+
 std::shared_ptr<ExprAST> ValueBindingAST::eval(std::shared_ptr<Scope> &ss, const pExpr &) const {
     ss->addName(getIdentifier(), value->eval(ss, value));
     return nullptr;
+}
+
+void ValueBindingAST::accept(visitor::NodeVisitor &visitor) const {
+    visitor.visitBindingAST(*this);
 }
 
 std::shared_ptr<ExprAST> ExprAST::eval(std::shared_ptr<Scope> &, const pExpr &ret) const {
@@ -76,9 +86,8 @@ pExpr ExprAST::apply(const std::vector<pExpr> &, pScope &) {
     throw RuntimeError("Expression cannot be applied.");
 }
 
-std::string ExprAST::display() const {
-    CLOG(DEBUG, "exception");
-    throw RuntimeError("Expression cannot be displayed.");
+void ExprAST::accept(visitor::NodeVisitor &visitor) const {
+    visitor.visitExprAST(*this);
 }
 
 std::shared_ptr<ExprAST> LoadingFileAST::eval(std::shared_ptr<Scope> &s, const pExpr &) const {
@@ -89,12 +98,20 @@ std::shared_ptr<ExprAST> LoadingFileAST::eval(std::shared_ptr<Scope> &s, const p
     return ptr->eval(s, ptr);
 }
 
+void LoadingFileAST::accept(visitor::NodeVisitor &visitor) const {
+    visitor.visitLoadingFileAST(*this);
+}
+
 std::shared_ptr<ExprAST> IfStatementAST::eval(std::shared_ptr<Scope> &ss, const pExpr &) const {
     auto ptr = condition->eval(ss, condition);
     if (auto boolFalsePtr = std::dynamic_pointer_cast<BooleansFalseAST>(ptr)) {
         return falseClause->eval(ss, falseClause);
     }
     return trueClause->eval(ss, trueClause);
+}
+
+void IfStatementAST::accept(visitor::NodeVisitor &visitor) const {
+    visitor.visitIfStatementAST(*this);
 }
 
 pExpr BuiltinLessThanAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) {
@@ -116,11 +133,13 @@ pExpr BuiltinLessThanAST::apply(const std::vector<pExpr> &actualArgs, pScope &s)
     else return std::make_shared<BooleansFalseAST>();
 }
 
+void BuiltinLessThanAST::accept(visitor::NodeVisitor &visitor) const {
+    visitor.visitBuiltinLessThanAST(*this);
+}
 
-std::string NumberAST::display() const {
-    std::stringstream ss;
-    ss << value;
-    return ss.str();
+
+void NumberAST::accept(visitor::NodeVisitor &visitor) const {
+    visitor.visitNumberAST(*this);
 }
 
 std::shared_ptr<ExprAST> IdentifierAST::eval(std::shared_ptr<Scope> &ss, const pExpr &) const {
@@ -132,10 +151,10 @@ std::shared_ptr<ExprAST> IdentifierAST::eval(std::shared_ptr<Scope> &ss, const p
     }
 }
 
-
-std::string LambdaAST::display() const {
-    return "#proceduce";
+void IdentifierAST::accept(visitor::NodeVisitor &visitor) const {
+    visitor.visitIdentifierAST(*this);
 }
+
 
 pExpr BuiltinOppositeAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) {
     if (auto p = std::dynamic_pointer_cast<NumberAST>(actualArgs.front()->eval(s, actualArgs.front()))) {
@@ -146,11 +165,19 @@ pExpr BuiltinOppositeAST::apply(const std::vector<pExpr> &actualArgs, pScope &s)
     }
 }
 
+void BuiltinOppositeAST::accept(visitor::NodeVisitor &visitor) const {
+    visitor.visitBuiltinOppositeAST(*this);
+}
+
 pExpr BuiltinListAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) {
     std::shared_ptr<ExprAST> list = std::make_shared<NilAST>();
     for (int i = static_cast<int>(actualArgs.size() - 1); i >= 0; i--)
         list = std::make_shared<PairAST>(actualArgs[i]->eval(s, actualArgs[i]), list);
     return list;
+}
+
+void BuiltinListAST::accept(visitor::NodeVisitor &visitor) const {
+    visitor.visitBuiltinListAST(*this);
 }
 
 std::shared_ptr<ExprAST> LambdaApplicationAST::eval(std::shared_ptr<Scope> &ss, const pExpr &) const {
@@ -162,12 +189,16 @@ std::shared_ptr<ExprAST> LambdaApplicationAST::eval(std::shared_ptr<Scope> &ss, 
     }
 }
 
-std::string BooleansTrueAST::display() const {
-    return "#t";
+void LambdaApplicationAST::accept(visitor::NodeVisitor &visitor) const {
+    visitor.visitLambdaApplicationAST(*this);
 }
 
-std::string BooleansFalseAST::display() const {
-    return "#f";
+void BooleansTrueAST::accept(visitor::NodeVisitor &visitor) const {
+    visitor.visitBooleansTrueAST(*this);
+}
+
+void BooleansFalseAST::accept(visitor::NodeVisitor &visitor) const {
+    visitor.visitBooleansFalseAST(*this);
 }
 
 std::shared_ptr<ExprAST> AllExprAST::eval(std::shared_ptr<Scope> &s, const pExpr &) const {
@@ -177,14 +208,18 @@ std::shared_ptr<ExprAST> AllExprAST::eval(std::shared_ptr<Scope> &s, const pExpr
     return ret;
 }
 
+void AllExprAST::accept(visitor::NodeVisitor &visitor) const {
+    visitor.visitAllExprAST(*this);
+}
+
 std::shared_ptr<ExprAST> PairAST::eval(std::shared_ptr<Scope> &s, const pExpr &ret) const {
     data.first = data.first->eval(s, data.first);
     data.second = data.second->eval(s, data.second);
     return ret;
 }
 
-std::string PairAST::display() const {
-    return "(" + data.first->display() + ", " + data.second->display() + ")";
+void PairAST::accept(visitor::NodeVisitor &visitor) const {
+    visitor.visitPairAST(*this);
 }
 
 pExpr BuiltinNullAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) {
@@ -194,8 +229,17 @@ pExpr BuiltinNullAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) {
         return std::make_shared<BooleansFalseAST>();
 }
 
-std::string NilAST::display() const {
-    return "\'()";
+void BuiltinNullAST::accept(visitor::NodeVisitor &visitor) const {
+    visitor.visitBuiltinNullAST(*this);
+}
+
+
+void LambdaAST::accept(visitor::NodeVisitor &visitor) const {
+    visitor.visitLambdaAST(*this);
+}
+
+void NilAST::accept(visitor::NodeVisitor &visitor) const {
+    visitor.visitNilAST(*this);
 }
 
 pExpr BuiltinCarAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) {
@@ -207,6 +251,10 @@ pExpr BuiltinCarAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) {
     }
 }
 
+void BuiltinCarAST::accept(visitor::NodeVisitor &visitor) const {
+    visitor.visitBuiltinCarAST(*this);
+}
+
 pExpr BuiltinCdrAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) {
     if (auto p = std::dynamic_pointer_cast<PairAST>(actualArgs.front()->eval(s, actualArgs.front()))) {
         return p->data.second;
@@ -214,6 +262,10 @@ pExpr BuiltinCdrAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) {
         CLOG(DEBUG, "exception");
         throw NotPair("Cannot convert to pair");
     }
+}
+
+void BuiltinCdrAST::accept(visitor::NodeVisitor &visitor) const {
+    visitor.visitBuiltinCdrAST(*this);
 }
 
 pExpr BuiltinConsAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) {
@@ -224,6 +276,10 @@ pExpr BuiltinConsAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) {
         CLOG(DEBUG, "exception");
         throw NotPair("Builtin cons error.");
     }
+}
+
+void BuiltinConsAST::accept(visitor::NodeVisitor &visitor) const {
+    visitor.visitBuiltinConsAST(*this);
 }
 
 pExpr BuiltinAddAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) {
@@ -240,6 +296,10 @@ pExpr BuiltinAddAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) {
     return std::make_shared<NumberAST>(num);
 }
 
+void BuiltinAddAST::accept(visitor::NodeVisitor &visitor) const {
+    visitor.visitBuiltinAddAST(*this);
+}
+
 pExpr BuiltinMultiplyAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) {
     double num = 1;
     for (auto element: actualArgs) {
@@ -254,6 +314,10 @@ pExpr BuiltinMultiplyAST::apply(const std::vector<pExpr> &actualArgs, pScope &s)
     return std::make_shared<NumberAST>(num);
 }
 
+void BuiltinMultiplyAST::accept(visitor::NodeVisitor &visitor) const {
+    visitor.visitBuiltinMultiplyAST(*this);
+}
+
 pExpr
 BuiltinReciprocalAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) {
     if (auto p = std::dynamic_pointer_cast<NumberAST>(actualArgs.front()->eval(s, actualArgs.front()))) {
@@ -262,6 +326,10 @@ BuiltinReciprocalAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) {
         CLOG(DEBUG, "exception");
         throw NotNumber("The operands cannot be converted to number");
     }
+}
+
+void BuiltinReciprocalAST::accept(visitor::NodeVisitor &visitor) const {
+    visitor.visitBuiltinReciprocalAST(*this);
 }
 
 CondStatementAST::CondStatementAST(const std::vector<std::shared_ptr<ExprAST>> &condition,
@@ -275,6 +343,10 @@ std::shared_ptr<ExprAST> CondStatementAST::eval(std::shared_ptr<Scope> &s, const
     return ifStatement->eval(s, ifStatement);
 }
 
+void CondStatementAST::accept(visitor::NodeVisitor &visitor) const {
+    visitor.visitCondStatementAST(*this);
+}
+
 std::shared_ptr<ExprAST> LetStatementAST::eval(std::shared_ptr<Scope> &s, const pExpr &) const {
     auto tmp = std::make_shared<Scope>();
     tmp->setSearchDomain(s);
@@ -283,4 +355,16 @@ std::shared_ptr<ExprAST> LetStatementAST::eval(std::shared_ptr<Scope> &s, const 
         tmp->addName(id, value[index]->eval(s, value[index]));
     }
     return expr->eval(tmp, expr);
+}
+
+void LetStatementAST::accept(visitor::NodeVisitor &visitor) const {
+    visitor.visitLetStatementAST(*this);
+}
+
+void BindingAST::accept(visitor::NodeVisitor &visitor) const {
+    visitor.visitBindingAST(*this);
+}
+
+void BuiltinDrawAST::accept(visitor::NodeVisitor &visitor) const {
+    visitor.visitBuiltinDrawAST(*this);
 }

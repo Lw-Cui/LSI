@@ -2,6 +2,7 @@
 #define GI_BUILTINDRAW_H
 
 #include <AST.h>
+#include <visitor.h>
 #include <SFML/Graphics.hpp>
 #include <Controller.h>
 
@@ -16,7 +17,7 @@ namespace ast {
     public:
         GUIBuiltinDrawAST(con::Controller &);
 
-        std::string display() const override;
+        virtual void accept(visitor::NodeVisitor &visitor) const override;
 
         pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
     };

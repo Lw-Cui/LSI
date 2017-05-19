@@ -88,7 +88,7 @@ TEST(BaseLibrariesParsingTest, ReverseTest) {
         CREATE_CONTEXT();
         lex.appendExp("(load \"setup.scm\")");
         REPL_COND("(reverse (list 1 2 3))", true);
-        ASSERT_STREQ("(3, (2, (1, '())))", res->display().c_str());
+        ASSERT_STREQ("(3, (2, (1, '())))", disp.to_string().c_str());
     END_TRY
 }
 
@@ -97,10 +97,10 @@ TEST(BaseLibrariesParsingTest, AppendTest) {
         CREATE_CONTEXT();
         lex.appendExp("(load \"setup.scm\")");
         REPL_COND("(append (list 1 2 3) (list 4 5 6))", true);
-        ASSERT_STREQ("(1, (2, (3, (4, (5, (6, '()))))))", res->display().c_str());
+        ASSERT_STREQ("(1, (2, (3, (4, (5, (6, '()))))))", disp.to_string().c_str());
 
         REPL_COND("(append (list 6 5) (list 4 3) (list 2 1 0))", true);
-        ASSERT_STREQ("(6, (5, (4, (3, (2, (1, (0, '())))))))", res->display().c_str());
+        ASSERT_STREQ("(6, (5, (4, (3, (2, (1, (0, '())))))))", disp.to_string().c_str());
     END_TRY
 }
 
@@ -109,7 +109,7 @@ TEST(BaseLibrariesParsingTest, MapTest) {
         CREATE_CONTEXT();
         lex.appendExp("(load \"setup.scm\")");
         REPL_COND("(map (list 1 2 3) (lambda (x) (+ x 1)))", true);
-        ASSERT_STREQ("(2, (3, (4, '())))", res->display().c_str());
+        ASSERT_STREQ("(2, (3, (4, '())))", disp.to_string().c_str());
     END_TRY
 }
 
