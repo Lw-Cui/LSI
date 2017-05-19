@@ -18,7 +18,9 @@ set(INTERPRETER_SOURCE_FILES
         basicParser.cpp
         context.cpp
         AST.cpp
+        visitor.cpp
         ../include/parser.h
         ../include/context.h
-        ../include/AST.h)
+        ../include/AST.h
+        ../include/visitor.h)
 add_library(${INTERPRETER_LIB} ${INTERPRETER_SOURCE_FILES})

@@ -3,6 +3,7 @@
 #include <parser.h>
 #include <exception.h>
 #include <testMacro.h>
+#include <visitor.h>
 
 using namespace lexers;
 using namespace parser;

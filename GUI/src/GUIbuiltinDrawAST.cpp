@@ -34,8 +34,8 @@ shared_ptr<ast::ExprAST> ast::GUIBuiltinDrawAST::toPairAST(const sf::Vector2f &v
     return make_shared<PairAST>(make_shared<NumberAST>(vec.x), make_shared<NumberAST>(vec.y));
 }
 
-string ast::GUIBuiltinDrawAST::display() const {
-    return "Finished drawing.";
+ast::GUIBuiltinDrawAST::GUIBuiltinDrawAST(con::Controller &c) : controller{c} {}
+
+void ast::GUIBuiltinDrawAST::accept(visitor::NodeVisitor &visitor) const {
 }
 
-ast::GUIBuiltinDrawAST::GUIBuiltinDrawAST(con::Controller &c) : controller{c} {}

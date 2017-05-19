@@ -2,10 +2,6 @@
 
 using namespace std;
 
-std::string ast::CLIBuiltinDrawAST::display() const {
-    return "Finish Drawing";
-}
-
 std::pair<float, float> ast::CLIBuiltinDrawAST::toPair(const std::shared_ptr<ExprAST> &ptr) {
     if (auto pairPtr = dynamic_pointer_cast<PairAST>(ptr)) {
         float first = (float) dynamic_pointer_cast<NumberAST>(pairPtr->data.first)->getValue();
@@ -32,5 +28,7 @@ ast::CLIBuiltinDrawAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) {
 }
 
 ast::CLIBuiltinDrawAST::CLIBuiltinDrawAST(Image &i) : image{i} {
+}
 
+void ast::CLIBuiltinDrawAST::accept(visitor::NodeVisitor &visitor) const {
 }

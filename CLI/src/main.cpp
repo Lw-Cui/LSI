@@ -8,10 +8,12 @@
 #include <image.h>
 #include <exception.h>
 #include <cxxopts.hpp>
+#include <visitor.h>
 #include <CLIbuiltinDrawAST.h>
 
 using namespace std;
 using namespace ast;
+using namespace visitor;
 using namespace parser;
 using namespace lexers;
 using namespace cxxopts;
@@ -82,14 +84,16 @@ int main(int argc, char *argv[]) {
             lex.appendExp(string("(load \"") + s + "\")");
             auto ast = parseAllExpr(lex);
             shared_ptr<ExprAST> ptr = ast->eval(scope, ast);
+            visitor::DisplayVisitor disp;
             if (ptr) {
-                cout << ptr->display();
+                ptr->accept(disp);
+                cout << disp.to_string();
             }
         }
         if (!options.count("nopainter") && !options.count("nostdlib")) {
             image.save(options["output"].as<string>().c_str());
         }
-    //} catch (RuntimeError &e) {
+        //} catch (RuntimeError &e) {
         //cout << e.what() << endl;
         //throw;
     } catch (const OptionException &e) {

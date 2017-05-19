@@ -3,6 +3,7 @@
 #include <Controller.h>
 #include <GUIbuiltinDrawAST.h>
 #include <exception.h>
+#include <visitor.h>
 
 using namespace std;
 using namespace sf;
@@ -10,6 +11,7 @@ using namespace con;
 using namespace context;
 using namespace parser;
 using namespace exception;
+using namespace visitor;
 
 void Controller::appendChar(char c) {
     if (!toType.count(c))
@@ -67,9 +69,12 @@ con::Text Controller::evaluation() {
 
     try {
         lexers::Lexer lex(currentText.formatString.toString().substr(4));
+        DisplayVisitor disp;
         auto ast = parseAllExpr(lex);
+
         if (auto ptr = ast->eval(scope, ast)) {
-            pushString(resultText.formatString, ptr->display());
+            ptr->accept(disp);
+            pushString(resultText.formatString, disp.to_string());
         } else {
             pushString(resultText.formatString, "\'()");
         }
