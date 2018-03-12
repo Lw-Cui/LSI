@@ -14,6 +14,7 @@ pExpr LambdaAST::apply(const std::vector<pExpr> &actualArgs, pScope &ss) {
     auto tmp = std::make_shared<Scope>();
     tmp->setSearchDomain(context);
     // If external scope contains some identifier needed by this lambda, update it.
+    // For example: func A calls func B while func B appears behind func A. Like C with auto declaration.
     tmp->setSearchDomain(ss);
 
     for (size_t i = 0; i < actualArgs.size(); i++) {
@@ -41,6 +42,7 @@ pExpr LambdaAST::apply(const std::vector<pExpr> &actualArgs, pScope &ss) {
 
 std::shared_ptr<ExprAST> LambdaAST::eval(std::shared_ptr<Scope> &ss, const pExpr &ret) const {
     // Here we evaluate the sub-routine.
+    // Please note that func body will not be eval here, no binding at all
     // because lambda will be evaluated more than once when regraded as argument, so store it stauts.
     if (!isSubRoutineEvaluated)
         for (auto expr: expression)

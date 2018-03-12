@@ -2,6 +2,7 @@ set(PARSER_TEST_FILES
         exceptionTest.cpp
         basicParserTest.cpp
         functionParsingTest.cpp
+        contextTest.cpp
         keywordTest.cpp
         builtinFunctionTest.cpp
         ../../include/testMacro.h)
