@@ -16,7 +16,7 @@ shared_ptr<ExprAST> parser::parseFunctionApplicationExpr(lexers::Lexer &lex) {
     while (lex.getTokType() != Lexer::TokClosingBracket) {
         arguments.push_back(parseExpr(lex));
     }
-    return make_shared<LambdaApplicationAST>(make_shared<IdentifierAST>(identifier), arguments);
+    return make_shared<InvocationAST>(make_shared<IdentifierAST>(identifier), arguments);
 }
 
 shared_ptr<ExprAST> parser::parseLambdaApplicationExpr(lexers::Lexer &lex) {
@@ -25,7 +25,7 @@ shared_ptr<ExprAST> parser::parseLambdaApplicationExpr(lexers::Lexer &lex) {
     while (lex.getTokType() != Lexer::TokClosingBracket) {
         arguments.push_back(parseExpr(lex));
     }
-    return make_shared<LambdaApplicationAST>(lambda, arguments);
+    return make_shared<InvocationAST>(lambda, arguments);
 }
 
 std::shared_ptr<ExprAST> parser::parseLambdaDefinitionExpr(lexers::Lexer &lex) {

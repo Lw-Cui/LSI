@@ -59,7 +59,7 @@ namespace visitor {
 
         virtual void visitLambdaBindingAST(const ast::LambdaBindingAST) {}
 
-        virtual void visitLambdaApplicationAST(const ast::LambdaApplicationAST) {}
+        virtual void visitLambdaApplicationAST(const ast::InvocationAST) {}
 
         virtual void visitBuiltinDrawAST(const ast::BuiltinDrawAST) {}
 

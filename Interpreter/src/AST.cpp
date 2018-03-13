@@ -24,8 +24,8 @@ pExpr LambdaAST::apply(const std::vector<pExpr> &actualArgs, pScope &ss) {
         } else {
             tmp->addName(formalArgs[i + 1],
                          std::make_shared<BuiltinListAST>()->apply(
-                                 std::vector<std::shared_ptr<ExprAST>>{actualArgs.begin() + i, actualArgs.end()},
-                                 ss));
+                             std::vector<std::shared_ptr<ExprAST>>{actualArgs.begin() + i, actualArgs.end()},
+                             ss));
             break;
         }
     }
@@ -37,7 +37,11 @@ pExpr LambdaAST::apply(const std::vector<pExpr> &actualArgs, pScope &ss) {
         // Don't eval sub-routine. We've done it (it could be only evaluated once) in LambdaAST::eval
         if (!std::dynamic_pointer_cast<LambdaBindingAST>(expression[i]))
             expression[i]->eval(tmp, expression[i]);
-    return expression.back()->eval(tmp, expression.back());
+    auto ret = expression.back()->eval(tmp, expression.back());
+    // remove current function name record
+    if (!ss->delCurFuncName())
+        throw exception::RuntimeError("Function name record is corrupted.");
+    return ret;
 }
 
 std::shared_ptr<ExprAST> LambdaAST::eval(std::shared_ptr<Scope> &ss, const pExpr &ret) const {
@@ -65,6 +69,45 @@ std::shared_ptr<ExprAST> LambdaBindingAST::eval(std::shared_ptr<Scope> &ss, cons
     ss->addName(getIdentifier(), lambda->eval(ss, lambda));
     return nullptr;
 }
+
+std::shared_ptr<ExprAST> IfStatementAST::eval(std::shared_ptr<Scope> &ss, const pExpr &) const {
+    auto ptr = condition->eval(ss, condition);
+    if (auto boolFalsePtr = std::dynamic_pointer_cast<BooleansFalseAST>(ptr)) {
+        //TODO: tail recursion optimization
+        if (auto call = std::dynamic_pointer_cast<InvocationAST>(falseClause)) {
+            if (auto id = std::dynamic_pointer_cast<IdentifierAST>(call->callableObj)) {
+                if (id->getId() == ss->getCurFuncName())
+                    CLOG(DEBUG, "parser") << "Tail recursion " << ss->getCurFuncName();
+            }
+        }
+        return falseClause->eval(ss, falseClause);
+    }
+    if (auto call = std::dynamic_pointer_cast<InvocationAST>(falseClause)) {
+        if (auto id = std::dynamic_pointer_cast<IdentifierAST>(call->callableObj)) {
+            if (id->getId() == ss->getCurFuncName())
+                CLOG(DEBUG, "parser") << "Tail recursion " << ss->getCurFuncName();
+        }
+    }
+    return trueClause->eval(ss, trueClause);
+}
+
+std::shared_ptr<ExprAST> InvocationAST::eval(std::shared_ptr<Scope> &ss, const pExpr &) const {
+    if (std::dynamic_pointer_cast<LambdaAST>(callableObj)) {
+        ss->setCurFuncName("(Anonymous)");
+        return callableObj->apply(actualArgs, ss);
+    } else if (auto id = std::dynamic_pointer_cast<IdentifierAST>(callableObj)) {
+        CLOG(DEBUG, "parser") << "Func " << ss->getCurFuncName() << " calls " << id->getId();
+        auto lambda = id->eval(ss, id);
+        ss->setCurFuncName(id->getId());
+        return lambda->apply(actualArgs, ss);
+    } else {
+        // it may be a function call which returns lambda, so just eval it first
+        auto lambda = callableObj->eval(ss, callableObj);
+        ss->setCurFuncName("(Anonymous)");
+        return lambda->apply(actualArgs, ss);
+    }
+}
+
 
 void LambdaBindingAST::accept(visitor::NodeVisitor &visitor) const {
     visitor.visitLambdaBindingAST(*this);
@@ -104,33 +147,25 @@ void LoadingFileAST::accept(visitor::NodeVisitor &visitor) const {
     visitor.visitLoadingFileAST(*this);
 }
 
-std::shared_ptr<ExprAST> IfStatementAST::eval(std::shared_ptr<Scope> &ss, const pExpr &) const {
-    auto ptr = condition->eval(ss, condition);
-    if (auto boolFalsePtr = std::dynamic_pointer_cast<BooleansFalseAST>(ptr)) {
-        return falseClause->eval(ss, falseClause);
-    }
-    return trueClause->eval(ss, trueClause);
-}
-
 void IfStatementAST::accept(visitor::NodeVisitor &visitor) const {
     visitor.visitIfStatementAST(*this);
 }
 
 pExpr BuiltinLessThanAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) {
     bool res = std::is_sorted(
-            std::begin(actualArgs), std::end(actualArgs),
-            [&](std::shared_ptr<ExprAST> p1, std::shared_ptr<ExprAST> p2) {
-                //[&](decltype(actualArgs)::value_type p1, decltype(actualArgs)::value_type p2) {
-                auto np1 = std::dynamic_pointer_cast<NumberAST>(p1->eval(s, p1));
-                auto np2 = std::dynamic_pointer_cast<NumberAST>(p2->eval(s, p2));
-                if (np1 && np2) {
-                    // Important: if (comp(*next,*first)) return true then is_sorted return false
-                    return np1->getValue() <= np2->getValue();
-                } else {
-                    CLOG(DEBUG, "exception");
-                    throw NotNumber("The operands in less than operator cannot be converted to number");
-                }
-            });
+        std::begin(actualArgs), std::end(actualArgs),
+        [&](std::shared_ptr<ExprAST> p1, std::shared_ptr<ExprAST> p2) {
+            //[&](decltype(actualArgs)::value_type p1, decltype(actualArgs)::value_type p2) {
+            auto np1 = std::dynamic_pointer_cast<NumberAST>(p1->eval(s, p1));
+            auto np2 = std::dynamic_pointer_cast<NumberAST>(p2->eval(s, p2));
+            if (np1 && np2) {
+                // Important: if (comp(*next,*first)) return true then is_sorted return false
+                return np1->getValue() <= np2->getValue();
+            } else {
+                CLOG(DEBUG, "exception");
+                throw NotNumber("The operands in less than operator cannot be converted to number");
+            }
+        });
     if (res) return std::make_shared<BooleansTrueAST>();
     else return std::make_shared<BooleansFalseAST>();
 }
@@ -182,16 +217,15 @@ void BuiltinListAST::accept(visitor::NodeVisitor &visitor) const {
     visitor.visitBuiltinListAST(*this);
 }
 
-std::shared_ptr<ExprAST> LambdaApplicationAST::eval(std::shared_ptr<Scope> &ss, const pExpr &) const {
-    if (std::dynamic_pointer_cast<LambdaAST>(lambdaOrIdentifier)) {
-        return lambdaOrIdentifier->apply(actualArgs, ss);
-    } else {
-        auto lambda = lambdaOrIdentifier->eval(ss, lambdaOrIdentifier);
-        return lambda->apply(actualArgs, ss);
-    }
+std::shared_ptr<ExprAST> FunctionArgumentAST::eval(std::shared_ptr<Scope> &ss, const pExpr &) const {
+    return nullptr;
 }
 
-void LambdaApplicationAST::accept(visitor::NodeVisitor &visitor) const {
+const std::vector<std::shared_ptr<ExprAST>> &FunctionArgumentAST::getAcualArgs() const {
+    return actualArgs;
+}
+
+void InvocationAST::accept(visitor::NodeVisitor &visitor) const {
     visitor.visitLambdaApplicationAST(*this);
 }
 
@@ -336,7 +370,7 @@ void BuiltinReciprocalAST::accept(visitor::NodeVisitor &visitor) const {
 
 CondStatementAST::CondStatementAST(const std::vector<std::shared_ptr<ExprAST>> &condition,
                                    const std::vector<std::shared_ptr<ExprAST>> &result)
-        : ifStatement{std::make_shared<BooleansFalseAST>()} {
+    : ifStatement{std::make_shared<BooleansFalseAST>()} {
     for (int index = static_cast<int>(condition.size() - 1); index >= 0; index--)
         ifStatement = std::make_shared<IfStatementAST>(condition[index], result[index], ifStatement);
 }
