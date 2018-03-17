@@ -64,7 +64,7 @@ namespace context {
         }
 
         const string getCurFuncName() const {
-            if (!curFuncName.empty()) return curFuncName.top();
+            if (!callStack.empty()) return callStack.top();
             // That is necessary since in function body we need new scope
 
             if (!nameDomain.empty()) {
@@ -75,12 +75,12 @@ namespace context {
         }
 
         void setCurFuncName(const string &name) {
-            if (!impl.count(name)) curFuncName.push(name);
+            if (!builtinList.count(name)) callStack.push(name);
         }
 
         bool delCurFuncName() {
-            if (!curFuncName.empty()) {
-                curFuncName.pop();
+            if (!callStack.empty()) {
+                callStack.pop();
                 return true;
             } else {
                 if (!nameDomain.empty())
@@ -94,7 +94,21 @@ namespace context {
 
         std::vector<pScope> nameDomain;
 
-        std::stack<std::string> curFuncName;
+        std::stack<std::string> callStack;
+
+        const std::set<std::string> builtinList = {
+            "cons",
+            "car",
+            "cdr",
+            "+",
+            "*",
+            "null?",
+            "<",
+            "#opposite",
+            "#reciprocal",
+            "list",
+            "else",
+        };
     };
 
     bool Scope::count(const std::string &str) const {

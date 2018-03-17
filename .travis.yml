@@ -143,21 +143,6 @@ install:
       fi
     fi
 
-  ############################################################################
-  # Install a recent SFML
-  ############################################################################
-  - |
-    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
-      wget http://www.sfml-dev.org/files/SFML-2.4.1-linux-gcc-64-bit.tar.gz
-      tar -xzvf SFML-2.4.1-linux-gcc-64-bit.tar.gz
-      bash "${TRAVIS_BUILD_DIR}"/DependencyInstall.sh
-      sudo cp -r SFML-2.4.1/lib/* /usr/lib/x86_64-linux-gnu/
-      sudo cp -r SFML-2.4.1/include/* /usr/include/x86_64-linux-gnu/
-      sudo ldconfig
-    else
-      brew install sfml
-    fi
-
 before_script:
   - cd "${TRAVIS_BUILD_DIR}"
   - cmake . -Bbuild -DCMAKE_CXX_COMPILER="$CXX" -DCMAKE_C_COMPILER="$CC" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
@@ -171,10 +156,6 @@ script:
   - |
     if [[ $BUILD_TYPE == "Release" ]]; then
     bash ../CLI/test/test.sh
-    fi
-  - |
-    if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
-      ./../build/GUI/test/GUITest
     fi
 
 notifications:

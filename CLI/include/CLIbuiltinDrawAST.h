@@ -15,7 +15,7 @@ namespace ast {
 
         virtual void accept(visitor::NodeVisitor &visitor) const override;
 
-        pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
 
     private:
         std::pair<float, float> toPair(const std::shared_ptr<ExprAST> &);

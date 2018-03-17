@@ -10,7 +10,3 @@
  (define (x a) a)
  (x 5)
  (if (< n 0) acc (SUM (- n 1) (+ acc n))))
-
-(SUM 5 0)
-
-(line (cons 5 6) (cons 10 -5))

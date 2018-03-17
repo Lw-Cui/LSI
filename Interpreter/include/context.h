@@ -46,8 +46,6 @@ namespace context {
         bool delCurFuncName();
 
     private:
-        std::string curFuncName;
-
         std::shared_ptr<ScopeImpl> impl;
 
     };

@@ -25,7 +25,7 @@ namespace ast {
     public:
         virtual pExpr eval(pScope &, const pExpr &) const;
 
-        virtual pExpr apply(const std::vector<pExpr> &, pScope &);
+        virtual pExpr apply(const std::vector<pExpr>, pScope &);
 
         virtual void accept(visitor::NodeVisitor &) const;
 
@@ -230,7 +230,7 @@ namespace ast {
         LambdaAST(const LambdaAST &other) : formalArgs(other.formalArgs), expression(other.expression),
                                             context(new Scope(*other.context)) {}
 
-        pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
 
         std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &ss, const pExpr &) const override;
 
@@ -243,7 +243,7 @@ namespace ast {
 
     class BuiltinConsAST : public ExprAST {
     public:
-        pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
 
         virtual void accept(visitor::NodeVisitor &visitor) const override;
     };
@@ -253,63 +253,63 @@ namespace ast {
 
         virtual void accept(visitor::NodeVisitor &visitor) const override;
 
-        pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
     };
 
     class BuiltinCdrAST : public ExprAST {
     public:
         virtual void accept(visitor::NodeVisitor &visitor) const override;
 
-        pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
     };
 
     class BuiltinAddAST : public ExprAST {
     public:
         virtual void accept(visitor::NodeVisitor &visitor) const override;
 
-        pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
     };
 
     class BuiltinMultiplyAST : public ExprAST {
     public:
         virtual void accept(visitor::NodeVisitor &visitor) const override;
 
-        pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
     };
 
     class BuiltinListAST : public ExprAST {
     public:
         virtual void accept(visitor::NodeVisitor &visitor) const override;
 
-        pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
     };
 
     class BuiltinNullAST : public ExprAST {
     public:
         virtual void accept(visitor::NodeVisitor &visitor) const override;
 
-        pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
     };
 
     class BuiltinLessThanAST : public ExprAST {
     public:
         virtual void accept(visitor::NodeVisitor &visitor) const override;
 
-        pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
     };
 
     class BuiltinOppositeAST : public ExprAST {
     public:
         virtual void accept(visitor::NodeVisitor &visitor) const override;
 
-        pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
     };
 
     class BuiltinReciprocalAST : public ExprAST {
     public:
         virtual void accept(visitor::NodeVisitor &visitor) const override;
 
-        pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
     };
 
     class LambdaBindingAST : public BindingAST {

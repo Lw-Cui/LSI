@@ -9,7 +9,7 @@ using namespace exception;
 using namespace ast;
 using namespace visitor;
 
-pExpr LambdaAST::apply(const std::vector<pExpr> &actualArgs, pScope &ss) {
+pExpr LambdaAST::apply(const std::vector<pExpr> actualArgs, pScope &ss) {
     // Backup scope of lambda. If not, recursive calls will destroy scope by binding arguments.
     auto tmp = std::make_shared<Scope>();
     tmp->setSearchDomain(context);
@@ -20,7 +20,7 @@ pExpr LambdaAST::apply(const std::vector<pExpr> &actualArgs, pScope &ss) {
     for (size_t i = 0; i < actualArgs.size(); i++) {
         if (formalArgs[i] != ".") {
             // Evaluate value from current scope and set them into scope of lambda
-            tmp->addName(formalArgs[i], actualArgs[i]->eval(ss, actualArgs[i]));
+            tmp->addName(formalArgs[i], actualArgs[i]);
         } else {
             tmp->addName(formalArgs[i + 1],
                          std::make_shared<BuiltinListAST>()->apply(
@@ -92,20 +92,34 @@ std::shared_ptr<ExprAST> IfStatementAST::eval(std::shared_ptr<Scope> &ss, const 
 }
 
 std::shared_ptr<ExprAST> InvocationAST::eval(std::shared_ptr<Scope> &ss, const pExpr &) const {
+    // Eval the arguments once
+    std::vector<pExpr> evalRes;
+    for (auto ptr: actualArgs) evalRes.push_back(ptr->eval(ss, ptr));
+
     if (std::dynamic_pointer_cast<LambdaAST>(callableObj)) {
         ss->setCurFuncName("(Anonymous)");
-        return callableObj->apply(actualArgs, ss);
+        return callableObj->apply(std::move(evalRes), ss);
     } else if (auto id = std::dynamic_pointer_cast<IdentifierAST>(callableObj)) {
         CLOG(DEBUG, "parser") << "Func " << ss->getCurFuncName() << " calls " << id->getId();
         auto lambda = id->eval(ss, id);
         ss->setCurFuncName(id->getId());
-        return lambda->apply(actualArgs, ss);
+        return lambda->apply(std::move(evalRes), ss);
     } else {
         // it may be a function call which returns lambda, so just eval it first
         auto lambda = callableObj->eval(ss, callableObj);
         ss->setCurFuncName("(Anonymous)");
-        return lambda->apply(actualArgs, ss);
+        return lambda->apply(std::move(evalRes), ss);
     }
+}
+
+std::shared_ptr<ExprAST> LetStatementAST::eval(std::shared_ptr<Scope> &s, const pExpr &) const {
+    auto tmp = std::make_shared<Scope>();
+    tmp->setSearchDomain(s);
+    for (auto index = 0; index < identifier.size(); index++) {
+        auto id = std::dynamic_pointer_cast<IdentifierAST>(identifier[index])->getId();
+        tmp->addName(id, value[index]->eval(s, value[index]));
+    }
+    return expr->eval(tmp, expr);
 }
 
 
@@ -126,7 +140,7 @@ std::shared_ptr<ExprAST> ExprAST::eval(std::shared_ptr<Scope> &, const pExpr &re
     return ret;
 };
 
-pExpr ExprAST::apply(const std::vector<pExpr> &, pScope &) {
+pExpr ExprAST::apply(const std::vector<pExpr>, pScope &) {
     CLOG(DEBUG, "exception");
     throw RuntimeError("Expression cannot be applied.");
 }
@@ -151,13 +165,13 @@ void IfStatementAST::accept(visitor::NodeVisitor &visitor) const {
     visitor.visitIfStatementAST(*this);
 }
 
-pExpr BuiltinLessThanAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) {
+pExpr BuiltinLessThanAST::apply(const std::vector<pExpr> actualArgs, pScope &s) {
     bool res = std::is_sorted(
         std::begin(actualArgs), std::end(actualArgs),
         [&](std::shared_ptr<ExprAST> p1, std::shared_ptr<ExprAST> p2) {
             //[&](decltype(actualArgs)::value_type p1, decltype(actualArgs)::value_type p2) {
-            auto np1 = std::dynamic_pointer_cast<NumberAST>(p1->eval(s, p1));
-            auto np2 = std::dynamic_pointer_cast<NumberAST>(p2->eval(s, p2));
+            auto np1 = std::dynamic_pointer_cast<NumberAST>(p1);
+            auto np2 = std::dynamic_pointer_cast<NumberAST>(p2);
             if (np1 && np2) {
                 // Important: if (comp(*next,*first)) return true then is_sorted return false
                 return np1->getValue() <= np2->getValue();
@@ -183,7 +197,6 @@ std::shared_ptr<ExprAST> IdentifierAST::eval(std::shared_ptr<Scope> &ss, const p
     if (ss->count(getId())) {
         return ss->searchName(getId());
     } else {
-        std::cout << getId() << std::endl;
         throw UnboundIdentifier("Unbound identifier: " + getId());
     }
 }
@@ -193,8 +206,8 @@ void IdentifierAST::accept(visitor::NodeVisitor &visitor) const {
 }
 
 
-pExpr BuiltinOppositeAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) {
-    if (auto p = std::dynamic_pointer_cast<NumberAST>(actualArgs.front()->eval(s, actualArgs.front()))) {
+pExpr BuiltinOppositeAST::apply(const std::vector<pExpr> actualArgs, pScope &s) {
+    if (auto p = std::dynamic_pointer_cast<NumberAST>(actualArgs.front())) {
         return std::make_shared<NumberAST>(-p->getValue());
     } else {
         CLOG(DEBUG, "exception");
@@ -206,10 +219,10 @@ void BuiltinOppositeAST::accept(visitor::NodeVisitor &visitor) const {
     visitor.visitBuiltinOppositeAST(*this);
 }
 
-pExpr BuiltinListAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) {
+pExpr BuiltinListAST::apply(const std::vector<pExpr> actualArgs, pScope &s) {
     std::shared_ptr<ExprAST> list = std::make_shared<NilAST>();
     for (int i = static_cast<int>(actualArgs.size() - 1); i >= 0; i--)
-        list = std::make_shared<PairAST>(actualArgs[i]->eval(s, actualArgs[i]), list);
+        list = std::make_shared<PairAST>(actualArgs[i], list);
     return list;
 }
 
@@ -258,8 +271,8 @@ void PairAST::accept(visitor::NodeVisitor &visitor) const {
     visitor.visitPairAST(*this);
 }
 
-pExpr BuiltinNullAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) {
-    if (auto p = std::dynamic_pointer_cast<NilAST>(actualArgs.front()->eval(s, actualArgs.front())))
+pExpr BuiltinNullAST::apply(const std::vector<pExpr> actualArgs, pScope &s) {
+    if (auto p = std::dynamic_pointer_cast<NilAST>(actualArgs.front()))
         return std::make_shared<BooleansTrueAST>();
     else
         return std::make_shared<BooleansFalseAST>();
@@ -278,8 +291,8 @@ void NilAST::accept(visitor::NodeVisitor &visitor) const {
     visitor.visitNilAST(*this);
 }
 
-pExpr BuiltinCarAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) {
-    if (auto p = std::dynamic_pointer_cast<PairAST>(actualArgs.front()->eval(s, actualArgs.front()))) {
+pExpr BuiltinCarAST::apply(const std::vector<pExpr> actualArgs, pScope &s) {
+    if (auto p = std::dynamic_pointer_cast<PairAST>(actualArgs.front())) {
         return p->data.first;
     } else {
         CLOG(DEBUG, "exception");
@@ -291,8 +304,8 @@ void BuiltinCarAST::accept(visitor::NodeVisitor &visitor) const {
     visitor.visitBuiltinCarAST(*this);
 }
 
-pExpr BuiltinCdrAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) {
-    if (auto p = std::dynamic_pointer_cast<PairAST>(actualArgs.front()->eval(s, actualArgs.front()))) {
+pExpr BuiltinCdrAST::apply(const std::vector<pExpr> actualArgs, pScope &s) {
+    if (auto p = std::dynamic_pointer_cast<PairAST>(actualArgs.front())) {
         return p->data.second;
     } else {
         CLOG(DEBUG, "exception");
@@ -304,10 +317,10 @@ void BuiltinCdrAST::accept(visitor::NodeVisitor &visitor) const {
     visitor.visitBuiltinCdrAST(*this);
 }
 
-pExpr BuiltinConsAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) {
+pExpr BuiltinConsAST::apply(const std::vector<pExpr> actualArgs, pScope &s) {
     if (actualArgs.size() == 2) {
         // actualArgs[0]->eval(s, actualArgs[0]) maybe return a new object, so return value matters.
-        return std::make_shared<PairAST>(actualArgs[0]->eval(s, actualArgs[0]), actualArgs[1]->eval(s, actualArgs[1]));
+        return std::make_shared<PairAST>(actualArgs[0], actualArgs[1]);
     } else {
         CLOG(DEBUG, "exception");
         throw NotPair("Builtin cons error.");
@@ -318,10 +331,9 @@ void BuiltinConsAST::accept(visitor::NodeVisitor &visitor) const {
     visitor.visitBuiltinConsAST(*this);
 }
 
-pExpr BuiltinAddAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) {
+pExpr BuiltinAddAST::apply(const std::vector<pExpr> actualArgs, pScope &s) {
     double num = 0;
-    for (auto element: actualArgs) {
-        std::shared_ptr<ExprAST> res = element->eval(s, element);
+    for (auto res: actualArgs) {
         if (auto p = std::dynamic_pointer_cast<NumberAST>(res)) {
             num += p->getValue();
         } else {
@@ -336,10 +348,9 @@ void BuiltinAddAST::accept(visitor::NodeVisitor &visitor) const {
     visitor.visitBuiltinAddAST(*this);
 }
 
-pExpr BuiltinMultiplyAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) {
+pExpr BuiltinMultiplyAST::apply(const std::vector<pExpr> actualArgs, pScope &s) {
     double num = 1;
-    for (auto element: actualArgs) {
-        std::shared_ptr<ExprAST> res = element->eval(s, element);
+    for (auto res: actualArgs) {
         if (auto p = std::dynamic_pointer_cast<NumberAST>(res)) {
             num *= p->getValue();
         } else {
@@ -355,8 +366,8 @@ void BuiltinMultiplyAST::accept(visitor::NodeVisitor &visitor) const {
 }
 
 pExpr
-BuiltinReciprocalAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) {
-    if (auto p = std::dynamic_pointer_cast<NumberAST>(actualArgs.front()->eval(s, actualArgs.front()))) {
+BuiltinReciprocalAST::apply(const std::vector<pExpr> actualArgs, pScope &s) {
+    if (auto p = std::dynamic_pointer_cast<NumberAST>(actualArgs.front())) {
         return std::make_shared<NumberAST>(1 / p->getValue());
     } else {
         CLOG(DEBUG, "exception");
@@ -381,16 +392,6 @@ std::shared_ptr<ExprAST> CondStatementAST::eval(std::shared_ptr<Scope> &s, const
 
 void CondStatementAST::accept(visitor::NodeVisitor &visitor) const {
     visitor.visitCondStatementAST(*this);
-}
-
-std::shared_ptr<ExprAST> LetStatementAST::eval(std::shared_ptr<Scope> &s, const pExpr &) const {
-    auto tmp = std::make_shared<Scope>();
-    tmp->setSearchDomain(s);
-    for (auto index = 0; index < identifier.size(); index++) {
-        auto id = std::dynamic_pointer_cast<IdentifierAST>(identifier[index])->getId();
-        tmp->addName(id, value[index]->eval(s, value[index]));
-    }
-    return expr->eval(tmp, expr);
 }
 
 void LetStatementAST::accept(visitor::NodeVisitor &visitor) const {
