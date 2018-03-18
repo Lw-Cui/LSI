@@ -3,21 +3,12 @@
 
 #include <string>
 #include <vector>
+#include <exception>
 
 namespace exception {
-    class RuntimeError {
-    private:
-        std::string errorInfo;
+    class RuntimeError : public std::runtime_error {
     public:
-        RuntimeError(const std::string &what) { appendInfo(what); }
-
-        void appendInfo(const std::string &what) {
-            errorInfo += "\n\t" + what;
-        }
-
-        std::string what() const {
-            return errorInfo;
-        }
+        explicit RuntimeError(const std::string &what) : runtime_error(what) {}
     };
 
     class NotPair : public RuntimeError {

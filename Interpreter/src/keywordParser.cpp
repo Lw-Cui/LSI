@@ -31,8 +31,7 @@ std::shared_ptr<ExprAST> parser::parseIfStatementExpr(lexers::Lexer &lex) {
         auto falseClause = parseExpr(lex);
         return make_shared<IfStatementAST>(condition, trueClause, falseClause);
     } catch (RuntimeError &e) {
-        e.appendInfo("@ if statement");
-        throw;
+        throw NotAtomType(std::string(e.what()) + " @ if statement");
     }
 }
 
