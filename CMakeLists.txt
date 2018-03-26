@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.2)
-project(GI)
+project(LSI)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
 
 if (NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "Debug")
+    set(CMAKE_BUILD_TYPE "Release")
 endif (NOT CMAKE_BUILD_TYPE)
 SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} --coverage")
 
@@ -20,7 +20,9 @@ add_subdirectory(external/googletest)
 include_directories(${gtest_SOURCE_FILE}/include)
 include_directories(${gmock_SOURCE_FILE}/include)
 
-add_subdirectory(test)
+add_subdirectory(Test_driver)
 add_subdirectory(Interpreter)
-add_subdirectory(GUI)
-add_subdirectory(CLI)
+add_subdirectory(Interface/CLI)
+
+# GUI is out of date
+# add_subdirectory(Interface/GUI)

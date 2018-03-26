@@ -33,7 +33,7 @@ matrix:
             - clang-3.6
             - g++-5
           sources: &sources
-            - ubuntu-toolchain-r-test
+            - ubuntu-toolchain-r-Test_driver
             - llvm-toolchain-precise-3.6
     - env: CLANG_VERSION=3.6 BUILD_TYPE=Release
       os: linux
@@ -50,7 +50,7 @@ matrix:
             - clang-3.7
             - g++-5
           sources: &sources
-            - ubuntu-toolchain-r-test
+            - ubuntu-toolchain-r-Test_driver
             - llvm-toolchain-precise-3.7
     - env: CLANG_VERSION=3.7 BUILD_TYPE=Release
       os: linux
@@ -67,7 +67,7 @@ matrix:
             - clang-3.8
             - g++-5
           sources: &sources
-            - ubuntu-toolchain-r-test
+            - ubuntu-toolchain-r-Test_driver
             - llvm-toolchain-precise-3.8
     - env: CLANG_VERSION=3.8 BUILD_TYPE=Release
       os: linux
@@ -165,9 +165,9 @@ before_script:
 
 script:
   - cd Scheme
-  - ./../build/Interpreter/test/lexer/lexersTest
-  - ./../build/Interpreter/test/parser/parserTest
-  - ./../build/Interpreter/test/lisplib/lispLibTest
+  - ./../build/Interpreter/Test_driver/lexer/lexersTest
+  - ./../build/Interpreter/Test_driver/parser/parserTest
+  - ./../build/Interpreter/Test_driver/lisplib/lispLibTest
   - |
     if [[ $BUILD_TYPE == "Release" ]]; then
     bash ../CLI/test/test.sh

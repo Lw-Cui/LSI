@@ -19,7 +19,7 @@ namespace ast {
 
         virtual void accept(visitor::NodeVisitor &visitor) const override;
 
-        pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
     };
 }
 
