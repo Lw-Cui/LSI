@@ -10,7 +10,6 @@ std::pair<float, float> ast::CLIBuiltinDrawAST::toPair(const std::shared_ptr<Exp
         LOG(DEBUG) << "Parse pair: (" << first << ", " << 1000 - second << ")";
         return make_pair(first, 1000 - second);
     } else {
-        CLOG(DEBUG, "exception");
         throw std::logic_error("Cannot convert to pair");
     }
 }

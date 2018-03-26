@@ -6,7 +6,11 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
 endif (NOT CMAKE_BUILD_TYPE)
-SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} --coverage")
+
+if (CMAKE_BUILD_TYPE STREQUAL "Coverage")
+    set(CMAKE_BUILD_TYPE "Debug")
+    SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} --coverage")
+ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 
 add_subdirectory(external/easylogging)
 include_directories(external/easylogging/src)

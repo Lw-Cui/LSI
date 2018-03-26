@@ -17,12 +17,10 @@ void setStack(rlim_t stackSize) {
         if (rl.rlim_cur < stackSize) {
             rl.rlim_cur = stackSize;
             if (setrlimit(RLIMIT_STACK, &rl) != 0) {
-                CLOG(DEBUG, "exception");
                 throw std::logic_error("Cannot set resource info.");
             }
         }
     } else {
-        CLOG(DEBUG, "exception");
         throw std::logic_error("Cannot get resource info.");
     }
 }

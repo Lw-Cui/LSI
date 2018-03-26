@@ -16,7 +16,6 @@ double Lexer::getNum() {
         stepForward();
         return tmp;
     } else {
-        CLOG(DEBUG, "exception");
         throw std::logic_error("Token isn't number.");
     }
 }
@@ -27,7 +26,6 @@ std::string Lexer::getIdentifier() {
         stepForward();
         return std::move(tmp);
     } else {
-        CLOG(DEBUG, "exception");
         throw std::logic_error("Token isn't identifier.");
     }
 }

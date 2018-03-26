@@ -82,20 +82,17 @@ std::shared_ptr<ExprAST> parser::parseBracketExpr(lexers::Lexer &lex) {
 
 shared_ptr<ExprAST> parser::parseNumberExpr(Lexer &lex) {
     auto num = lex.getNum();
-    CLOG(DEBUG, "parser") << "Parse number " << num;
     return make_shared<NumberAST>(num);
 }
 
 shared_ptr<ExprAST> parser::parseIdentifierExpr(lexers::Lexer &lex) {
     auto str = lex.getIdentifier();
-    CLOG(DEBUG, "parser") << "Parse identifier " << str;
     return make_shared<IdentifierAST>(str);
 }
 
 
 shared_ptr<ExprAST> parser::parseIdDefinitionExpr(lexers::Lexer &lex) {
     auto identifier = lex.getIdentifier();
-    CLOG(DEBUG, "parser") << "Parse identifier Definition: " << identifier;
     return make_shared<ValueBindingAST>(identifier, parseExpr(lex));
 }
 

@@ -25,7 +25,6 @@ sf::Vector2f ast::GUIBuiltinDrawAST::toVec2f(const shared_ptr<ast::ExprAST> &ptr
         LOG(DEBUG) << "Parse vec2f: (" << vec2f.x << ", " << vec2f.y << ")";
         return vec2f;
     } else {
-        CLOG(DEBUG, "exception");
         throw std::logic_error("Cannot convert to vector2f.");
     }
 }
