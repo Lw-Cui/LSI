@@ -1,5 +1,0 @@
-include_directories(../Interpreter/include)
-set(SFML_LIB sfml-graphics sfml-window sfml-system)
-include_directories(include)
-add_subdirectory(src)
-add_subdirectory(test)

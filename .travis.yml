@@ -155,6 +155,7 @@ install:
       sudo cp -r SFML-2.4.1/include/* /usr/include/x86_64-linux-gnu/
       sudo ldconfig
     else
+      brew update
       brew install sfml
     fi
 
@@ -165,13 +166,12 @@ before_script:
 
 script:
   - cd Scheme
-  - ./../build/Interpreter/test/lexer/lexersTest
-  - ./../build/Interpreter/test/parser/parserTest
-  - ./../build/Interpreter/test/lisplib/lispLibTest
-  - |
-    if [[ $BUILD_TYPE == "Release" ]]; then
-    bash ../CLI/test/test.sh
-    fi
+  - ./../build/Interpreter/test/core/coreTest
+  - ./../build/Interpreter/test/stdlib/stdlibTest
+#- |
+#if [[ $BUILD_TYPE == "Release" ]]; then
+#bash ./../Interface/CLI/test/test.sh
+#fi
 
 notifications:
   email: cui@hellolw.com
