@@ -8,7 +8,7 @@ set(EXCEPTION_FILES
 
 set(LEXERS_SOURCE_FILES
         ${EXCEPTION_FILES}
-        Parser/lexers.cpp include/lexers.h
+        parser/lexers.cpp include/lexers.h
         )
 add_library(${LEXERS_LIB} ${LEXERS_SOURCE_FILES})
 

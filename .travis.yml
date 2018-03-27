@@ -167,7 +167,7 @@ before_script:
 script:
   - cd Scheme
   - ./../build/Interpreter/test/core/coreTest
-  - ./../build/Interpreter/test/lisplib/lispLibTest
+  - ./../build/Interpreter/test/stdlib/stdlibTest
 #- |
 #if [[ $BUILD_TYPE == "Release" ]]; then
 #bash ./../Interface/CLI/test/test.sh
