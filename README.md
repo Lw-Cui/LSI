@@ -1,8 +1,6 @@
 # LSI
 
-[![Coverage Status](https://scan.coverity.com/projects/11270/badge.svg?flat=1)](https://scan.coverity.com/projects/p-ainters-drawing-board-alpha)
-
-[![Build Status](https://travis-ci.org/Lw-Cui/LSI.svg?branch=v0.1-rc1)](https://travis-ci.org/Lw-Cui/LSI)
+[![Coverage Status](https://scan.coverity.com/projects/11270/badge.svg?flat=1)](https://scan.coverity.com/projects/p-ainters-drawing-board-alpha)  [![Build Status](https://travis-ci.org/Lw-Cui/LSI.svg?branch=v0.1-rc1)](https://travis-ci.org/Lw-Cui/LSI)
 
 **L**iwei's **S**cheme **I**nterpreter.
 
