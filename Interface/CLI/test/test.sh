@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
-../build/CLI/src/GI_CLI -o ../CLI/test/res.bmp test/CLITest.scm -p stdlib
-diff ../CLI/test/res.bmp ../CLI/test/standard.bmp
+dirname=`dirname $0`
+../build/Interface/CLI/src/LSI_CLI -o $dirname/res.bmp cli_test/CLITest.scm -p stdlib
+diff ../Interface/CLI/test/res.bmp ../Interface/CLI/test/standard.bmp
