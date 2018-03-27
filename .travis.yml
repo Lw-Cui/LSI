@@ -169,10 +169,10 @@ script:
   - ./../build/Interpreter/test/lexer/lexersTest
   - ./../build/Interpreter/test/parser/parserTest
   - ./../build/Interpreter/test/lisplib/lispLibTest
-  - |
-    if [[ $BUILD_TYPE == "Release" ]]; then
-    bash ./../Interface/CLI/test/test.sh
-    fi
+#- |
+#if [[ $BUILD_TYPE == "Release" ]]; then
+#bash ./../Interface/CLI/test/test.sh
+#fi
 
 notifications:
   email: cui@hellolw.com
