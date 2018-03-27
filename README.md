@@ -1,6 +1,6 @@
 # LSI
 
-[![Coverage Status](https://scan.coverity.com/projects/11270/badge.svg?flat=1)](https://scan.coverity.com/projects/p-ainters-drawing-board-alpha)  [![Build Status](https://travis-ci.org/Lw-Cui/LSI.svg?branch=v0.1-rc1)](https://travis-ci.org/Lw-Cui/LSI)
+[![Coverage Status](https://scan.coverity.com/projects/11270/badge.svg?flat=1)](https://scan.coverity.com/projects/p-ainters-drawing-board-alpha)   [![Build Status](https://travis-ci.org/Lw-Cui/LSI.svg?branch=v0.1-rc1)](https://travis-ci.org/Lw-Cui/LSI)
 
 **L**iwei's **S**cheme **I**nterpreter.
 
@@ -12,7 +12,7 @@ Use LSI for painting!
 git submodule update --init
 mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release
 make LSI_CLI
-../build/Interface/CLI/src/LSI_CLI -o `dirname $0`/res.bmp cli_test/CLITest.scm -p stdlib
+../build/Interface/CLI/src/LSI_CLI -o res.bmp cli_test/CLITest.scm -p stdlib
 ```
 
 
