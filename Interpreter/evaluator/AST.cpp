@@ -100,7 +100,6 @@ std::shared_ptr<ExprAST> InvocationAST::eval(std::shared_ptr<Scope> &ss, const p
         ss->setCurFuncName("(Anonymous)");
         return callableObj->apply(std::move(evalRes), ss);
     } else if (auto id = std::dynamic_pointer_cast<IdentifierAST>(callableObj)) {
-        CLOG(DEBUG, "parser") << "Func " << ss->getCurFuncName() << " calls " << id->getId();
         auto lambda = id->eval(ss, id);
         ss->setCurFuncName(id->getId());
         return lambda->apply(std::move(evalRes), ss);

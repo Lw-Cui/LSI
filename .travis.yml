@@ -166,8 +166,7 @@ before_script:
 
 script:
   - cd Scheme
-  - ./../build/Interpreter/test/lexer/lexersTest
-  - ./../build/Interpreter/test/parser/parserTest
+  - ./../build/Interpreter/test/core/coreTest
   - ./../build/Interpreter/test/lisplib/lispLibTest
 #- |
 #if [[ $BUILD_TYPE == "Release" ]]; then

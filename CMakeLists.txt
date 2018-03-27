@@ -24,7 +24,6 @@ add_subdirectory(external/googletest)
 include_directories(${gtest_SOURCE_FILE}/include)
 include_directories(${gmock_SOURCE_FILE}/include)
 
-add_subdirectory(Test_driver)
 add_subdirectory(Interpreter)
 add_subdirectory(Interface/CLI)
 
