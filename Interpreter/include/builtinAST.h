@@ -10,7 +10,7 @@ namespace ast {
 
     class BuiltinConsAST : public ExprAST {
     public:
-        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> &&actualArgs, pScope &) override;
 
         void accept(visitor::NodeVisitor &visitor) const override;
 
@@ -22,7 +22,7 @@ namespace ast {
 
         void accept(visitor::NodeVisitor &visitor) const override;
 
-        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> &&actualArgs, pScope &) override;
 
         pExpr getPointer() const override;
     };
@@ -31,7 +31,7 @@ namespace ast {
     public:
         void accept(visitor::NodeVisitor &visitor) const override;
 
-        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> &&actualArgs, pScope &) override;
 
         pExpr getPointer() const override;
     };
@@ -40,7 +40,7 @@ namespace ast {
     public:
         void accept(visitor::NodeVisitor &visitor) const override;
 
-        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> &&actualArgs, pScope &) override;
 
         pExpr getPointer() const override;
     };
@@ -49,7 +49,7 @@ namespace ast {
     public:
         void accept(visitor::NodeVisitor &visitor) const override;
 
-        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> &&actualArgs, pScope &) override;
 
         pExpr getPointer() const override;
     };
@@ -58,7 +58,7 @@ namespace ast {
     public:
         void accept(visitor::NodeVisitor &visitor) const override;
 
-        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> &&actualArgs, pScope &) override;
 
         pExpr getPointer() const override;
     };
@@ -67,7 +67,7 @@ namespace ast {
     public:
         void accept(visitor::NodeVisitor &visitor) const override;
 
-        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> &&actualArgs, pScope &) override;
 
         pExpr getPointer() const override;
     };
@@ -76,7 +76,7 @@ namespace ast {
     public:
         void accept(visitor::NodeVisitor &visitor) const override;
 
-        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> &&actualArgs, pScope &) override;
 
         pExpr getPointer() const override;
     };
@@ -85,7 +85,7 @@ namespace ast {
     public:
         void accept(visitor::NodeVisitor &visitor) const override;
 
-        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> &&actualArgs, pScope &) override;
 
         pExpr getPointer() const override;
     };
@@ -94,7 +94,7 @@ namespace ast {
     public:
         void accept(visitor::NodeVisitor &visitor) const override;
 
-        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
+        pExpr apply(const std::vector<pExpr> &&actualArgs, pScope &) override;
 
         pExpr getPointer() const override;
     };
@@ -103,8 +103,6 @@ namespace ast {
     class BuiltinDrawAST : public ExprAST {
     public:
         void accept(visitor::NodeVisitor &visitor) const override;
-
-        BuiltinDrawAST() {}
 
         pExpr getPointer() const override;
 

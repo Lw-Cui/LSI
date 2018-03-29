@@ -9,7 +9,7 @@ using namespace exception;
 using namespace ast;
 using namespace visitor;
 
-pExpr LambdaAST::apply(const std::vector<pExpr> actualArgs, pScope &ss) {
+pExpr LambdaAST::apply(const std::vector<pExpr> &&actualArgs, pScope &ss) {
     // Create new scope
     auto curScope = std::make_shared<Scope>();
     curScope->setLexicalScope(context);
@@ -70,7 +70,7 @@ std::shared_ptr<ExprAST> LambdaBindingAST::eval(std::shared_ptr<Scope> &ss) cons
     CLOG(DEBUG, "evaluator") << "eval [" << getIdentifier() << "]";
     ss->addName(getIdentifier(), lambda->eval(ss));
     CLOG(DEBUG, "evaluator") << "finish eval [" << getIdentifier() << "]";
-    return nullptr;
+    return getPointer();
 }
 
 std::shared_ptr<ExprAST> IfStatementAST::eval(std::shared_ptr<Scope> &ss) const {
@@ -103,22 +103,22 @@ std::shared_ptr<ExprAST> InvocationAST::eval(std::shared_ptr<Scope> &ss) const {
 
     if (std::dynamic_pointer_cast<LambdaAST>(callableObj)) {
         //ss->setCurFuncName("(Anonymous)");
-        CLOG(INFO, "evaluator") << "call anonymous func";
+        CLOG(DEBUG, "evaluator") << "call anonymous func";
         ret = callableObj->apply(std::move(evalRes), ss);
-        CLOG(INFO, "evaluator") << "finish call anonymous func";
+        CLOG(DEBUG, "evaluator") << "finish call anonymous func";
     } else if (auto id = std::dynamic_pointer_cast<IdentifierAST>(callableObj)) {
-        CLOG(INFO, "evaluator") << "call [" << id->getId() << "]";
+        CLOG(DEBUG, "evaluator") << "call [" << id->getId() << "]";
         auto lambda = id->eval(ss);
         //ss->setCurFuncName(id->getId());
         ret = lambda->apply(std::move(evalRes), ss);
-        CLOG(INFO, "evaluator") << "finish call [" << id->getId() << "]";
+        CLOG(DEBUG, "evaluator") << "finish call [" << id->getId() << "]";
     } else {
-        CLOG(INFO, "evaluator") << "call anonymous func";
+        CLOG(DEBUG, "evaluator") << "call anonymous func";
         // it may be a function call which returns lambda, so just eval it first
         auto lambda = callableObj->eval(ss);
         //ss->setCurFuncName("(Anonymous)");
         ret = lambda->apply(std::move(evalRes), ss);
-        CLOG(INFO, "evaluator") << "finish call anonymous func";
+        CLOG(DEBUG, "evaluator") << "finish call anonymous func";
     }
     return ret;
 }
