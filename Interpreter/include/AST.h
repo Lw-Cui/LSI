@@ -227,9 +227,6 @@ namespace ast {
 
         virtual void accept(visitor::NodeVisitor &visitor) const override;
 
-        LambdaAST(const LambdaAST &other) : formalArgs(other.formalArgs), expression(other.expression),
-                                            context(new Scope(*other.context)) {}
-
         pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
 
         std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &ss, const pExpr &) const override;

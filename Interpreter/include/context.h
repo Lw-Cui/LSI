@@ -18,8 +18,6 @@ namespace context {
     class ScopeImpl;
 
     class Scope {
-        friend class ScopeImpl;
-
     public:
         Scope();
 
@@ -29,9 +27,13 @@ namespace context {
 
         pExpr searchName(const std::string &) const;
 
-        void setSearchDomain(const std::shared_ptr<Scope> &);
+        void setDynamicScope(const std::shared_ptr<Scope> &);
+
+        void setLexicalScope(const std::shared_ptr<Scope> &);
 
         bool count(const std::string &str) const;
+
+        bool justCount(const std::string &str) const;
 
         void openNewScope(std::shared_ptr<Scope> &);
 
@@ -39,15 +41,17 @@ namespace context {
 
         void clear();
 
+        /*
         const std::string getCurFuncName() const;
 
         void setCurFuncName(const std::string &str);
 
         bool delCurFuncName();
+         */
 
-    private:
         std::shared_ptr<ScopeImpl> impl;
 
+        std::unordered_map<std::string, std::shared_ptr<ast::ExprAST>> x;
     };
 
     using pScope = std::shared_ptr<Scope>;

@@ -166,13 +166,12 @@ before_script:
 
 script:
   - cd Scheme
-  - ./../build/Interpreter/test/core/coreTest
-  - ./../build/Interpreter/test/stdlib/stdlibTest
+  - ./../build/Interpreter/test/InterpreterTest
 #- |
 #if [[ $BUILD_TYPE == "Release" ]]; then
 #bash ./../Interface/CLI/test/test.sh
 #fi
 
 notifications:
-  email: cui@hellolw.com
+  email: 645739460@QQ.com
 

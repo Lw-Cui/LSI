@@ -18,9 +18,10 @@ set(INTERPRETER_SOURCE_FILES
         parser/keywordParser.cpp
         parser/basicParser.cpp
         evaluator/context.cpp include/context.h
+        evaluator/coreAST.cpp
         evaluator/AST.cpp include/AST.h
         evaluator/visitor.cpp include/visitor.h
-        include/parser.h)
+        include/parser.h evaluator/coreAST.cpp)
 add_library(${INTERPRETER_LIB} ${INTERPRETER_SOURCE_FILES})
 
 add_subdirectory(test)

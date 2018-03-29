@@ -17,35 +17,26 @@ namespace context {
             addAllBuiltinFunc();
         }
 
-        void addBuiltinFunc(const std::string &name, const std::shared_ptr<ast::ExprAST> &expr) {
-            impl[name] = expr;
-        }
-
-        void addAllBuiltinFunc() {
-            addBuiltinFunc("cons", make_shared<BuiltinConsAST>());
-            addBuiltinFunc("car", make_shared<BuiltinCarAST>());
-            addBuiltinFunc("cdr", make_shared<BuiltinCdrAST>());
-            addBuiltinFunc("+", make_shared<BuiltinAddAST>());
-            addBuiltinFunc("*", make_shared<BuiltinMultiplyAST>());
-            addBuiltinFunc("null?", make_shared<BuiltinNullAST>());
-            addBuiltinFunc("<", make_shared<BuiltinLessThanAST>());
-            addBuiltinFunc("#opposite", make_shared<BuiltinOppositeAST>());
-            addBuiltinFunc("#reciprocal", make_shared<BuiltinReciprocalAST>());
-            addBuiltinFunc("list", make_shared<BuiltinListAST>());
-            addBuiltinFunc("else", make_shared<BooleansTrueAST>());
-        }
-
         void clear() {
             impl.clear();
             addAllBuiltinFunc();
+        }
+
+
+        bool justCount(const std::string &id) const {
+            return (bool)impl.count(id);
         }
 
         bool count(const std::string &str) const {
             return searchName(str) != nullptr;
         }
 
-        void setSearchDomain(const pScope &s) {
-            nameDomain.push_back(s);
+        void setDynamicScope(const std::shared_ptr<Scope> &scope) {
+            dynamicScope = scope;
+        }
+
+        void setLexicalScope(const std::shared_ptr<Scope> &scope) {
+            lexicalScope = scope;
         }
 
         bool addName(const std::string &id, pExpr ptr) {
@@ -56,13 +47,20 @@ namespace context {
 
         pExpr searchName(const std::string &id) const {
             if (impl.count(id)) return impl.find(id)->second;
+
             pExpr ret = nullptr;
-            for (auto sptr: nameDomain)
-                if ((ret = sptr->searchName(id)) != nullptr)
-                    return ret;
+            if (lexicalScope && ((ret = lexicalScope->searchName(id)) != nullptr))
+                return ret;
+            if (dynamicScope && ((ret = dynamicScope->searchName(id)) != nullptr))
+                return ret;
             return ret;
         }
 
+        void addBuiltinFunc(const std::string &name, const std::shared_ptr<ast::ExprAST> &expr) {
+            impl[name] = expr;
+        }
+
+        /*
         const string getCurFuncName() const {
             if (!callStack.empty()) return callStack.top();
             // That is necessary since in function body we need new scope
@@ -88,13 +86,28 @@ namespace context {
                 return false;
             }
         }
+         */
 
-    private:
+        void addAllBuiltinFunc() {
+            addBuiltinFunc("cons", make_shared<BuiltinConsAST>());
+            addBuiltinFunc("car", make_shared<BuiltinCarAST>());
+            addBuiltinFunc("cdr", make_shared<BuiltinCdrAST>());
+            addBuiltinFunc("+", make_shared<BuiltinAddAST>());
+            addBuiltinFunc("*", make_shared<BuiltinMultiplyAST>());
+            addBuiltinFunc("null?", make_shared<BuiltinNullAST>());
+            addBuiltinFunc("<", make_shared<BuiltinLessThanAST>());
+            addBuiltinFunc("#opposite", make_shared<BuiltinOppositeAST>());
+            addBuiltinFunc("#reciprocal", make_shared<BuiltinReciprocalAST>());
+            addBuiltinFunc("list", make_shared<BuiltinListAST>());
+            addBuiltinFunc("else", make_shared<BooleansTrueAST>());
+        }
+
+
         std::unordered_map<std::string, std::shared_ptr<ast::ExprAST>> impl;
 
-        std::vector<pScope> nameDomain;
+        pScope dynamicScope, lexicalScope;
 
-        std::stack<std::string> callStack;
+        static std::stack<std::string> callStack;
 
         const std::set<std::string> builtinList = {
             "cons",
@@ -111,8 +124,14 @@ namespace context {
         };
     };
 
+    std::stack<std::string> ScopeImpl::callStack;
+
     bool Scope::count(const std::string &str) const {
         return impl->count(str);
+    }
+
+    bool Scope::justCount(const std::string &str) const {
+        return impl->justCount(str);
     }
 
     Scope::Scope() : impl{new ScopeImpl} {}
@@ -121,10 +140,6 @@ namespace context {
 
     void Scope::addBuiltinFunc(const std::string &name, const std::shared_ptr<ast::ExprAST> &expr) const {
         impl->addBuiltinFunc(name, expr);
-    }
-
-    void Scope::setSearchDomain(const pScope &s) {
-        impl->setSearchDomain(s);
     }
 
     pExpr Scope::searchName(const std::string &id) const {
@@ -138,12 +153,13 @@ namespace context {
     void Scope::openNewScope(pScope &p) {
         auto tmp = p;
         p = make_shared<Scope>();
-        p->setSearchDomain(tmp);
+        p->setLexicalScope(tmp);
     }
 
     Scope::Scope(const Scope &other) : impl(new ScopeImpl(*other.impl)) {
     }
 
+    /*
     const std::string Scope::getCurFuncName() const {
         return impl->getCurFuncName();
     }
@@ -154,6 +170,15 @@ namespace context {
 
     bool Scope::delCurFuncName() {
         return impl->delCurFuncName();
+    }
+     */
+
+    void Scope::setLexicalScope(const std::shared_ptr<Scope> &scope) {
+        impl->setLexicalScope(scope);
+    }
+
+    void Scope::setDynamicScope(const std::shared_ptr<Scope> &scope) {
+        impl->setDynamicScope(scope);
     }
 
 }
