@@ -29,3 +29,26 @@ TEST(ContextTest, ScopeTest) {
     ASSERT_EQ(0, numPtr->getValue());
     ASSERT_STREQ("0", disp.to_string().c_str());
 }
+
+TEST(ContextTest, MultipleEvalTest) {
+    CREATE_CONTEXT();
+    lex.appendExp("(define (Test_driver)"
+                      "  (define a 0)"
+                      "  (let ((b 0)) (+ a b)))"
+                      "(define a 1)"
+                      "(define b 2)");
+
+    REPL_COND("(Test_driver)", TO_NUM_PTR(res));
+    ASSERT_EQ(0, numPtr->getValue());
+    ASSERT_STREQ("0", disp.to_string().c_str());
+
+    auto newScope = std::make_shared<Scope>();
+    res = ast->eval(newScope);
+    ASSERT_EQ(0, numPtr->getValue());
+    ASSERT_STREQ("0", disp.to_string().c_str());
+
+    auto lastScope = std::make_shared<Scope>();
+    res = ast->eval(lastScope);
+    ASSERT_EQ(0, numPtr->getValue());
+    ASSERT_STREQ("0", disp.to_string().c_str());
+}
