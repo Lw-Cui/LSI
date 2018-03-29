@@ -3,6 +3,7 @@
 
 #include <string>
 #include <AST.h>
+#include <builtinAST.h>
 
 namespace visitor {
     class NodeVisitor {

@@ -24,7 +24,7 @@
 #define REPL_COND(str, condition)\
     lex.appendExp(str);\
     ast = parseAllExpr(lex);\
-    res = ast->eval(s, ast);\
+    res = ast->eval(s);\
     ASSERT_TRUE(condition);\
     numPtr = TO_NUM_PTR(res);\
     trueBool = TO_TRUE_PTR(res);\

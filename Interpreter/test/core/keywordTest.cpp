@@ -11,7 +11,7 @@ using namespace exception;
 TEST(KeywordParsingTest, IdentifierDefinitionTest) {
     CREATE_CONTEXT();
     REPL_COND("(define n 5)", s->count("n"));
-    res = s->searchName("n")->eval(s, s->searchName("n"));
+    res = s->searchName("n")->eval(s);
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
     numPtr = std::dynamic_pointer_cast<NumberAST>(res);
     ASSERT_EQ(5, numPtr->getValue());
@@ -19,7 +19,7 @@ TEST(KeywordParsingTest, IdentifierDefinitionTest) {
 
     REPL_COND("(define a n)", s->count("a"));
 
-    res = s->searchName("a")->eval(s, s->searchName("a"));
+    res = s->searchName("a")->eval(s);
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
     numPtr = std::dynamic_pointer_cast<NumberAST>(res);
     ASSERT_EQ(5, numPtr->getValue());
