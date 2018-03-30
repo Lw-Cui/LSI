@@ -32,9 +32,8 @@ pExpr LambdaAST::apply(const std::vector<pExpr> &&actualArgs, pScope &ss) {
         curScope->addName(formalArgs[2], std::make_shared<NilAST>());
     }
 
+    // ATTENTION: sub-routes are evaluated here. If something goes wrong, do it in the LambdaAST:eval.
     for (int i = 0; i < expression.size() - 1; i++)
-        // Don't eval sub-routine. It has been evaluated in LambdaAST::eval()
-        if (!std::dynamic_pointer_cast<LambdaBindingAST>(expression[i]))
             expression[i]->eval(curScope);
     auto ret = expression.back()->eval(curScope);
     // remove current function name record
@@ -48,15 +47,7 @@ std::shared_ptr<ExprAST> LambdaAST::eval(std::shared_ptr<Scope> &ss) const {
     auto lambda = std::make_shared<LambdaAST>(this->formalArgs, this->expression);
     lambda->context->setLexicalScope(ss);
 
-    // Here we evaluate the sub-routine rather than lambda body.
-    // lambda will be evaluated more than once when regraded as argument, so store it stauts.
-    if (!isSubRoutineEvaluated)
-        for (auto expr: expression)
-            if (std::shared_ptr<LambdaBindingAST> ptr = std::dynamic_pointer_cast<LambdaBindingAST>(expr)) {
-                // Add sub-routine into original context of this lambda
-                ptr->eval(lambda->context);
-            }
-    isSubRoutineEvaluated = true;
+    // ATTENTION: we do not eval sub-routines within lambda->context.
 
     // Just derive child node. Hence lambda's context won't be modified afterwards.
     auto parent = ss;

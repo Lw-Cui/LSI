@@ -4,10 +4,6 @@
 #include <AST.h>
 
 namespace ast {
-    using context::Scope;
-
-    using pScope = std::shared_ptr<Scope>;
-
     class BuiltinConsAST : public ExprAST {
     public:
         pExpr apply(const std::vector<pExpr> &&actualArgs, pScope &) override;

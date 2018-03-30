@@ -12,6 +12,9 @@ if (CMAKE_BUILD_TYPE STREQUAL "Coverage")
     SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} --coverage")
 ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 
+# make clang 3.9 happy
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-expansion-to-defined")
+
 add_subdirectory(external/easylogging)
 include_directories(external/easylogging/src)
 

@@ -23,7 +23,7 @@ namespace ast {
 
     class ExprAST {
     public:
-        // eval this AST node and return result. The node itself does not be changed.
+        // Eval this AST node and return result. The node itself does not be changed.
         virtual pExpr eval(pScope &) const;
 
         virtual pExpr getPointer() const;

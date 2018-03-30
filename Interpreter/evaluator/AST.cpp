@@ -195,6 +195,7 @@ pExpr AllExprAST::getPointer() const {
 }
 
 std::shared_ptr<ExprAST> PairAST::eval(std::shared_ptr<Scope> &s) const {
+    // Attention: since the evaluation may depends on context, never store those result.
     return std::make_shared<PairAST>(data.first->eval(s), data.second->eval(s));
 }
 
@@ -272,8 +273,7 @@ pExpr BuiltinCdrAST::getPointer() const {
 
 pExpr BuiltinConsAST::apply(const std::vector<pExpr>&& actualArgs, pScope &s) {
     if (actualArgs.size() == 2) {
-        // actualArgs[0]->eval(s, actualArgs[0]) maybe return a new object, so return value matters.
-        return std::make_shared<PairAST>(actualArgs[0], actualArgs[1]);
+        return std::make_shared<PairAST>(actualArgs[0]->eval(s), actualArgs[1]->eval(s));
     } else {
         throw NotPair("Builtin cons error.");
     }
