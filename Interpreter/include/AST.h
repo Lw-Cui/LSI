@@ -1,5 +1,6 @@
 #ifndef GI_AST_H
 #define GI_AST_H
+#define APPLY_FUNC pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) const override;
 
 #include <exception>
 #include <fstream>
@@ -33,7 +34,7 @@ namespace ast {
 
         virtual pExpr getPointer() const;
 
-        virtual pExpr apply(std::vector<pExpr> &&, pScope &) const;
+        virtual pExpr apply(const std::vector<pExpr> &, pScope &) const;
 
         virtual void accept(visitor::NodeVisitor &) const;
     };
@@ -243,7 +244,7 @@ namespace ast {
 
         void accept(visitor::NodeVisitor &visitor) const override;
 
-        pExpr apply(std::vector<pExpr> &&actualArgs, pScope &) const override;
+        APPLY_FUNC
 
         std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &ss) const override;
 

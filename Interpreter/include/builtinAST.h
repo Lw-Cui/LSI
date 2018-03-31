@@ -6,7 +6,7 @@
 namespace ast {
     class BuiltinConsAST : public ExprAST {
     public:
-        pExpr apply(std::vector<pExpr> &&actualArgs, pScope &) const override;
+        APPLY_FUNC
 
         void accept(visitor::NodeVisitor &visitor) const override;
 
@@ -15,82 +15,81 @@ namespace ast {
 
     class BuiltinCarAST : public ExprAST {
     public:
+        APPLY_FUNC
 
         void accept(visitor::NodeVisitor &visitor) const override;
-
-        pExpr apply(std::vector<pExpr> &&actualArgs, pScope &) const override;
 
         pExpr getPointer() const override;
     };
 
     class BuiltinCdrAST : public ExprAST {
     public:
-        void accept(visitor::NodeVisitor &visitor) const override;
+        APPLY_FUNC
 
-        pExpr apply(std::vector<pExpr> &&actualArgs, pScope &) const override;
+        void accept(visitor::NodeVisitor &visitor) const override;
 
         pExpr getPointer() const override;
     };
 
     class BuiltinAddAST : public ExprAST {
     public:
-        void accept(visitor::NodeVisitor &visitor) const override;
+        APPLY_FUNC
 
-        pExpr apply(std::vector<pExpr> &&actualArgs, pScope &) const override;
+        void accept(visitor::NodeVisitor &visitor) const override;
 
         pExpr getPointer() const override;
     };
 
     class BuiltinMultiplyAST : public ExprAST {
     public:
-        void accept(visitor::NodeVisitor &visitor) const override;
+        APPLY_FUNC
 
-        pExpr apply(std::vector<pExpr> &&actualArgs, pScope &) const override;
+        void accept(visitor::NodeVisitor &visitor) const override;
 
         pExpr getPointer() const override;
     };
 
     class BuiltinListAST : public ExprAST {
     public:
-        void accept(visitor::NodeVisitor &visitor) const override;
+        APPLY_FUNC
 
-        pExpr apply(std::vector<pExpr> &&actualArgs, pScope &) const override;
+        void accept(visitor::NodeVisitor &visitor) const override;
 
         pExpr getPointer() const override;
     };
 
     class BuiltinNullAST : public ExprAST {
     public:
-        void accept(visitor::NodeVisitor &visitor) const override;
+        APPLY_FUNC
 
-        pExpr apply(std::vector<pExpr> &&actualArgs, pScope &) const override;
+        void accept(visitor::NodeVisitor &visitor) const override;
 
         pExpr getPointer() const override;
     };
 
     class BuiltinLessThanAST : public ExprAST {
     public:
-        void accept(visitor::NodeVisitor &visitor) const override;
+        APPLY_FUNC
 
-        pExpr apply(std::vector<pExpr> &&actualArgs, pScope &) const override;
+        void accept(visitor::NodeVisitor &visitor) const override;
 
         pExpr getPointer() const override;
     };
 
     class BuiltinOppositeAST : public ExprAST {
     public:
-        void accept(visitor::NodeVisitor &visitor) const override;
+        APPLY_FUNC
 
-        pExpr apply(std::vector<pExpr> &&actualArgs, pScope &) const override;
+        void accept(visitor::NodeVisitor &visitor) const override;
 
         pExpr getPointer() const override;
     };
 
     class BuiltinReciprocalAST : public ExprAST {
     public:
-        void accept(visitor::NodeVisitor &visitor) const override;
+        APPLY_FUNC
 
-        pExpr apply(std::vector<pExpr> &&actualArgs, pScope &) const override;
+        void accept(visitor::NodeVisitor &visitor) const override;
 
         pExpr getPointer() const override;
     };

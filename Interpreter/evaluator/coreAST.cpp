@@ -10,7 +10,7 @@ using namespace exception;
 using namespace ast;
 using namespace visitor;
 
-pExpr LambdaAST::apply(std::vector<pExpr> &&actualArgs, pScope &ss) const {
+pExpr LambdaAST::apply(const std::vector<pExpr> &actualArgs, pScope &ss) const {
     // Create new scope
     auto curScope = std::make_shared<Scope>();
     curScope->setLexicalScope(context);
@@ -96,14 +96,14 @@ std::shared_ptr<ExprAST> InvocationAST::eval(std::shared_ptr<Scope> &ss) const {
     if (std::dynamic_pointer_cast<LambdaAST>(callableObj)) {
         //ss->setCurFuncName("(Anonymous)");
         CLOG(DEBUG, "evaluator") << "call anonymous func";
-        ret = callableObj->apply(std::move(evalRes), ss);
+        ret = callableObj->apply(evalRes, ss);
         CLOG(DEBUG, "evaluator") << "finish call anonymous func";
 
     } else if (auto id = std::dynamic_pointer_cast<IdentifierAST>(callableObj)) {
         CLOG(DEBUG, "evaluator") << "call [" << id->getId() << "]";
         auto lambda = id->eval(ss);
         //ss->setCurFuncName(id->getId());
-        ret = lambda->apply(std::move(evalRes), ss);
+        ret = lambda->apply(evalRes, ss);
         CLOG(DEBUG, "evaluator") << "finish call [" << id->getId() << "]";
        
     } else {
@@ -111,19 +111,9 @@ std::shared_ptr<ExprAST> InvocationAST::eval(std::shared_ptr<Scope> &ss) const {
         // it may be a function call which returns lambda, so just eval it first
         auto lambda = callableObj->eval(ss);
         //ss->setCurFuncName("(Anonymous)");
-        ret = lambda->apply(std::move(evalRes), ss);
+        ret = lambda->apply(evalRes, ss);
         CLOG(DEBUG, "evaluator") << "finish call anonymous func";
     }
     return ret;
-}
-
-std::shared_ptr<ExprAST> LetStatementAST::eval(std::shared_ptr<Scope> &s) const {
-    auto tmp = std::make_shared<Scope>();
-    tmp->setDynamicScope(s);
-    for (auto index = 0; index < identifier.size(); index++) {
-        auto id = std::dynamic_pointer_cast<IdentifierAST>(identifier[index])->getId();
-        tmp->addName(id, value[index]->eval(s));
-    }
-    return expr->eval(tmp);
 }
 
