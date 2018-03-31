@@ -12,10 +12,8 @@ using namespace ast;
 
 namespace context {
 
-    std::stack<std::string> Scope::callTrace;
-
     bool Scope::count(const std::string &str) const {
-        return searchName(str) != nullptr;
+        return findSymbol(str) != nullptr;
     }
 
 
@@ -40,18 +38,18 @@ namespace context {
         symtab[name] = expr;
     }
 
-    pExpr Scope::searchName(const std::string &id) const {
+    pExpr Scope::findSymbol(const std::string &id) const {
         if (symtab.count(id)) return symtab.find(id)->second;
 
         pExpr ret = nullptr;
-        if (lexicalScope && ((ret = lexicalScope->searchName(id)) != nullptr))
+        if (lexicalScope && ((ret = lexicalScope->findSymbol(id)) != nullptr))
             return ret;
-        if (dynamicScope && ((ret = dynamicScope->searchName(id)) != nullptr))
+        if (dynamicScope && ((ret = dynamicScope->findSymbol(id)) != nullptr))
             return ret;
         return ret;
     }
 
-    bool Scope::addName(const std::string &id, pExpr ptr) {
+    bool Scope::addSymbol(const std::string &id, pExpr ptr) {
         symtab[id] = ptr;
         return true;
     }
@@ -68,6 +66,30 @@ namespace context {
         addBuiltinFunc("#reciprocal", make_shared<BuiltinReciprocalAST>());
         addBuiltinFunc("list", make_shared<BuiltinListAST>());
         addBuiltinFunc("else", make_shared<BooleansTrueAST>());
+    }
+
+    std::stack<std::string> Scope::callTrace;
+
+    int Scope::anonymousId;
+
+
+    void Scope::stepIntoFunc(const std::string &name) {
+        if (builtinList.count(name)) return;
+        CLOG(DEBUG, "context") << "call [" << name << "]";
+        callTrace.push(name);
+    }
+
+    void Scope::stepOutFunc() {
+        CLOG(DEBUG, "context") << "finish call [" << callTrace.top() << "]";
+        callTrace.pop();
+    }
+
+    void Scope::stepIntoAnonymousFunc() {
+        stepIntoFunc("(anonymous #" + to_string(anonymousId++) + ")");
+    }
+
+    std::string Scope::currentFunc() const {
+        return callTrace.top();
     }
 
 }

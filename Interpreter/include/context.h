@@ -22,13 +22,21 @@ namespace context {
     public:
         Scope();
 
-        bool addName(const std::string &id, pExpr ptr);
+        bool addSymbol(const std::string &id, pExpr ptr);
 
-        pExpr searchName(const std::string &) const;
+        pExpr findSymbol(const std::string &) const;
 
         void setDynamicScope(const std::shared_ptr<Scope> &);
 
         void setLexicalScope(const std::shared_ptr<Scope> &);
+
+        void stepIntoAnonymousFunc();
+
+        void stepIntoFunc(const std::string &name);
+
+        void stepOutFunc();
+
+        std::string currentFunc() const;
 
         bool count(const std::string &str) const;
 
@@ -36,20 +44,17 @@ namespace context {
 
         void addBuiltinFunc(const std::string &name, const std::shared_ptr<ast::ExprAST> &);
 
-        /*
-        const std::string getCurFuncName() const;
-
-        void setCurFuncName(const std::string &str);
-
-        bool delCurFuncName();
-         */
     private:
 
         void addAllBuiltinFunc();
 
+        std::unordered_map<std::string, std::shared_ptr<ast::ExprAST>> symtab;
+
         std::shared_ptr<Scope> dynamicScope, lexicalScope;
 
         static std::stack<std::string> callTrace;
+
+        static int anonymousId;
 
         const std::set<std::string> builtinList = {
             "cons",
@@ -64,8 +69,6 @@ namespace context {
             "list",
             "else",
         };
-
-        std::unordered_map<std::string, std::shared_ptr<ast::ExprAST>> symtab;
     };
 
     using pScope = std::shared_ptr<Scope>;

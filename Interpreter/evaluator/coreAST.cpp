@@ -19,9 +19,9 @@ pExpr LambdaAST::apply(const std::vector<pExpr> &actualArgs, pScope &ss) const {
 
     for (size_t i = 0; i < actualArgs.size(); i++) {
         if (formalArgs[i] != ".") {
-            curScope->addName(formalArgs[i], actualArgs[i]);
+            curScope->addSymbol(formalArgs[i], actualArgs[i]);
         } else {
-            curScope->addName(
+            curScope->addSymbol(
                 formalArgs[i + 1],
                 std::make_shared<BuiltinListAST>()->apply(
                     std::vector<std::shared_ptr<ExprAST>>{actualArgs.begin() + i, actualArgs.end()},
@@ -30,16 +30,16 @@ pExpr LambdaAST::apply(const std::vector<pExpr> &actualArgs, pScope &ss) const {
         }
     }
     if (actualArgs.size() == 1 && formalArgs.size() > 1 && formalArgs[1] == ".") {
-        curScope->addName(formalArgs[2], std::make_shared<NilAST>());
+        curScope->addSymbol(formalArgs[2], std::make_shared<NilAST>());
     }
 
     // ATTENTION: sub-routes are evaluated here. If something goes wrong, do it in the LambdaAST:eval.
     for (int i = 0; i < expression.size() - 1; i++)
         expression[i]->eval(curScope);
     auto ret = expression.back()->eval(curScope);
+
     // remove current function name record
-    //if (!ss->delCurFuncName())
-    //   throw exception::RuntimeError("Function name record is corrupted.");
+    ss->stepOutFunc();
     return ret;
 }
 
@@ -60,59 +60,55 @@ std::shared_ptr<ExprAST> LambdaAST::eval(std::shared_ptr<Scope> &ss) const {
 
 std::shared_ptr<ExprAST> LambdaBindingAST::eval(std::shared_ptr<Scope> &ss) const {
     CLOG(DEBUG, "evaluator") << "eval [" << getIdentifier() << "]";
-    ss->addName(getIdentifier(), lambda->eval(ss));
+    ss->addSymbol(getIdentifier(), lambda->eval(ss));
     CLOG(DEBUG, "evaluator") << "finish eval [" << getIdentifier() << "]";
     return getPointer();
+}
+
+bool IfStatementAST::tailRecursion(const std::shared_ptr<ExprAST> &clause, std::shared_ptr<Scope> &ss) const {
+    if (auto callable = std::dynamic_pointer_cast<InvocationAST>(clause)) {
+        if (auto id = std::dynamic_pointer_cast<IdentifierAST>(callable->callableObj)) {
+            if (id->getId() == ss->currentFunc()) {
+                CLOG(DEBUG, "evaluator") << "tail recursion detected " << ss->currentFunc();
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 std::shared_ptr<ExprAST> IfStatementAST::eval(std::shared_ptr<Scope> &ss) const {
     auto ptr = condition->eval(ss);
     if (auto boolFalsePtr = std::dynamic_pointer_cast<BooleansFalseAST>(ptr)) {
         //TODO: tail recursion optimization
-        if (auto call = std::dynamic_pointer_cast<InvocationAST>(falseClause)) {
-            if (auto id = std::dynamic_pointer_cast<IdentifierAST>(call->callableObj)) {
-                //if (id->getId() == ss->getCurFuncName())
-                //CLOG(DEBUG, "parser") << "Tail recursion " << ss->getCurFuncName();
-            }
-        }
+        tailRecursion(falseClause, ss);
         return falseClause->eval(ss);
+    } else {
+        tailRecursion(trueClause, ss);
+        return trueClause->eval(ss);
     }
-    if (auto call = std::dynamic_pointer_cast<InvocationAST>(falseClause)) {
-        if (auto id = std::dynamic_pointer_cast<IdentifierAST>(call->callableObj)) {
-            //if (id->getId() == ss->getCurFuncName())
-            //CLOG(DEBUG, "parser") << "Tail recursion " << ss->getCurFuncName();
-        }
-    }
-    return trueClause->eval(ss);
 }
 
 std::shared_ptr<ExprAST> InvocationAST::eval(std::shared_ptr<Scope> &ss) const {
     // Eval the arguments each time: it depends on scope
     std::vector<pExpr> evalRes;
-    for (auto ptr: actualArgs) evalRes.push_back(ptr->eval(ss));
+    for (const auto &ptr: actualArgs) evalRes.push_back(ptr->eval(ss));
 
     std::shared_ptr<ExprAST> ret;
 
     if (std::dynamic_pointer_cast<LambdaAST>(callableObj)) {
-        //ss->setCurFuncName("(Anonymous)");
-        CLOG(DEBUG, "evaluator") << "call anonymous func";
+        ss->stepIntoAnonymousFunc();
         ret = callableObj->apply(evalRes, ss);
-        CLOG(DEBUG, "evaluator") << "finish call anonymous func";
 
     } else if (auto id = std::dynamic_pointer_cast<IdentifierAST>(callableObj)) {
-        CLOG(DEBUG, "evaluator") << "call [" << id->getId() << "]";
         auto lambda = id->eval(ss);
-        //ss->setCurFuncName(id->getId());
+        ss->stepIntoFunc(id->getId());
         ret = lambda->apply(evalRes, ss);
-        CLOG(DEBUG, "evaluator") << "finish call [" << id->getId() << "]";
-       
     } else {
-        CLOG(DEBUG, "evaluator") << "call anonymous func";
         // it may be a function call which returns lambda, so just eval it first
         auto lambda = callableObj->eval(ss);
-        //ss->setCurFuncName("(Anonymous)");
+        ss->stepIntoAnonymousFunc();
         ret = lambda->apply(evalRes, ss);
-        CLOG(DEBUG, "evaluator") << "finish call anonymous func";
     }
     return ret;
 }

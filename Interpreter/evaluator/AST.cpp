@@ -21,7 +21,7 @@ pExpr LambdaBindingAST::getPointer() const {
 }
 
 std::shared_ptr<ExprAST> ValueBindingAST::eval(std::shared_ptr<Scope> &ss) const {
-    ss->addName(getIdentifier(), value->eval(ss));
+    ss->addSymbol(getIdentifier(), value->eval(ss));
     return getPointer();
 }
 
@@ -80,6 +80,7 @@ IfStatementAST::IfStatementAST(const std::shared_ptr<ExprAST> &c, const std::sha
                                const std::shared_ptr<ExprAST> &f) :
     condition{c}, trueClause{t}, falseClause{f} {}
 
+
 pExpr BuiltinLessThanAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) const {
     bool res = std::is_sorted(
         std::begin(actualArgs), std::end(actualArgs),
@@ -117,7 +118,7 @@ pExpr NumberAST::getPointer() const {
 
 std::shared_ptr<ExprAST> IdentifierAST::eval(std::shared_ptr<Scope> &ss) const {
     if (ss->count(getId())) {
-        return ss->searchName(getId());
+        return ss->findSymbol(getId());
     } else {
         throw UnboundIdentifier("Unbound identifier: " + getId());
     }
@@ -132,7 +133,7 @@ pExpr IdentifierAST::getPointer() const {
 }
 
 
-pExpr BuiltinOppositeAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) const{
+pExpr BuiltinOppositeAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) const {
     if (auto p = std::dynamic_pointer_cast<NumberAST>(actualArgs.front())) {
         return std::make_shared<NumberAST>(-p->getValue());
     } else {
@@ -219,7 +220,7 @@ pExpr PairAST::getPointer() const {
     return std::make_shared<PairAST>(*this);
 }
 
-pExpr BuiltinNullAST::apply(const std::vector<pExpr> &actualArgs, pScope &s)const {
+pExpr BuiltinNullAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) const {
     if (auto p = std::dynamic_pointer_cast<NilAST>(actualArgs.front()))
         return std::make_shared<BooleansTrueAST>();
     else
@@ -286,7 +287,7 @@ pExpr BuiltinCdrAST::getPointer() const {
     return std::make_shared<BuiltinCdrAST>(*this);
 }
 
-pExpr BuiltinConsAST::apply(const std::vector<pExpr>& actualArgs, pScope &s) const {
+pExpr BuiltinConsAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) const {
     if (actualArgs.size() == 2) {
         return std::make_shared<PairAST>(actualArgs[0]->eval(s), actualArgs[1]->eval(s));
     } else {
@@ -407,7 +408,7 @@ std::shared_ptr<ExprAST> LetStatementAST::eval(std::shared_ptr<Scope> &s) const 
     tmp->setDynamicScope(s);
     for (auto index = 0; index < identifier.size(); index++) {
         auto id = std::dynamic_pointer_cast<IdentifierAST>(identifier[index])->getId();
-        tmp->addName(id, value[index]->eval(s));
+        tmp->addSymbol(id, value[index]->eval(s));
     }
     return expr->eval(tmp);
 }

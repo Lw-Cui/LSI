@@ -132,6 +132,8 @@ namespace ast {
     private:
         std::shared_ptr<ExprAST> condition;
         std::shared_ptr<ExprAST> trueClause, falseClause;
+
+        bool tailRecursion(const std::shared_ptr<ExprAST> &, std::shared_ptr<Scope> &) const;
     };
 
     class CondStatementAST : public ExprAST {
