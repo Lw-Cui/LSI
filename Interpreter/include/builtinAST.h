@@ -101,8 +101,6 @@ namespace ast {
         void accept(visitor::NodeVisitor &visitor) const override;
 
         pExpr getPointer() const override;
-
-        using pExpr = std::shared_ptr<ExprAST>;
     };
 }
 #endif //LSI_BUILTINAST_H
