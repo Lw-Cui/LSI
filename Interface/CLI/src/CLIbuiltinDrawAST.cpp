@@ -1,8 +1,9 @@
 #include <CLIbuiltinDrawAST.h>
+#include <context.h>
 
 using namespace std;
 
-std::pair<float, float> ast::CLIBuiltinDrawAST::toPair(const std::shared_ptr<ExprAST> &ptr) {
+std::pair<float, float> ast::CLIBuiltinDrawAST::toPair(const std::shared_ptr<ExprAST> &ptr) const {
     if (auto pairPtr = dynamic_pointer_cast<PairAST>(ptr)) {
         float first = (float) dynamic_pointer_cast<NumberAST>(pairPtr->data.first)->getValue();
         float second = (float) dynamic_pointer_cast<NumberAST>(pairPtr->data.second)->getValue();
@@ -15,7 +16,7 @@ std::pair<float, float> ast::CLIBuiltinDrawAST::toPair(const std::shared_ptr<Exp
 }
 
 std::shared_ptr<ast::ExprAST>
-ast::CLIBuiltinDrawAST::apply(const std::vector<pExpr> &&actualArgs, pScope &s) {
+ast::CLIBuiltinDrawAST::apply(std::vector<pExpr> &&actualArgs, pScope &s) const {
     auto exprPtr = actualArgs.front()->eval(s);
     while (!dynamic_pointer_cast<NilAST>(exprPtr)) {
         auto pairPtr = dynamic_pointer_cast<PairAST>(exprPtr);

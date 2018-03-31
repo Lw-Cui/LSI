@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <exception.h>
+#include <context.h>
 #include <parser.h>
 
 using namespace lexers;

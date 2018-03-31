@@ -5,6 +5,7 @@
 #include <visitor.h>
 #include <AST.h>
 #include <builtinAST.h>
+#include <context.h>
 
 using namespace parser;
 using namespace exception;
@@ -32,6 +33,9 @@ pExpr ValueBindingAST::getPointer() const {
     return std::make_shared<ValueBindingAST>(*this);
 }
 
+ValueBindingAST::ValueBindingAST(const std::string &id, const std::shared_ptr<ExprAST> &v)
+    : BindingAST(id), value{v} {}
+
 std::shared_ptr<ExprAST> ExprAST::eval(std::shared_ptr<Scope> &) const {
     return getPointer();
 };
@@ -40,7 +44,7 @@ pExpr ExprAST::getPointer() const {
     return std::make_shared<ExprAST>(*this);
 }
 
-pExpr ExprAST::apply(const std::vector<pExpr> &&, pScope &) {
+pExpr ExprAST::apply(std::vector<pExpr> &&, pScope &) const {
     throw RuntimeError("Expression cannot be applied.");
 }
 
@@ -72,7 +76,11 @@ pExpr IfStatementAST::getPointer() const {
     return std::make_shared<IfStatementAST>(*this);
 }
 
-pExpr BuiltinLessThanAST::apply(const std::vector<pExpr> &&actualArgs, pScope &s) {
+IfStatementAST::IfStatementAST(const std::shared_ptr<ExprAST> &c, const std::shared_ptr<ExprAST> &t,
+                               const std::shared_ptr<ExprAST> &f) :
+    condition{c}, trueClause{t}, falseClause{f} {}
+
+pExpr BuiltinLessThanAST::apply(std::vector<pExpr> &&actualArgs, pScope &s) const {
     bool res = std::is_sorted(
         std::begin(actualArgs), std::end(actualArgs),
         [&](std::shared_ptr<ExprAST> p1, std::shared_ptr<ExprAST> p2) {
@@ -124,7 +132,7 @@ pExpr IdentifierAST::getPointer() const {
 }
 
 
-pExpr BuiltinOppositeAST::apply(const std::vector<pExpr> &&actualArgs, pScope &s) {
+pExpr BuiltinOppositeAST::apply(std::vector<pExpr> &&actualArgs, pScope &s) const{
     if (auto p = std::dynamic_pointer_cast<NumberAST>(actualArgs.front())) {
         return std::make_shared<NumberAST>(-p->getValue());
     } else {
@@ -140,7 +148,7 @@ pExpr BuiltinOppositeAST::getPointer() const {
     return std::make_shared<BuiltinOppositeAST>(*this);
 }
 
-pExpr BuiltinListAST::apply(const std::vector<pExpr> &&actualArgs, pScope &s) {
+pExpr BuiltinListAST::apply(std::vector<pExpr> &&actualArgs, pScope &s) const {
     std::shared_ptr<ExprAST> list = std::make_shared<NilAST>();
     for (int i = static_cast<int>(actualArgs.size() - 1); i >= 0; i--)
         list = std::make_shared<PairAST>(actualArgs[i], list);
@@ -161,6 +169,10 @@ void InvocationAST::accept(visitor::NodeVisitor &visitor) const {
 
 pExpr InvocationAST::getPointer() const {
     return std::make_shared<InvocationAST>(*this);
+}
+
+InvocationAST::InvocationAST(const std::shared_ptr<ExprAST> &lam, const std::vector<std::shared_ptr<ExprAST>> &args)
+    : callableObj{lam}, actualArgs{args} {
 }
 
 void BooleansTrueAST::accept(visitor::NodeVisitor &visitor) const {
@@ -207,7 +219,7 @@ pExpr PairAST::getPointer() const {
     return std::make_shared<PairAST>(*this);
 }
 
-pExpr BuiltinNullAST::apply(const std::vector<pExpr> &&actualArgs, pScope &s) {
+pExpr BuiltinNullAST::apply(std::vector<pExpr> &&actualArgs, pScope &s)const {
     if (auto p = std::dynamic_pointer_cast<NilAST>(actualArgs.front()))
         return std::make_shared<BooleansTrueAST>();
     else
@@ -231,6 +243,9 @@ pExpr LambdaAST::getPointer() const {
     return std::make_shared<LambdaAST>(*this);
 }
 
+LambdaAST::LambdaAST(std::vector<std::string> v, std::vector<std::shared_ptr<ExprAST>> expr)
+    : formalArgs{std::move(v)}, expression{std::move(expr)}, context{new Scope} {}
+
 void NilAST::accept(visitor::NodeVisitor &visitor) const {
     visitor.visitNilAST(*this);
 }
@@ -239,7 +254,7 @@ pExpr NilAST::getPointer() const {
     return std::make_shared<NilAST>(*this);
 }
 
-pExpr BuiltinCarAST::apply(const std::vector<pExpr> &&actualArgs, pScope &s) {
+pExpr BuiltinCarAST::apply(std::vector<pExpr> &&actualArgs, pScope &s) const {
     if (auto p = std::dynamic_pointer_cast<PairAST>(actualArgs.front())) {
         return p->data.first;
     } else {
@@ -255,7 +270,7 @@ pExpr BuiltinCarAST::getPointer() const {
     return std::make_shared<BuiltinCarAST>(*this);
 }
 
-pExpr BuiltinCdrAST::apply(const std::vector<pExpr> &&actualArgs, pScope &s) {
+pExpr BuiltinCdrAST::apply(std::vector<pExpr> &&actualArgs, pScope &s) const {
     if (auto p = std::dynamic_pointer_cast<PairAST>(actualArgs.front())) {
         return p->data.second;
     } else {
@@ -271,7 +286,7 @@ pExpr BuiltinCdrAST::getPointer() const {
     return std::make_shared<BuiltinCdrAST>(*this);
 }
 
-pExpr BuiltinConsAST::apply(const std::vector<pExpr>&& actualArgs, pScope &s) {
+pExpr BuiltinConsAST::apply(std::vector<pExpr>&& actualArgs, pScope &s) const {
     if (actualArgs.size() == 2) {
         return std::make_shared<PairAST>(actualArgs[0]->eval(s), actualArgs[1]->eval(s));
     } else {
@@ -287,7 +302,7 @@ pExpr BuiltinConsAST::getPointer() const {
     return std::make_shared<BuiltinConsAST>(*this);
 }
 
-pExpr BuiltinAddAST::apply(const std::vector<pExpr> &&actualArgs, pScope &s) {
+pExpr BuiltinAddAST::apply(std::vector<pExpr> &&actualArgs, pScope &s) const {
     double num = 0;
     for (auto res: actualArgs) {
         if (auto p = std::dynamic_pointer_cast<NumberAST>(res)) {
@@ -307,7 +322,7 @@ pExpr BuiltinAddAST::getPointer() const {
     return std::make_shared<BuiltinAddAST>(*this);
 }
 
-pExpr BuiltinMultiplyAST::apply(const std::vector<pExpr> &&actualArgs, pScope &s) {
+pExpr BuiltinMultiplyAST::apply(std::vector<pExpr> &&actualArgs, pScope &s) const {
     double num = 1;
     for (auto res: actualArgs) {
         if (auto p = std::dynamic_pointer_cast<NumberAST>(res)) {
@@ -328,7 +343,7 @@ pExpr BuiltinMultiplyAST::getPointer() const {
 }
 
 pExpr
-BuiltinReciprocalAST::apply(const std::vector<pExpr> &&actualArgs, pScope &s) {
+BuiltinReciprocalAST::apply(std::vector<pExpr> &&actualArgs, pScope &s) const {
     if (auto p = std::dynamic_pointer_cast<NumberAST>(actualArgs.front())) {
         return std::make_shared<NumberAST>(1 / p->getValue());
     } else {

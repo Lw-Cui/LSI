@@ -1,6 +1,7 @@
 #include <memory>
 #include <gtest/gtest.h>
 #include <parser.h>
+#include <context.h>
 #include <testMacro.h>
 
 using namespace lexers;

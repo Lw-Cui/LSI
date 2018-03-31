@@ -15,12 +15,12 @@ namespace ast {
 
         void accept(visitor::NodeVisitor &visitor) const override;
 
-        pExpr apply(const std::vector<pExpr> &&actualArgs, pScope &) override;
+        pExpr apply(std::vector<pExpr> &&actualArgs, pScope &) const override;
 
         pExpr getPointer() const override ;
 
     private:
-        std::pair<float, float> toPair(const std::shared_ptr<ExprAST> &);
+        std::pair<float, float> toPair(const std::shared_ptr<ExprAST> &) const;
 
         Image &image;
     };

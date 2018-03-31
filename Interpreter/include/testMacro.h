@@ -2,6 +2,7 @@
 #define GI_TEST_MACRO_H
 
 #include <visitor.h>
+#include <context.h>
 
 #define CREATE_CONTEXT() \
     auto s = std::make_shared<Scope>();\

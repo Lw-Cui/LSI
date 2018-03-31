@@ -3,13 +3,14 @@
 #include <parser.h>
 #include <exception.h>
 #include <visitor.h>
+#include <context.h>
 
 using namespace parser;
 using namespace exception;
 using namespace ast;
 using namespace visitor;
 
-pExpr LambdaAST::apply(const std::vector<pExpr> &&actualArgs, pScope &ss) {
+pExpr LambdaAST::apply(std::vector<pExpr> &&actualArgs, pScope &ss) const {
     // Create new scope
     auto curScope = std::make_shared<Scope>();
     curScope->setLexicalScope(context);
@@ -34,7 +35,7 @@ pExpr LambdaAST::apply(const std::vector<pExpr> &&actualArgs, pScope &ss) {
 
     // ATTENTION: sub-routes are evaluated here. If something goes wrong, do it in the LambdaAST:eval.
     for (int i = 0; i < expression.size() - 1; i++)
-            expression[i]->eval(curScope);
+        expression[i]->eval(curScope);
     auto ret = expression.back()->eval(curScope);
     // remove current function name record
     //if (!ss->delCurFuncName())
@@ -86,7 +87,7 @@ std::shared_ptr<ExprAST> IfStatementAST::eval(std::shared_ptr<Scope> &ss) const 
 }
 
 std::shared_ptr<ExprAST> InvocationAST::eval(std::shared_ptr<Scope> &ss) const {
-    // Eval the arguments once
+    // Eval the arguments each time: it depends on scope
     std::vector<pExpr> evalRes;
     for (auto ptr: actualArgs) evalRes.push_back(ptr->eval(ss));
 
@@ -97,12 +98,14 @@ std::shared_ptr<ExprAST> InvocationAST::eval(std::shared_ptr<Scope> &ss) const {
         CLOG(DEBUG, "evaluator") << "call anonymous func";
         ret = callableObj->apply(std::move(evalRes), ss);
         CLOG(DEBUG, "evaluator") << "finish call anonymous func";
+
     } else if (auto id = std::dynamic_pointer_cast<IdentifierAST>(callableObj)) {
         CLOG(DEBUG, "evaluator") << "call [" << id->getId() << "]";
         auto lambda = id->eval(ss);
         //ss->setCurFuncName(id->getId());
         ret = lambda->apply(std::move(evalRes), ss);
         CLOG(DEBUG, "evaluator") << "finish call [" << id->getId() << "]";
+       
     } else {
         CLOG(DEBUG, "evaluator") << "call anonymous func";
         // it may be a function call which returns lambda, so just eval it first

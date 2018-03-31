@@ -3,7 +3,9 @@
 
 #include <memory>
 #include <string>
+#include <stack>
 #include <unordered_map>
+#include <set>
 
 namespace ast {
     class ExprAST;
@@ -13,15 +15,12 @@ namespace ast {
 namespace context {
 
     using Iter = std::unordered_map<std::string, std::shared_ptr<ast::ExprAST>>::const_iterator;
-    using pExpr = std::shared_ptr<ast::ExprAST>;
 
-    class ScopeImpl;
+    using pExpr = std::shared_ptr<ast::ExprAST>;
 
     class Scope {
     public:
         Scope();
-
-        Scope(const Scope &);
 
         bool addName(const std::string &id, pExpr ptr);
 
@@ -33,13 +32,9 @@ namespace context {
 
         bool count(const std::string &str) const;
 
-        bool justCount(const std::string &str) const;
-
-        void openNewScope(std::shared_ptr<Scope> &);
-
-        void addBuiltinFunc(const std::string &name, const std::shared_ptr<ast::ExprAST> &) const;
-
         void clear();
+
+        void addBuiltinFunc(const std::string &name, const std::shared_ptr<ast::ExprAST> &);
 
         /*
         const std::string getCurFuncName() const;
@@ -48,10 +43,29 @@ namespace context {
 
         bool delCurFuncName();
          */
+    private:
 
-        std::shared_ptr<ScopeImpl> impl;
+        void addAllBuiltinFunc();
 
-        std::unordered_map<std::string, std::shared_ptr<ast::ExprAST>> x;
+        std::shared_ptr<Scope> dynamicScope, lexicalScope;
+
+        static std::stack<std::string> callTrace;
+
+        const std::set<std::string> builtinList = {
+            "cons",
+            "car",
+            "cdr",
+            "+",
+            "*",
+            "null?",
+            "<",
+            "#opposite",
+            "#reciprocal",
+            "list",
+            "else",
+        };
+
+        std::unordered_map<std::string, std::shared_ptr<ast::ExprAST>> symtab;
     };
 
     using pScope = std::shared_ptr<Scope>;

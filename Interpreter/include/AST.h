@@ -8,16 +8,21 @@
 #include <map>
 #include <vector>
 #include <easylogging++.h>
-#include <context.h>
 
 namespace visitor {
     class NodeVisitor;
+}
+
+namespace context {
+    class Scope;
 }
 
 namespace ast {
     using context::Scope;
 
     using pScope = std::shared_ptr<Scope>;
+
+    class ExprAST;
 
     using pExpr = std::shared_ptr<ExprAST>;
 
@@ -28,10 +33,11 @@ namespace ast {
 
         virtual pExpr getPointer() const;
 
-        virtual pExpr apply(const std::vector<pExpr> &&, pScope &);
+        virtual pExpr apply(std::vector<pExpr> &&, pScope &) const;
 
         virtual void accept(visitor::NodeVisitor &) const;
     };
+
 
     class AllExprAST : public ExprAST {
     public:
@@ -99,9 +105,7 @@ namespace ast {
         void accept(visitor::NodeVisitor &visitor) const override;
 
         InvocationAST(const std::shared_ptr<ExprAST> &lam,
-                      const std::vector<std::shared_ptr<ExprAST>> &args)
-            : callableObj{lam}, actualArgs{args} {
-        }
+                      const std::vector<std::shared_ptr<ExprAST>> &args);
 
         pExpr getPointer() const override;
 
@@ -116,8 +120,7 @@ namespace ast {
     public:
         IfStatementAST(const std::shared_ptr<ExprAST> &c,
                        const std::shared_ptr<ExprAST> &t,
-                       const std::shared_ptr<ExprAST> &f) :
-            condition{c}, trueClause{t}, falseClause{f} {}
+                       const std::shared_ptr<ExprAST> &f);
 
         std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &) const override;
 
@@ -220,8 +223,7 @@ namespace ast {
     class ValueBindingAST : public BindingAST {
     public:
         ValueBindingAST(const std::string &id,
-                        const std::shared_ptr<ExprAST> &v)
-            : BindingAST(id), value{v} {}
+                        const std::shared_ptr<ExprAST> &v);
 
         std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &ss) const override;
 
@@ -237,13 +239,11 @@ namespace ast {
         friend class LambdaBindingAST;
 
     public:
-        LambdaAST(std::vector<std::string> v,
-                  std::vector<std::shared_ptr<ExprAST>> expr)
-            : formalArgs{std::move(v)}, expression{std::move(expr)}, context{new Scope} {}
+        LambdaAST(std::vector<std::string> v, std::vector<std::shared_ptr<ExprAST>> expr);
 
         void accept(visitor::NodeVisitor &visitor) const override;
 
-        pExpr apply(const std::vector<pExpr> &&actualArgs, pScope &) override;
+        pExpr apply(std::vector<pExpr> &&actualArgs, pScope &) const override;
 
         std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &ss) const override;
 
@@ -253,7 +253,6 @@ namespace ast {
         std::vector<std::string> formalArgs;
         std::vector<std::shared_ptr<ExprAST>> expression;
         mutable pScope context;
-        mutable bool isSubRoutineEvaluated = false;
     };
 
 
