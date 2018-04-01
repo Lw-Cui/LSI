@@ -10,18 +10,12 @@ using namespace exception;
 using namespace ast;
 using namespace visitor;
 
-pExpr LambdaAST::apply(const std::vector<pExpr> &actualArgs, pScope &ss) const {
-    // Create new scope
-    auto curScope = std::make_shared<Scope>();
-    curScope->setLexicalScope(context);
-    // Like C with auto declaration: A invokes B while B appears behind A.
-    curScope->setDynamicScope(ss);
-
+void LambdaAST::setArgs(const std::vector<pExpr> &actualArgs, std::shared_ptr<Scope> &ss) const {
     for (size_t i = 0; i < actualArgs.size(); i++) {
         if (formalArgs[i] != ".") {
-            curScope->addSymbol(formalArgs[i], actualArgs[i]);
+            ss->addSymbol(formalArgs[i], actualArgs[i]);
         } else {
-            curScope->addSymbol(
+            ss->addSymbol(
                 formalArgs[i + 1],
                 std::make_shared<BuiltinListAST>()->apply(
                     std::vector<std::shared_ptr<ExprAST>>{actualArgs.begin() + i, actualArgs.end()},
@@ -30,13 +24,42 @@ pExpr LambdaAST::apply(const std::vector<pExpr> &actualArgs, pScope &ss) const {
         }
     }
     if (actualArgs.size() == 1 && formalArgs.size() > 1 && formalArgs[1] == ".") {
-        curScope->addSymbol(formalArgs[2], std::make_shared<NilAST>());
+        ss->addSymbol(formalArgs[2], std::make_shared<NilAST>());
     }
+}
 
-    // ATTENTION: sub-routes are evaluated here. If something goes wrong, do it in the LambdaAST:eval.
-    for (int i = 0; i < expression.size() - 1; i++)
-        expression[i]->eval(curScope);
-    auto ret = expression.back()->eval(curScope);
+
+pExpr LambdaAST::apply(const std::vector<pExpr> &actualArgs, pScope &ss) const {
+    auto args = actualArgs;
+    pExpr ret = nullptr;
+    do {
+        // Create new scope
+        auto curScope = std::make_shared<Scope>();
+        curScope->setLexicalScope(context);
+        // Like C with auto declaration: A invokes B while B appears behind A.
+        curScope->setDynamicScope(ss);
+        setArgs(args, curScope);
+
+        for (int i = 0; i < expression.size() - 1; i++)
+            // Don't eval sub-routine. It has been evaluated in LambdaAST::eval()
+            // otherwise the temp scope will be stored in sub-routine, which consumes billions of bytes.
+            if (!std::dynamic_pointer_cast<LambdaBindingAST>(expression[i]))
+                expression[i]->eval(curScope);
+
+        ret = expression.back()->eval(curScope);
+
+        if (auto ptr = std::dynamic_pointer_cast<TailRecursionArgs>(ret)) {
+            args = ptr->actualArgs;
+            /*
+            auto num = std::dynamic_pointer_cast<NumberAST>(args[0]);
+            if (num && num->getValue() == 100)
+                CLOG(INFO, "evaluator") << num->getValue();
+                */
+
+        } else
+            break;
+
+    } while (true);
 
     // remove current function name record
     ss->stepOutFunc();
@@ -48,7 +71,15 @@ std::shared_ptr<ExprAST> LambdaAST::eval(std::shared_ptr<Scope> &ss) const {
     auto lambda = std::make_shared<LambdaAST>(this->formalArgs, this->expression);
     lambda->context->setLexicalScope(ss);
 
-    // ATTENTION: we do not eval sub-routines within lambda->context.
+    // Here we evaluate the sub-routine rather than lambda body.
+    // lambda will be evaluated more than once when regraded as argument, so store it stauts.
+    if (!isSubRoutineEvaluated)
+        for (auto expr: expression)
+            if (std::shared_ptr<LambdaBindingAST> ptr = std::dynamic_pointer_cast<LambdaBindingAST>(expr)) {
+                // Add sub-routine into original context of this lambda
+                ptr->eval(lambda->context);
+            }
+    isSubRoutineEvaluated = true;
 
     // Just derive child node. Hence lambda's context won't be modified afterwards.
     auto parent = ss;
@@ -65,27 +96,37 @@ std::shared_ptr<ExprAST> LambdaBindingAST::eval(std::shared_ptr<Scope> &ss) cons
     return getPointer();
 }
 
-bool IfStatementAST::tailRecursion(const std::shared_ptr<ExprAST> &clause, std::shared_ptr<Scope> &ss) const {
+std::vector<pExpr> IfStatementAST::getTailRecursionArgs(
+    const std::shared_ptr<ExprAST> &clause, std::shared_ptr<Scope> &ss) const {
     if (auto callable = std::dynamic_pointer_cast<InvocationAST>(clause)) {
         if (auto id = std::dynamic_pointer_cast<IdentifierAST>(callable->callableObj)) {
             if (id->getId() == ss->currentFunc()) {
                 CLOG(DEBUG, "evaluator") << "tail recursion detected " << ss->currentFunc();
-                return true;
+                std::vector<pExpr> evalRes;
+                for (const auto &ptr: callable->actualArgs) evalRes.push_back(ptr->eval(ss));
+                return std::move(evalRes);
             }
         }
     }
-    return false;
+    return std::vector<pExpr>();
 }
 
 std::shared_ptr<ExprAST> IfStatementAST::eval(std::shared_ptr<Scope> &ss) const {
     auto ptr = condition->eval(ss);
     if (auto boolFalsePtr = std::dynamic_pointer_cast<BooleansFalseAST>(ptr)) {
-        //TODO: tail recursion optimization
-        tailRecursion(falseClause, ss);
-        return falseClause->eval(ss);
+        return eval(falseClause, ss);
     } else {
-        tailRecursion(trueClause, ss);
-        return trueClause->eval(ss);
+        return eval(trueClause, ss);
+    }
+}
+
+std::shared_ptr<ExprAST> IfStatementAST::eval(
+    const std::shared_ptr<ExprAST> &branch, std::shared_ptr<Scope> &ss) const {
+    auto args = getTailRecursionArgs(branch, ss);
+    if (!args.empty()) {
+        return std::make_shared<TailRecursionArgs>(args);
+    } else {
+        return branch->eval(ss);
     }
 }
 

@@ -117,6 +117,13 @@ namespace ast {
         std::vector<std::shared_ptr<ExprAST>> actualArgs;
     };
 
+    class TailRecursionArgs : public ExprAST {
+    public:
+        TailRecursionArgs(std::vector<pExpr> actualArgs) : actualArgs{std::move(actualArgs)} {}
+
+        std::vector<pExpr> actualArgs;
+    };
+
     class IfStatementAST : public ExprAST {
     public:
         IfStatementAST(const std::shared_ptr<ExprAST> &c,
@@ -133,7 +140,10 @@ namespace ast {
         std::shared_ptr<ExprAST> condition;
         std::shared_ptr<ExprAST> trueClause, falseClause;
 
-        bool tailRecursion(const std::shared_ptr<ExprAST> &, std::shared_ptr<Scope> &) const;
+        std::vector<pExpr> getTailRecursionArgs
+            (const std::shared_ptr<ExprAST> &, std::shared_ptr<Scope> &) const;
+
+        std::shared_ptr<ExprAST> eval(const std::shared_ptr<ExprAST> &, std::shared_ptr<Scope> &) const;
     };
 
     class CondStatementAST : public ExprAST {
@@ -242,13 +252,15 @@ namespace ast {
         friend class LambdaBindingAST;
 
     public:
+        APPLY_FUNC
+
         LambdaAST(std::vector<std::string> v, std::vector<std::shared_ptr<ExprAST>> expr);
 
         void accept(visitor::NodeVisitor &visitor) const override;
 
-        APPLY_FUNC
-
         std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &ss) const override;
+
+        void setArgs(const std::vector<pExpr> &actualArgs, std::shared_ptr<Scope> &ss) const;
 
         pExpr getPointer() const override;
 
@@ -256,6 +268,7 @@ namespace ast {
         std::vector<std::string> formalArgs;
         std::vector<std::shared_ptr<ExprAST>> expression;
         mutable pScope context;
+        mutable bool isSubRoutineEvaluated = false;
     };
 
 

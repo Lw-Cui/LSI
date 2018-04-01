@@ -247,6 +247,7 @@ pExpr LambdaAST::getPointer() const {
 LambdaAST::LambdaAST(std::vector<std::string> v, std::vector<std::shared_ptr<ExprAST>> expr)
     : formalArgs{std::move(v)}, expression{std::move(expr)}, context{new Scope} {}
 
+
 void NilAST::accept(visitor::NodeVisitor &visitor) const {
     visitor.visitNilAST(*this);
 }

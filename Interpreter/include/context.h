@@ -44,7 +44,7 @@ namespace context {
 
         void addBuiltinFunc(const std::string &name, const std::shared_ptr<ast::ExprAST> &);
 
-    private:
+    //private:
 
         void addAllBuiltinFunc();
 
