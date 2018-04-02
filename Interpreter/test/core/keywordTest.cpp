@@ -43,12 +43,12 @@ TEST(KeywordParsingTest, CondStatementTest) {
     CREATE_CONTEXT();
     lex.appendExp("(load \"setup.scm\")");
     REPL_COND("(cond ((= (+ 5 6) 0) 1)"
-                  "       ((= (+ 5 (- 4)) 0) 2)"
-                  "       (else 3))", TO_NUM_PTR(res));
+              "       ((= (+ 5 (- 4)) 0) 2)"
+              "       (else 3))", TO_NUM_PTR(res));
     ASSERT_EQ(3, numPtr->getValue());
     REPL_COND("(cond ((= (+ 5 6) 0) 1)"
-                  "       ((= (+ 5 (- 5)) 0) 2)"
-                  "       (else 3))", TO_NUM_PTR(res));
+              "       ((= (+ 5 (- 5)) 0) 2)"
+              "       (else 3))", TO_NUM_PTR(res));
     ASSERT_EQ(2, numPtr->getValue());
 }
 
@@ -57,9 +57,9 @@ TEST(KeywordParsingTest, LetStatementTest) {
     CREATE_CONTEXT();
     lex.appendExp("(load \"setup.scm\")");
     REPL_COND("(let((x 5)"
-                  "      (y 6)"
-                  "      (foo (lambda (x y) (+ x y))))"
-                  "  (foo x y))", TO_NUM_PTR(res));
+              "      (y 6)"
+              "      (foo (lambda (x y) (+ x y))))"
+              "  (foo x y))", TO_NUM_PTR(res));
     ASSERT_EQ(11, numPtr->getValue());
 }
 

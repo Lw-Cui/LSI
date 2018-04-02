@@ -268,7 +268,6 @@ namespace ast {
         std::vector<std::string> formalArgs;
         std::vector<std::shared_ptr<ExprAST>> expression;
         mutable pScope context;
-        mutable bool isSubRoutineEvaluated = false;
     };
 
 

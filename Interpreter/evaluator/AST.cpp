@@ -95,6 +95,8 @@ pExpr BuiltinLessThanAST::apply(const std::vector<pExpr> &actualArgs, pScope &s)
                 throw NotNumber("The operands in less than operator cannot be converted to number");
             }
         });
+
+    s->stepOutFunc();
     if (res) return std::make_shared<BooleansTrueAST>();
     else return std::make_shared<BooleansFalseAST>();
 }
@@ -135,6 +137,7 @@ pExpr IdentifierAST::getPointer() const {
 
 pExpr BuiltinOppositeAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) const {
     if (auto p = std::dynamic_pointer_cast<NumberAST>(actualArgs.front())) {
+        s->stepOutFunc();
         return std::make_shared<NumberAST>(-p->getValue());
     } else {
         throw NotNumber("The operands cannot be converted to number");
@@ -153,6 +156,8 @@ pExpr BuiltinListAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) con
     std::shared_ptr<ExprAST> list = std::make_shared<NilAST>();
     for (int i = static_cast<int>(actualArgs.size() - 1); i >= 0; i--)
         list = std::make_shared<PairAST>(actualArgs[i], list);
+
+    s->stepOutFunc();
     return list;
 }
 
@@ -221,6 +226,8 @@ pExpr PairAST::getPointer() const {
 }
 
 pExpr BuiltinNullAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) const {
+
+    s->stepOutFunc();
     if (auto p = std::dynamic_pointer_cast<NilAST>(actualArgs.front()))
         return std::make_shared<BooleansTrueAST>();
     else
@@ -258,6 +265,8 @@ pExpr NilAST::getPointer() const {
 
 pExpr BuiltinCarAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) const {
     if (auto p = std::dynamic_pointer_cast<PairAST>(actualArgs.front())) {
+
+        s->stepOutFunc();
         return p->data.first;
     } else {
         throw NotPair("Cannot convert to pair");
@@ -274,6 +283,8 @@ pExpr BuiltinCarAST::getPointer() const {
 
 pExpr BuiltinCdrAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) const {
     if (auto p = std::dynamic_pointer_cast<PairAST>(actualArgs.front())) {
+
+        s->stepOutFunc();
         return p->data.second;
     } else {
         throw NotPair("Cannot convert to pair");
@@ -290,7 +301,9 @@ pExpr BuiltinCdrAST::getPointer() const {
 
 pExpr BuiltinConsAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) const {
     if (actualArgs.size() == 2) {
-        return std::make_shared<PairAST>(actualArgs[0]->eval(s), actualArgs[1]->eval(s));
+        auto p = std::make_shared<PairAST>(actualArgs[0]->eval(s), actualArgs[1]->eval(s));
+        s->stepOutFunc();
+        return p;
     } else {
         throw NotPair("Builtin cons error.");
     }
@@ -313,6 +326,7 @@ pExpr BuiltinAddAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) cons
             throw NotNumber("The operands cannot be converted to number");
         }
     }
+    s->stepOutFunc();
     return std::make_shared<NumberAST>(num);
 }
 
@@ -333,6 +347,7 @@ pExpr BuiltinMultiplyAST::apply(const std::vector<pExpr> &actualArgs, pScope &s)
             throw NotNumber("The operands cannot be converted to number");
         }
     }
+    s->stepOutFunc();
     return std::make_shared<NumberAST>(num);
 }
 
@@ -347,6 +362,8 @@ pExpr BuiltinMultiplyAST::getPointer() const {
 pExpr
 BuiltinReciprocalAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) const {
     if (auto p = std::dynamic_pointer_cast<NumberAST>(actualArgs.front())) {
+
+        s->stepOutFunc();
         return std::make_shared<NumberAST>(1 / p->getValue());
     } else {
         throw NotNumber("The operands cannot be converted to number");

@@ -51,6 +51,7 @@ namespace ast {
 
     class BuiltinListAST : public ExprAST {
     public:
+
         APPLY_FUNC
 
         void accept(visitor::NodeVisitor &visitor) const override;

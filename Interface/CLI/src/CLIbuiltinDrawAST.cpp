@@ -8,7 +8,6 @@ std::pair<float, float> ast::CLIBuiltinDrawAST::toPair(const std::shared_ptr<Exp
         float first = (float) dynamic_pointer_cast<NumberAST>(pairPtr->data.first)->getValue();
         float second = (float) dynamic_pointer_cast<NumberAST>(pairPtr->data.second)->getValue();
 
-        LOG(DEBUG) << "Parse pair: (" << first << ", " << 1000 - second << ")";
         return make_pair(first, 1000 - second);
     } else {
         throw std::logic_error("Cannot convert to pair");
@@ -24,6 +23,7 @@ ast::CLIBuiltinDrawAST::apply(const std::vector<pExpr> &actualArgs, pScope &s) c
         image.set(static_cast<int>(pair.first), static_cast<int>(pair.second), 0);
         exprPtr = pairPtr->data.second;
     }
+    s->stepOutFunc();
     return std::make_shared<CLIBuiltinDrawAST>(image);
 }
 

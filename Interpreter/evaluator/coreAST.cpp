@@ -15,6 +15,8 @@ void LambdaAST::setArgs(const std::vector<pExpr> &actualArgs, std::shared_ptr<Sc
         if (formalArgs[i] != ".") {
             ss->addSymbol(formalArgs[i], actualArgs[i]);
         } else {
+            // Attention: builtinList has to register itself
+            ss->stepIntoFunc("list");
             ss->addSymbol(
                 formalArgs[i + 1],
                 std::make_shared<BuiltinListAST>()->apply(
@@ -51,10 +53,6 @@ pExpr LambdaAST::apply(const std::vector<pExpr> &actualArgs, pScope &ss) const {
 
         if (auto ptr = std::dynamic_pointer_cast<TailRecursionArgs>(ret)) {
             args = ptr->actualArgs;
-            auto num = std::dynamic_pointer_cast<NumberAST>(args[0]);
-            if (num && num->getValue() == 100)
-                CLOG(INFO, "evaluator") << num->getValue();
-
         } else
             break;
 
@@ -68,17 +66,29 @@ pExpr LambdaAST::apply(const std::vector<pExpr> &actualArgs, pScope &ss) const {
 std::shared_ptr<ExprAST> LambdaAST::eval(std::shared_ptr<Scope> &ss) const {
     // Create new lambda and operate on it. AST itself should not be changed
     auto lambda = std::make_shared<LambdaAST>(this->formalArgs, this->expression);
+
+    // store current context;
+    // it has been done before sub-routine evaluation since eval add new node to context
     lambda->context->setLexicalScope(ss);
 
-    // Here we evaluate the sub-routine rather than lambda body.
-    // lambda will be evaluated more than once when regraded as argument, so store it stauts.
-    if (!isSubRoutineEvaluated)
-        for (auto expr: expression)
-            if (std::shared_ptr<LambdaBindingAST> ptr = std::dynamic_pointer_cast<LambdaBindingAST>(expr)) {
-                // Add sub-routine into original context of this lambda
-                ptr->eval(lambda->context);
-            }
-    isSubRoutineEvaluated = true;
+    /*
+     * Here we evaluate the sub-routine rather than lambda body.
+     * (define (SUM n acc)
+     *      (define (x a) a)
+     *      (define (b a) a)
+     *      (if (< n 0) acc (SUM (- n 1) (+ acc n))))
+     *
+     *     (SUM ...)
+     *      /   \
+     *    (x)  (extern scope)
+     *    /
+     *  (b)
+     */
+    for (auto expr: expression)
+        if (std::shared_ptr<LambdaBindingAST> ptr = std::dynamic_pointer_cast<LambdaBindingAST>(expr)) {
+            // Add sub-routine into original context of this lambda
+            ptr->eval(lambda->context);
+        }
 
     // Just derive child node. Hence lambda's context won't be modified afterwards.
     auto parent = ss;
@@ -91,7 +101,7 @@ std::shared_ptr<ExprAST> LambdaAST::eval(std::shared_ptr<Scope> &ss) const {
 std::shared_ptr<ExprAST> LambdaBindingAST::eval(std::shared_ptr<Scope> &ss) const {
     CLOG(DEBUG, "evaluator") << "eval [" << getIdentifier() << "]";
     ss->addSymbol(getIdentifier(), lambda->eval(ss));
-    CLOG(DEBUG, "evaluator") << "finish eval [" << getIdentifier() << "]";
+    CLOG(DEBUG, "evaluator") << "eval [" << getIdentifier() << "] done";
     return getPointer();
 }
 
@@ -103,6 +113,7 @@ std::vector<pExpr> IfStatementAST::getTailRecursionArgs(
                 CLOG(DEBUG, "evaluator") << "tail recursion detected " << ss->currentFunc();
                 std::vector<pExpr> evalRes;
                 for (const auto &ptr: callable->actualArgs) evalRes.push_back(ptr->eval(ss));
+                CLOG(DEBUG, "evaluator") << "tail recursion arguments done" << ss->currentFunc();
                 return std::move(evalRes);
             }
         }

@@ -46,7 +46,6 @@ namespace context {
     }
 
     void Scope::addSymbol(const std::string &id, pExpr ptr) {
-        if (builtinFunc.count(id)) throw std::runtime_error("Cannot overload Builtin func");
         symtab[id] = ptr;
     }
 
@@ -56,13 +55,12 @@ namespace context {
 
 
     void Scope::stepIntoFunc(const std::string &name) {
-        if (builtinFunc.count(name)) return;
-        CLOG(DEBUG, "context") << "call [" << name << "]";
+        CLOG(DEBUG, "context") << "call [" << name << "] @ level " << callTrace.size() + 1;
         callTrace.push(name);
     }
 
     void Scope::stepOutFunc() {
-        CLOG(DEBUG, "context") << "finish call [" << callTrace.top() << "]";
+        CLOG(DEBUG, "context") << "finish [" << callTrace.top() << "]" << " @ level " << callTrace.size();
         callTrace.pop();
     }
 
@@ -71,23 +69,27 @@ namespace context {
     }
 
     std::string Scope::currentFunc() const {
-        return callTrace.top();
+        if (callTrace.empty()) return "";
+        else return callTrace.top();
     }
 
     Scope::Scope() {}
 
+    // Attention: to add a builtin func, you have to:
+    // 1. assure that any place where you make_shared<Builtin> invokes scope->stepInto()
+    // 2. in its apply func, call scope->stepOut()
     const std::unordered_map<std::string, std::shared_ptr<ast::ExprAST>> Scope::builtinFunc = {
-        {"cons", make_shared<BuiltinConsAST>()},
-        {"car", make_shared<BuiltinCarAST>()},
-        {"cdr", make_shared<BuiltinCdrAST>()},
-        {"+", make_shared<BuiltinAddAST>()},
-        {"*", make_shared<BuiltinMultiplyAST>()},
-        {"null?", make_shared<BuiltinNullAST>()},
-        {"<", make_shared<BuiltinLessThanAST>()},
-        {"#opposite", make_shared<BuiltinOppositeAST>()},
+        {"cons",        make_shared<BuiltinConsAST>()},
+        {"car",         make_shared<BuiltinCarAST>()},
+        {"cdr",         make_shared<BuiltinCdrAST>()},
+        {"+",           make_shared<BuiltinAddAST>()},
+        {"*",           make_shared<BuiltinMultiplyAST>()},
+        {"null?",       make_shared<BuiltinNullAST>()},
+        {"<",           make_shared<BuiltinLessThanAST>()},
+        {"#opposite",   make_shared<BuiltinOppositeAST>()},
         {"#reciprocal", make_shared<BuiltinReciprocalAST>()},
-        {"list", make_shared<BuiltinListAST>()},
-        {"else", make_shared<BooleansTrueAST>()},
+        {"list",        make_shared<BuiltinListAST>()},
+        {"else",        make_shared<BooleansTrueAST>()},
     };
 
 }
