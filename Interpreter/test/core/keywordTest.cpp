@@ -3,6 +3,7 @@
 #include <exception.h>
 #include <parser.h>
 #include <testMacro.h>
+#include <context.h>
 
 using namespace lexers;
 using namespace parser;
@@ -11,7 +12,7 @@ using namespace exception;
 TEST(KeywordParsingTest, IdentifierDefinitionTest) {
     CREATE_CONTEXT();
     REPL_COND("(define n 5)", s->count("n"));
-    res = s->searchName("n")->eval(s, s->searchName("n"));
+    res = s->findSymbol("n")->eval(s);
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
     numPtr = std::dynamic_pointer_cast<NumberAST>(res);
     ASSERT_EQ(5, numPtr->getValue());
@@ -19,7 +20,7 @@ TEST(KeywordParsingTest, IdentifierDefinitionTest) {
 
     REPL_COND("(define a n)", s->count("a"));
 
-    res = s->searchName("a")->eval(s, s->searchName("a"));
+    res = s->findSymbol("a")->eval(s);
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(res));
     numPtr = std::dynamic_pointer_cast<NumberAST>(res);
     ASSERT_EQ(5, numPtr->getValue());
@@ -42,12 +43,12 @@ TEST(KeywordParsingTest, CondStatementTest) {
     CREATE_CONTEXT();
     lex.appendExp("(load \"setup.scm\")");
     REPL_COND("(cond ((= (+ 5 6) 0) 1)"
-                  "       ((= (+ 5 (- 4)) 0) 2)"
-                  "       (else 3))", TO_NUM_PTR(res));
+              "       ((= (+ 5 (- 4)) 0) 2)"
+              "       (else 3))", TO_NUM_PTR(res));
     ASSERT_EQ(3, numPtr->getValue());
     REPL_COND("(cond ((= (+ 5 6) 0) 1)"
-                  "       ((= (+ 5 (- 5)) 0) 2)"
-                  "       (else 3))", TO_NUM_PTR(res));
+              "       ((= (+ 5 (- 5)) 0) 2)"
+              "       (else 3))", TO_NUM_PTR(res));
     ASSERT_EQ(2, numPtr->getValue());
 }
 
@@ -56,9 +57,9 @@ TEST(KeywordParsingTest, LetStatementTest) {
     CREATE_CONTEXT();
     lex.appendExp("(load \"setup.scm\")");
     REPL_COND("(let((x 5)"
-                  "      (y 6)"
-                  "      (foo (lambda (x y) (+ x y))))"
-                  "  (foo x y))", TO_NUM_PTR(res));
+              "      (y 6)"
+              "      (foo (lambda (x y) (+ x y))))"
+              "  (foo x y))", TO_NUM_PTR(res));
     ASSERT_EQ(11, numPtr->getValue());
 }
 

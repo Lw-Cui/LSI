@@ -3,7 +3,9 @@
 
 #include <memory>
 #include <string>
+#include <stack>
 #include <unordered_map>
+#include <set>
 
 namespace ast {
     class ExprAST;
@@ -13,45 +15,47 @@ namespace ast {
 namespace context {
 
     using Iter = std::unordered_map<std::string, std::shared_ptr<ast::ExprAST>>::const_iterator;
-    using pExpr = std::shared_ptr<ast::ExprAST>;
 
-    class ScopeImpl;
+    using pExpr = std::shared_ptr<ast::ExprAST>;
 
     class Scope {
     public:
+
         Scope();
 
-        Scope(const Scope &);
+        void addSymbol(const std::string &id, pExpr ptr);
 
-        bool addName(const std::string &id, pExpr ptr);
-
-        pExpr searchName(const std::string &) const;
+        pExpr findSymbol(const std::string &) const;
 
         void setDynamicScope(const std::shared_ptr<Scope> &);
 
         void setLexicalScope(const std::shared_ptr<Scope> &);
 
+        void stepIntoAnonymousFunc();
+
+        void stepIntoFunc(const std::string &name);
+
+        void stepOutFunc();
+
+        std::string currentFunc() const;
+
         bool count(const std::string &str) const;
 
-        bool justCount(const std::string &str) const;
+        void clearCurScope();
 
-        void openNewScope(std::shared_ptr<Scope> &);
+        void addBuiltinFunc(const std::string &name, const std::shared_ptr<ast::ExprAST> &);
 
-        void addBuiltinFunc(const std::string &name, const std::shared_ptr<ast::ExprAST> &) const;
+        //private:
 
-        void clear();
+        std::unordered_map<std::string, std::shared_ptr<ast::ExprAST>> symtab;
 
-        /*
-        const std::string getCurFuncName() const;
+        std::shared_ptr<Scope> dynamicScope, lexicalScope;
 
-        void setCurFuncName(const std::string &str);
+        static std::stack<std::string> callTrace;
 
-        bool delCurFuncName();
-         */
+        static int anonymousId;
 
-        std::shared_ptr<ScopeImpl> impl;
-
-        std::unordered_map<std::string, std::shared_ptr<ast::ExprAST>> x;
+        static const std::unordered_map<std::string, std::shared_ptr<ast::ExprAST>> builtinFunc;
     };
 
     using pScope = std::shared_ptr<Scope>;

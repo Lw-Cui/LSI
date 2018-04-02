@@ -11,14 +11,16 @@ namespace ast {
 
     class CLIBuiltinDrawAST : public BuiltinDrawAST {
     public:
+        APPLY_FUNC
+
         CLIBuiltinDrawAST(Image &i);
 
-        virtual void accept(visitor::NodeVisitor &visitor) const override;
+        void accept(visitor::NodeVisitor &visitor) const override;
 
-        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
+        pExpr getPointer() const override;
 
     private:
-        std::pair<float, float> toPair(const std::shared_ptr<ExprAST> &);
+        std::pair<float, float> toPair(const std::shared_ptr<ExprAST> &) const;
 
         Image &image;
     };

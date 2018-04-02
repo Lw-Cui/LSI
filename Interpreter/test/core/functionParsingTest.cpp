@@ -1,6 +1,7 @@
 #include <memory>
 #include <gtest/gtest.h>
 #include <parser.h>
+#include <context.h>
 #include <testMacro.h>
 
 using namespace lexers;
@@ -10,21 +11,21 @@ using namespace std;
 TEST(FunctionParsingTest, FunctionDefinitionTest) {
     CREATE_CONTEXT();
     REPL_COND("(define (foo x) x)", s->count("foo"));
-    s->searchName("foo")->accept(disp);
+    s->findSymbol("foo")->accept(disp);
     ASSERT_STREQ("#proceduce", disp.to_string().c_str());
 }
 
 TEST(FunctionParsingTest, FunctionApplicationTest) {
     CREATE_CONTEXT();
     REPL_COND("(define (foo x) x)", s->count("foo"));
-    s->searchName("foo")->accept(disp);
+    s->findSymbol("foo")->accept(disp);
     ASSERT_STREQ("#proceduce", disp.to_string().c_str());
 
     REPL_COND("(foo 5)", TO_NUM_PTR(res));
     ASSERT_EQ(5, numPtr->getValue());
 
     REPL_COND("(define (bar x) (+ x 1))", s->count("bar"));
-    s->searchName("bar")->accept(disp);
+    s->findSymbol("bar")->accept(disp);
     ASSERT_STREQ("#proceduce", disp.to_string().c_str());
 
     REPL_COND("(bar 4)", TO_NUM_PTR(res));
@@ -36,7 +37,7 @@ TEST(FunctionParsingTest, FunctionApplicationTest) {
     ASSERT_EQ(5, numPtr->getValue());
 
     REPL_COND("(define b (foo (bar n)))", s->count("b"));
-    res = s->searchName("b");
+    res = s->findSymbol("b");
     ASSERT_TRUE(TO_NUM_PTR(res));
     numPtr = TO_NUM_PTR(res);
     ASSERT_EQ(5, numPtr->getValue());

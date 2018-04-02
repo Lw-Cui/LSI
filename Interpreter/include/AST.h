@@ -1,5 +1,6 @@
 #ifndef GI_AST_H
 #define GI_AST_H
+#define APPLY_FUNC pExpr apply(const std::vector<pExpr> &actualArgs, pScope &) const override;
 
 #include <exception>
 #include <fstream>
@@ -8,10 +9,13 @@
 #include <map>
 #include <vector>
 #include <easylogging++.h>
-#include <context.h>
 
 namespace visitor {
     class NodeVisitor;
+}
+
+namespace context {
+    class Scope;
 }
 
 namespace ast {
@@ -19,26 +23,32 @@ namespace ast {
 
     using pScope = std::shared_ptr<Scope>;
 
+    class ExprAST;
+
     using pExpr = std::shared_ptr<ExprAST>;
 
     class ExprAST {
     public:
-        virtual pExpr eval(pScope &, const pExpr &) const;
+        // Eval this AST node and return result. The node itself does not be changed.
+        virtual pExpr eval(pScope &) const;
 
-        virtual pExpr apply(const std::vector<pExpr>, pScope &);
+        virtual pExpr getPointer() const;
+
+        virtual pExpr apply(const std::vector<pExpr> &, pScope &) const;
 
         virtual void accept(visitor::NodeVisitor &) const;
-
-        virtual ~ExprAST() {}
     };
+
 
     class AllExprAST : public ExprAST {
     public:
-        AllExprAST(const std::vector<std::shared_ptr<ExprAST>> &v) : exprVec{v} {}
+        explicit AllExprAST(std::vector<std::shared_ptr<ExprAST>> v) : exprVec{std::move(v)} {}
 
-        virtual void accept(visitor::NodeVisitor &) const override;
+        void accept(visitor::NodeVisitor &) const override;
 
-        virtual std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &, const pExpr &) const override;
+        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &) const override;
+
+        pExpr getPointer() const override;
 
     private:
         std::vector<std::shared_ptr<ExprAST>> exprVec;
@@ -46,25 +56,27 @@ namespace ast {
 
     class BooleansFalseAST : public ExprAST {
     public:
-        BooleansFalseAST() {}
+        void accept(visitor::NodeVisitor &visitor) const override;
 
-        virtual void accept(visitor::NodeVisitor &visitor) const override;
+        pExpr getPointer() const override;
     };
 
     class BooleansTrueAST : public ExprAST {
     public:
-        BooleansTrueAST() {}
+        void accept(visitor::NodeVisitor &visitor) const override;
 
-        virtual void accept(visitor::NodeVisitor &visitor) const override;
+        pExpr getPointer() const override;
     };
 
     class NumberAST : public ExprAST {
     public:
-        NumberAST(double n) : value{n} {}
+        explicit NumberAST(double n) : value{n} {}
 
-        virtual void accept(visitor::NodeVisitor &visitor) const override;
+        void accept(visitor::NodeVisitor &visitor) const override;
 
         double getValue() const { return value; }
+
+        pExpr getPointer() const override;
 
     private:
         double value;
@@ -72,30 +84,18 @@ namespace ast {
 
     class IdentifierAST : public ExprAST {
     public:
-        IdentifierAST(const std::string &tid) : id{tid} {}
+        explicit IdentifierAST(std::string tid) : id{std::move(tid)} {}
 
-        virtual void accept(visitor::NodeVisitor &visitor) const override;
+        void accept(visitor::NodeVisitor &visitor) const override;
 
         std::string getId() const { return id; }
 
-        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &ss, const pExpr &) const override;
+        pExpr getPointer() const override;
+
+        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &ss) const override;
 
     private:
         std::string id;
-    };
-
-    class FunctionArgumentAST : public ExprAST {
-    public:
-        FunctionArgumentAST(const std::vector<std::shared_ptr<ExprAST>> &args) : actualArgs(args) {
-        }
-
-        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &ss, const pExpr &) const override;
-
-        const std::vector<std::shared_ptr<ExprAST>> &getAcualArgs() const;
-
-
-    private:
-        std::vector<std::shared_ptr<ExprAST>> actualArgs;
     };
 
     // deal with anonymous lambda invocation directly and normal function call
@@ -103,41 +103,59 @@ namespace ast {
         friend class IfStatementAST;
 
     public:
-        virtual void accept(visitor::NodeVisitor &visitor) const override;
+        void accept(visitor::NodeVisitor &visitor) const override;
 
-        InvocationAST(const std::shared_ptr<ExprAST> &lam, std::vector<std::shared_ptr<ExprAST>> &args)
-            : callableObj{lam}, actualArgs{args} {
-        }
+        InvocationAST(const std::shared_ptr<ExprAST> &lam,
+                      const std::vector<std::shared_ptr<ExprAST>> &args);
 
-        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &ss, const pExpr &) const override;
+        pExpr getPointer() const override;
+
+        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &ss) const override;
 
     private:
         std::shared_ptr<ExprAST> callableObj;
         std::vector<std::shared_ptr<ExprAST>> actualArgs;
     };
 
+    class TailRecursionArgs : public ExprAST {
+    public:
+        TailRecursionArgs(std::vector<pExpr> actualArgs) : actualArgs{std::move(actualArgs)} {}
+
+        std::vector<pExpr> actualArgs;
+    };
+
     class IfStatementAST : public ExprAST {
     public:
-        IfStatementAST(std::shared_ptr<ExprAST> c, std::shared_ptr<ExprAST> t, std::shared_ptr<ExprAST> f) :
-            condition{c}, trueClause{t}, falseClause{f} {}
+        IfStatementAST(const std::shared_ptr<ExprAST> &c,
+                       const std::shared_ptr<ExprAST> &t,
+                       const std::shared_ptr<ExprAST> &f);
 
-        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &, const pExpr &) const override;
+        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &) const override;
 
-        virtual void accept(visitor::NodeVisitor &visitor) const override;
+        pExpr getPointer() const override;
 
+        void accept(visitor::NodeVisitor &visitor) const override;
 
     private:
         std::shared_ptr<ExprAST> condition;
         std::shared_ptr<ExprAST> trueClause, falseClause;
+
+        std::vector<pExpr> getTailRecursionArgs
+            (const std::shared_ptr<ExprAST> &, std::shared_ptr<Scope> &) const;
+
+        std::shared_ptr<ExprAST> eval(const std::shared_ptr<ExprAST> &, std::shared_ptr<Scope> &) const;
     };
 
     class CondStatementAST : public ExprAST {
     public:
-        CondStatementAST(const std::vector<std::shared_ptr<ExprAST>> &, const std::vector<std::shared_ptr<ExprAST>> &);
+        CondStatementAST(const std::vector<std::shared_ptr<ExprAST>> &,
+                         const std::vector<std::shared_ptr<ExprAST>> &);
 
-        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &, const pExpr &) const override;
+        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &) const override;
 
-        virtual void accept(visitor::NodeVisitor &visitor) const override;
+        void accept(visitor::NodeVisitor &visitor) const override;
+
+        pExpr getPointer() const override;
 
     private:
         std::shared_ptr<ExprAST> ifStatement;
@@ -145,12 +163,16 @@ namespace ast {
 
     class LetStatementAST : public ExprAST {
     public:
-        LetStatementAST(const std::vector<std::shared_ptr<ExprAST>> &id, const std::vector<std::shared_ptr<ExprAST>> &v,
-                        const std::shared_ptr<ExprAST> &e) : identifier{id}, value{v}, expr{e} {}
+        LetStatementAST(std::vector<std::shared_ptr<ExprAST>> id,
+                        std::vector<std::shared_ptr<ExprAST>> v,
+                        std::shared_ptr<ExprAST> e) :
+            identifier{std::move(id)}, value{std::move(v)}, expr{std::move(e)} {}
 
-        virtual void accept(visitor::NodeVisitor &visitor) const override;
+        void accept(visitor::NodeVisitor &visitor) const override;
 
-        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &, const pExpr &) const override;
+        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &) const override;
+
+        pExpr getPointer() const override;
 
     private:
         std::vector<std::shared_ptr<ExprAST>> identifier, value;
@@ -159,11 +181,13 @@ namespace ast {
 
     class LoadingFileAST : public ExprAST {
     public:
-        LoadingFileAST(const std::string &f) : filename{f} {}
+        explicit LoadingFileAST(std::string f) : filename{std::move(f)} {}
 
-        virtual void accept(visitor::NodeVisitor &visitor) const override;
+        void accept(visitor::NodeVisitor &visitor) const override;
 
-        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &, const pExpr &) const override;
+        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &) const override;
+
+        pExpr getPointer() const override;
 
     private:
         std::string filename;
@@ -172,33 +196,38 @@ namespace ast {
 
     class PairAST : public ExprAST {
     public:
-        PairAST(std::shared_ptr<ExprAST> f, std::shared_ptr<ExprAST> s) : data{f, s} {}
+        PairAST(const std::shared_ptr<ExprAST> &f,
+                const std::shared_ptr<ExprAST> &s) : data{f, s} {}
 
-        virtual void accept(visitor::NodeVisitor &visitor) const override;
+        void accept(visitor::NodeVisitor &visitor) const override;
 
-        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &s, const pExpr &) const override;
+        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &s) const override;
 
         mutable std::pair<std::shared_ptr<ExprAST>, std::shared_ptr<ExprAST>> data;
+
+        pExpr getPointer() const override;
 
     };
 
     class NilAST : public ExprAST {
     public:
-        NilAST() {}
+        void accept(visitor::NodeVisitor &visitor) const override;
 
-        virtual void accept(visitor::NodeVisitor &visitor) const override;
+        pExpr getPointer() const override;
     };
 
 
     class BindingAST : public ExprAST {
     public:
-        BindingAST(const std::string &id) : identifier{id} {}
+        explicit BindingAST(std::string id) : identifier{std::move(id)} {}
 
-        virtual void accept(visitor::NodeVisitor &visitor) const override;
+        void accept(visitor::NodeVisitor &visitor) const override;
 
         const std::string &getIdentifier() const {
             return identifier;
         }
+
+        pExpr getPointer() const override;
 
     private:
         std::string identifier;
@@ -206,12 +235,14 @@ namespace ast {
 
     class ValueBindingAST : public BindingAST {
     public:
-        ValueBindingAST(const std::string &id, std::shared_ptr<ExprAST> v)
-            : BindingAST(id), value{v} {}
+        ValueBindingAST(const std::string &id,
+                        const std::shared_ptr<ExprAST> &v);
 
-        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &ss, const pExpr &) const override;
+        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &ss) const override;
 
-        virtual void accept(visitor::NodeVisitor &visitor) const override;
+        void accept(visitor::NodeVisitor &visitor) const override;
+
+        pExpr getPointer() const override;
 
     private:
         std::shared_ptr<ExprAST> value;
@@ -221,117 +252,41 @@ namespace ast {
         friend class LambdaBindingAST;
 
     public:
-        LambdaAST(const std::vector<std::string> &v,
-                  std::vector<std::shared_ptr<ExprAST>> expr)
-            : formalArgs{v}, expression{expr}, context{new Scope} {}
+        APPLY_FUNC
 
-        virtual void accept(visitor::NodeVisitor &visitor) const override;
+        LambdaAST(std::vector<std::string> v, std::vector<std::shared_ptr<ExprAST>> expr);
 
-        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
+        void accept(visitor::NodeVisitor &visitor) const override;
 
-        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &ss, const pExpr &) const override;
+        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &ss) const override;
+
+        void setArgs(const std::vector<pExpr> &actualArgs, std::shared_ptr<Scope> &ss) const;
+
+        pExpr getPointer() const override;
 
     private:
         std::vector<std::string> formalArgs;
         std::vector<std::shared_ptr<ExprAST>> expression;
         mutable pScope context;
-        mutable bool isSubRoutineEvaluated = false;
     };
 
-    class BuiltinConsAST : public ExprAST {
-    public:
-        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
-
-        virtual void accept(visitor::NodeVisitor &visitor) const override;
-    };
-
-    class BuiltinCarAST : public ExprAST {
-    public:
-
-        virtual void accept(visitor::NodeVisitor &visitor) const override;
-
-        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
-    };
-
-    class BuiltinCdrAST : public ExprAST {
-    public:
-        virtual void accept(visitor::NodeVisitor &visitor) const override;
-
-        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
-    };
-
-    class BuiltinAddAST : public ExprAST {
-    public:
-        virtual void accept(visitor::NodeVisitor &visitor) const override;
-
-        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
-    };
-
-    class BuiltinMultiplyAST : public ExprAST {
-    public:
-        virtual void accept(visitor::NodeVisitor &visitor) const override;
-
-        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
-    };
-
-    class BuiltinListAST : public ExprAST {
-    public:
-        virtual void accept(visitor::NodeVisitor &visitor) const override;
-
-        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
-    };
-
-    class BuiltinNullAST : public ExprAST {
-    public:
-        virtual void accept(visitor::NodeVisitor &visitor) const override;
-
-        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
-    };
-
-    class BuiltinLessThanAST : public ExprAST {
-    public:
-        virtual void accept(visitor::NodeVisitor &visitor) const override;
-
-        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
-    };
-
-    class BuiltinOppositeAST : public ExprAST {
-    public:
-        virtual void accept(visitor::NodeVisitor &visitor) const override;
-
-        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
-    };
-
-    class BuiltinReciprocalAST : public ExprAST {
-    public:
-        virtual void accept(visitor::NodeVisitor &visitor) const override;
-
-        pExpr apply(const std::vector<pExpr> actualArgs, pScope &) override;
-    };
 
     class LambdaBindingAST : public BindingAST {
     public:
-        virtual void accept(visitor::NodeVisitor &visitor) const override;
+        void accept(visitor::NodeVisitor &visitor) const override;
 
         LambdaBindingAST(const std::string &id,
                          const std::vector<std::string> &v,
-                         const std::vector<std::shared_ptr<ExprAST>> expr) :
+                         const std::vector<std::shared_ptr<ExprAST>> &expr) :
             BindingAST(id), lambda{std::make_shared<LambdaAST>(v, expr)} {}
 
-        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &ss, const pExpr &) const override;
+        std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &ss) const override;
+
+        pExpr getPointer() const override;
 
     private:
         std::shared_ptr<LambdaAST> lambda;
     };
-
-
-    class BuiltinDrawAST : public ExprAST {
-    public:
-        virtual void accept(visitor::NodeVisitor &visitor) const override;
-
-        BuiltinDrawAST() {}
-    };
-
 }
 
 #endif //GI_AST_H

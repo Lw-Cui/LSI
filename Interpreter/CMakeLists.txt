@@ -21,7 +21,7 @@ set(INTERPRETER_SOURCE_FILES
         evaluator/coreAST.cpp
         evaluator/AST.cpp include/AST.h
         evaluator/visitor.cpp include/visitor.h
-        include/parser.h evaluator/coreAST.cpp)
+        include/parser.h evaluator/coreAST.cpp include/builtinAST.h)
 add_library(${INTERPRETER_LIB} ${INTERPRETER_SOURCE_FILES})
 
 add_subdirectory(test)

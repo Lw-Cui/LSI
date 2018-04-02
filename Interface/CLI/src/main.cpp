@@ -39,6 +39,8 @@ void setStack(rlim_t stackSize) {
 int main(int argc, char *argv[]) {
     START_EASYLOGGINGPP(argc, argv);
     el::Logger *parserLogger = el::Loggers::getLogger("parser");
+    el::Logger *evaluatorLogger = el::Loggers::getLogger("evaluator");
+    el::Logger *conextLogger = el::Loggers::getLogger("context");
     el::Logger *exceptionLogger = el::Loggers::getLogger("exception");
     el::Loggers::reconfigureAllLoggers(el::ConfigurationType::ToFile, "false");
     el::Loggers::reconfigureAllLoggers(el::ConfigurationType::Format,
@@ -47,11 +49,11 @@ int main(int argc, char *argv[]) {
         setStack(48 * 1024 * 1024);   // 48MB
         Options options(argv[0], " - Scheme Interpreter/painter command line options");
         options.add_options()("o,output", "output image", value<std::string>()->default_value("output.bmp"))
-                ("src", "src filename", cxxopts::value<std::vector<std::string>>())
-                ("p,path", "stdlib path", cxxopts::value<std::string>())
-                ("nostdlib", "Do not use stdlib")
-                ("nopainter", "Do not use painter-related lib")
-                ("h,help", "Print help");
+            ("src", "src filename", cxxopts::value<std::vector<std::string>>())
+            ("p,path", "stdlib path", cxxopts::value<std::string>())
+            ("nostdlib", "Do not use stdlib")
+            ("nopainter", "Do not use painter-related lib")
+            ("h,help", "Print help");
         options.parse_positional("src");
         options.parse(argc, argv);
 
@@ -76,12 +78,12 @@ int main(int argc, char *argv[]) {
             lex.appendExp("(load \"" + path + "/Frame.scm\")");
         }
         auto ast = parseAllExpr(lex);
-        ast->eval(scope, ast);
+        ast->eval(scope);
         auto &v = options["src"].as<std::vector<std::string>>();
         for (const auto &s : v) {
             lex.appendExp(string("(load \"") + s + "\")");
             auto ast = parseAllExpr(lex);
-            shared_ptr<ExprAST> ptr = ast->eval(scope, ast);
+            shared_ptr<ExprAST> ptr = ast->eval(scope);
             visitor::DisplayVisitor disp;
             if (ptr) {
                 ptr->accept(disp);

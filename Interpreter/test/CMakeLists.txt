@@ -7,7 +7,7 @@ set(TEST_MAIN
 set(GTEST_LIB gtest gmock CACHE INTERAL "Google test lib & mock lib")
 
 set(TEST_FILES
-        core/exceptionTest.cpp
+        #core/exceptionTest.cpp
         core/basicParserTest.cpp
         core/functionParsingTest.cpp
         core/functionTest.cpp

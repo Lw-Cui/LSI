@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <exception.h>
+#include <context.h>
 #include <parser.h>
 
 using namespace lexers;
@@ -52,13 +53,13 @@ TEST(ExceptionParsingTest, BuiltinLessThanASTTest) {
     auto ss = std::make_shared<Scope>();
     lex.appendExp("(< 5 +)");
     auto ast = parseAllExpr(lex);
-    EXPECT_THROW(ast->eval(ss, ast), NotNumber);
+    EXPECT_THROW(ast->eval(ss), NotNumber);
 
     lex.clear();
-    ss->clear();
+    ss->clearCurScope();
     lex.appendExp("x");
     ast = parseAllExpr(lex);
-    EXPECT_THROW(ast->eval(ss, ast), UnboundIdentifier);
+    EXPECT_THROW(ast->eval(ss), UnboundIdentifier);
 }
 
 TEST(ExceptionParsingTest, BuiltinConsTest) {
@@ -66,11 +67,11 @@ TEST(ExceptionParsingTest, BuiltinConsTest) {
     auto ss = std::make_shared<Scope>();
     lex.appendExp("(car 5)");
     auto ast = parseAllExpr(lex);
-    EXPECT_THROW(ast->eval(ss,ast), NotPair);
+    EXPECT_THROW(ast->eval(ss), NotPair);
 
     lex.clear();
-    ss->clear();
+    ss->clearCurScope();
     lex.appendExp("(cons 5)");
     ast = parseAllExpr(lex);
-    EXPECT_THROW(ast->eval(ss, ast), NotPair);
+    EXPECT_THROW(ast->eval(ss), NotPair);
 }
