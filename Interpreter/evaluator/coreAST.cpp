@@ -32,9 +32,10 @@ void LambdaAST::setArgs(const std::vector<pExpr> &actualArgs, std::shared_ptr<Sc
 pExpr LambdaAST::apply(const std::vector<pExpr> &actualArgs, pScope &ss) const {
     auto args = actualArgs;
     pExpr ret = nullptr;
+    auto curScope = std::make_shared<Scope>();
     do {
         // Create new scope
-        auto curScope = std::make_shared<Scope>();
+        curScope->clearCurScope();
         curScope->setLexicalScope(context);
         // Like C with auto declaration: A invokes B while B appears behind A.
         curScope->setDynamicScope(ss);
@@ -50,11 +51,9 @@ pExpr LambdaAST::apply(const std::vector<pExpr> &actualArgs, pScope &ss) const {
 
         if (auto ptr = std::dynamic_pointer_cast<TailRecursionArgs>(ret)) {
             args = ptr->actualArgs;
-            /*
             auto num = std::dynamic_pointer_cast<NumberAST>(args[0]);
             if (num && num->getValue() == 100)
                 CLOG(INFO, "evaluator") << num->getValue();
-                */
 
         } else
             break;

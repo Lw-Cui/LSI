@@ -56,7 +56,7 @@ TEST(ExceptionParsingTest, BuiltinLessThanASTTest) {
     EXPECT_THROW(ast->eval(ss), NotNumber);
 
     lex.clear();
-    ss->clear();
+    ss->clearCurScope();
     lex.appendExp("x");
     ast = parseAllExpr(lex);
     EXPECT_THROW(ast->eval(ss), UnboundIdentifier);
@@ -70,7 +70,7 @@ TEST(ExceptionParsingTest, BuiltinConsTest) {
     EXPECT_THROW(ast->eval(ss), NotPair);
 
     lex.clear();
-    ss->clear();
+    ss->clearCurScope();
     lex.appendExp("(cons 5)");
     ast = parseAllExpr(lex);
     EXPECT_THROW(ast->eval(ss), NotPair);

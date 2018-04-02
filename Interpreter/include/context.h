@@ -20,9 +20,10 @@ namespace context {
 
     class Scope {
     public:
+
         Scope();
 
-        bool addSymbol(const std::string &id, pExpr ptr);
+        void addSymbol(const std::string &id, pExpr ptr);
 
         pExpr findSymbol(const std::string &) const;
 
@@ -40,13 +41,11 @@ namespace context {
 
         bool count(const std::string &str) const;
 
-        void clear();
+        void clearCurScope();
 
         void addBuiltinFunc(const std::string &name, const std::shared_ptr<ast::ExprAST> &);
 
-    //private:
-
-        void addAllBuiltinFunc();
+        //private:
 
         std::unordered_map<std::string, std::shared_ptr<ast::ExprAST>> symtab;
 
@@ -56,19 +55,7 @@ namespace context {
 
         static int anonymousId;
 
-        const std::set<std::string> builtinList = {
-            "cons",
-            "car",
-            "cdr",
-            "+",
-            "*",
-            "null?",
-            "<",
-            "#opposite",
-            "#reciprocal",
-            "list",
-            "else",
-        };
+        static const std::unordered_map<std::string, std::shared_ptr<ast::ExprAST>> builtinFunc;
     };
 
     using pScope = std::shared_ptr<Scope>;

@@ -25,13 +25,8 @@ namespace context {
         lexicalScope = scope;
     }
 
-    Scope::Scope() {
-        addAllBuiltinFunc();
-    }
-
-    void Scope::clear() {
+    void Scope::clearCurScope() {
         symtab.clear();
-        addAllBuiltinFunc();
     }
 
     void Scope::addBuiltinFunc(const std::string &name, const std::shared_ptr<ast::ExprAST> &expr) {
@@ -39,6 +34,7 @@ namespace context {
     }
 
     pExpr Scope::findSymbol(const std::string &id) const {
+        if (builtinFunc.count(id)) return builtinFunc.find(id)->second;
         if (symtab.count(id)) return symtab.find(id)->second;
 
         pExpr ret = nullptr;
@@ -49,23 +45,9 @@ namespace context {
         return ret;
     }
 
-    bool Scope::addSymbol(const std::string &id, pExpr ptr) {
+    void Scope::addSymbol(const std::string &id, pExpr ptr) {
+        if (builtinFunc.count(id)) throw std::runtime_error("Cannot overload Builtin func");
         symtab[id] = ptr;
-        return true;
-    }
-
-    void Scope::addAllBuiltinFunc() {
-        addBuiltinFunc("cons", make_shared<BuiltinConsAST>());
-        addBuiltinFunc("car", make_shared<BuiltinCarAST>());
-        addBuiltinFunc("cdr", make_shared<BuiltinCdrAST>());
-        addBuiltinFunc("+", make_shared<BuiltinAddAST>());
-        addBuiltinFunc("*", make_shared<BuiltinMultiplyAST>());
-        addBuiltinFunc("null?", make_shared<BuiltinNullAST>());
-        addBuiltinFunc("<", make_shared<BuiltinLessThanAST>());
-        addBuiltinFunc("#opposite", make_shared<BuiltinOppositeAST>());
-        addBuiltinFunc("#reciprocal", make_shared<BuiltinReciprocalAST>());
-        addBuiltinFunc("list", make_shared<BuiltinListAST>());
-        addBuiltinFunc("else", make_shared<BooleansTrueAST>());
     }
 
     std::stack<std::string> Scope::callTrace;
@@ -74,7 +56,7 @@ namespace context {
 
 
     void Scope::stepIntoFunc(const std::string &name) {
-        if (builtinList.count(name)) return;
+        if (builtinFunc.count(name)) return;
         CLOG(DEBUG, "context") << "call [" << name << "]";
         callTrace.push(name);
     }
@@ -91,6 +73,22 @@ namespace context {
     std::string Scope::currentFunc() const {
         return callTrace.top();
     }
+
+    Scope::Scope() {}
+
+    const std::unordered_map<std::string, std::shared_ptr<ast::ExprAST>> Scope::builtinFunc = {
+        {"cons", make_shared<BuiltinConsAST>()},
+        {"car", make_shared<BuiltinCarAST>()},
+        {"cdr", make_shared<BuiltinCdrAST>()},
+        {"+", make_shared<BuiltinAddAST>()},
+        {"*", make_shared<BuiltinMultiplyAST>()},
+        {"null?", make_shared<BuiltinNullAST>()},
+        {"<", make_shared<BuiltinLessThanAST>()},
+        {"#opposite", make_shared<BuiltinOppositeAST>()},
+        {"#reciprocal", make_shared<BuiltinReciprocalAST>()},
+        {"list", make_shared<BuiltinListAST>()},
+        {"else", make_shared<BooleansTrueAST>()},
+    };
 
 }
 
