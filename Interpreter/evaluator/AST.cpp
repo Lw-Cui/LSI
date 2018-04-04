@@ -59,6 +59,14 @@ std::shared_ptr<ExprAST> LoadingFileAST::eval(std::shared_ptr<Scope> &s) const {
     return ptr->eval(s);
 }
 
+std::vector<pExpr> LoadingFileAST::evalAll(std::shared_ptr<Scope> &s) const {
+    std::ifstream fin{filename};
+    std::string str{std::istreambuf_iterator<char>(fin), std::istreambuf_iterator<char>()};
+    lexers::Lexer lex{str};
+    auto ptr = std::dynamic_pointer_cast<AllExprAST>(parseAllExpr(lex));
+    return ptr->evalAll(s);
+}
+
 void LoadingFileAST::accept(visitor::NodeVisitor &visitor) const {
     visitor.visitLoadingFileAST(*this);
 }
@@ -146,6 +154,18 @@ void AllExprAST::accept(visitor::NodeVisitor &visitor) const {
 
 pExpr AllExprAST::getPointer() const {
     return std::make_shared<AllExprAST>(*this);
+}
+
+std::vector<pExpr> AllExprAST::evalAll(std::shared_ptr<Scope> &s) const {
+    std::vector<pExpr> ret;
+    for (auto ptr : exprVec)
+        if (auto load = std::dynamic_pointer_cast<LoadingFileAST>(ptr)) {
+            auto vec = load->evalAll(s);
+            ret.insert(std::end(ret), std::begin(vec), std::end(vec));
+        } else {
+            ret.push_back(ptr->eval(s));
+        }
+    return std::move(ret);
 }
 
 std::shared_ptr<ExprAST> PairAST::eval(std::shared_ptr<Scope> &s) const {

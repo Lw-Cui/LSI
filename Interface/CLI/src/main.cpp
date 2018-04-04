@@ -82,12 +82,15 @@ int main(int argc, char *argv[]) {
         auto &v = options["src"].as<std::vector<std::string>>();
         for (const auto &s : v) {
             lex.appendExp(string("(load \"") + s + "\")");
-            auto ast = parseAllExpr(lex);
-            shared_ptr<ExprAST> ptr = ast->eval(scope);
+            auto ast = std::dynamic_pointer_cast<AllExprAST>(parseAllExpr(lex));
+            auto ret = ast->evalAll(scope);
             visitor::DisplayVisitor disp;
-            if (ptr) {
-                ptr->accept(disp);
-                cout << disp.to_string();
+            for (auto ptr: ret) {
+                if (ptr) {
+                    ptr->accept(disp);
+                    auto str = disp.to_string();
+                    if (!str.empty()) cout << str << endl;
+                }
             }
         }
         if (!options.count("nopainter") && !options.count("nostdlib")) {

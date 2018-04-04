@@ -40,6 +40,13 @@ namespace ast {
     };
 
 
+    class EvalResult : public ExprAST {
+    public:
+        std::vector<pExpr> result;
+
+        explicit EvalResult(std::vector<pExpr> vec) : result(std::move(vec)) {}
+    };
+
     class AllExprAST : public ExprAST {
     public:
         explicit AllExprAST(std::vector<std::shared_ptr<ExprAST>> v) : exprVec{std::move(v)} {}
@@ -47,6 +54,8 @@ namespace ast {
         void accept(visitor::NodeVisitor &) const override;
 
         std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &) const override;
+
+        std::vector<pExpr> evalAll(std::shared_ptr<Scope> &) const;
 
         pExpr getPointer() const override;
 
@@ -119,7 +128,7 @@ namespace ast {
 
     class TailRecursionArgs : public ExprAST {
     public:
-        TailRecursionArgs(std::vector<pExpr> actualArgs) : actualArgs{std::move(actualArgs)} {}
+        explicit TailRecursionArgs(std::vector<pExpr> actualArgs) : actualArgs{std::move(actualArgs)} {}
 
         std::vector<pExpr> actualArgs;
     };
@@ -186,6 +195,8 @@ namespace ast {
         void accept(visitor::NodeVisitor &visitor) const override;
 
         std::shared_ptr<ExprAST> eval(std::shared_ptr<Scope> &) const override;
+
+        std::vector<pExpr> evalAll(std::shared_ptr<Scope> &) const;
 
         pExpr getPointer() const override;
 

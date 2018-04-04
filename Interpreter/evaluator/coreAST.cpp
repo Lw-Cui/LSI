@@ -113,7 +113,7 @@ std::vector<pExpr> IfStatementAST::getTailRecursionArgs(
                 CLOG(DEBUG, "evaluator") << "tail recursion detected " << ss->currentFunc();
                 std::vector<pExpr> evalRes;
                 for (const auto &ptr: callable->actualArgs) evalRes.push_back(ptr->eval(ss));
-                CLOG(DEBUG, "evaluator") << "tail recursion arguments done" << ss->currentFunc();
+                CLOG(DEBUG, "evaluator") << "tail recursion arguments done " << ss->currentFunc();
                 return std::move(evalRes);
             }
         }
