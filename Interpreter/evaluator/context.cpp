@@ -55,12 +55,14 @@ namespace context {
 
 
     void Scope::stepIntoFunc(const std::string &name) {
-        CLOG(DEBUG, "context") << "call [" << name << "] @ level " << callTrace.size() + 1;
+        CLOG(DEBUG, "context") << string(callTrace.size(), '|') << " /`"
+                               << "call [" << name << "] @ level " << callTrace.size() + 1;
         callTrace.push(name);
     }
 
     void Scope::stepOutFunc() {
-        CLOG(DEBUG, "context") << "finish [" << callTrace.top() << "]" << " @ level " << callTrace.size();
+        CLOG(DEBUG, "context") << string(callTrace.size() - 1, '|') << " \\_"
+                               << "finish [" << callTrace.top() << "]" << " @ level " << callTrace.size();
         callTrace.pop();
     }
 

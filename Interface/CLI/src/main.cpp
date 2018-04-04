@@ -84,9 +84,9 @@ int main(int argc, char *argv[]) {
             lex.appendExp(string("(load \"") + s + "\")");
             auto ast = std::dynamic_pointer_cast<AllExprAST>(parseAllExpr(lex));
             auto ret = ast->evalAll(scope);
-            visitor::DisplayVisitor disp;
             for (auto ptr: ret) {
                 if (ptr) {
+                    visitor::DisplayVisitor disp;
                     ptr->accept(disp);
                     auto str = disp.to_string();
                     if (!str.empty()) cout << str << endl;
