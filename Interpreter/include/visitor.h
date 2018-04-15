@@ -50,41 +50,39 @@ namespace visitor {
 
         virtual void visitBuiltinListAST(const ast::BuiltinListAST &) {}
 
-        virtual void visitBuiltinNullAST(const ast::BuiltinNullAST) {}
+        virtual void visitBuiltinNullAST(const ast::BuiltinNullAST &) {}
 
-        virtual void visitBuiltinLessThanAST(const ast::BuiltinLessThanAST) {}
+        virtual void visitBuiltinLessThanAST(const ast::BuiltinLessThanAST &) {}
 
-        virtual void visitBuiltinOppositeAST(const ast::BuiltinOppositeAST) {}
+        virtual void visitBuiltinOppositeAST(const ast::BuiltinOppositeAST &) {}
 
-        virtual void visitBuiltinReciprocalAST(const ast::BuiltinReciprocalAST) {}
+        virtual void visitBuiltinReciprocalAST(const ast::BuiltinReciprocalAST &) {}
 
-        virtual void visitLambdaBindingAST(const ast::LambdaBindingAST) {}
+        virtual void visitLambdaBindingAST(const ast::LambdaBindingAST &) {}
 
-        virtual void visitLambdaApplicationAST(const ast::InvocationAST) {}
+        virtual void visitLambdaApplicationAST(const ast::InvocationAST &) {}
 
-        virtual void visitBuiltinDrawAST(const ast::BuiltinDrawAST) {}
-
-    protected:
-        NodeVisitor() {}
+        virtual void visitBuiltinDrawAST(const ast::BuiltinDrawAST &) {}
     };
 
     class DisplayVisitor : public NodeVisitor {
     public:
-        virtual void visitBooleansFalseAST(const ast::BooleansFalseAST &) override;
+        void visitBooleansFalseAST(const ast::BooleansFalseAST &) override;
 
-        virtual void visitBooleansTrueAST(const ast::BooleansTrueAST &) override;
+        void visitBooleansTrueAST(const ast::BooleansTrueAST &) override;
 
-        virtual void visitNumberAST(const ast::NumberAST &) override;
+        void visitNumberAST(const ast::NumberAST &) override;
 
-        virtual void visitPairAST(const ast::PairAST &) override;
+        void visitPairAST(const ast::PairAST &) override;
 
-        virtual void visitNilAST(const ast::NilAST &) override;
+        void visitNilAST(const ast::NilAST &) override;
 
-        virtual void visitLambdaAST(const ast::LambdaAST &) override;
+        void visitLambdaAST(const ast::LambdaAST &) override;
 
         std::string to_string() const;
 
         void clear();
+
     private:
         std::string prettyPrint;
     };
