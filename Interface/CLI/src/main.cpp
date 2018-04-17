@@ -48,7 +48,8 @@ int main(int argc, char *argv[]) {
     try {
         // since we may access (1000, 0), which will crashe the whole world if `Image image(1000, 1000);`
         Image image(1001, 1001);
-        setStack(48 * 1024 * 1024);   // 48MB
+        // set stack up to 48MB: We don't need it anymore!
+        //setStack(48 * 1024 * 1024);
         Options options(argv[0], " - Scheme Interpreter/painter command line options");
         options.add_options()("o,output", "output image", value<std::string>()->default_value("output.bmp"))
             ("src", "src filename", cxxopts::value<std::vector<std::string>>())
