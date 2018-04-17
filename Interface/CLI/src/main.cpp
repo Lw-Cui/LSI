@@ -46,6 +46,8 @@ int main(int argc, char *argv[]) {
     el::Loggers::reconfigureAllLoggers(el::ConfigurationType::Format,
                                        "[%logger] %msg [%fbase:%line]");
     try {
+        // since we may access (1000, 0), which will crashe the whole world if `Image image(1000, 1000);`
+        Image image(1001, 1001);
         setStack(48 * 1024 * 1024);   // 48MB
         Options options(argv[0], " - Scheme Interpreter/painter command line options");
         options.add_options()("o,output", "output image", value<std::string>()->default_value("output.bmp"))
@@ -68,7 +70,6 @@ int main(int argc, char *argv[]) {
         Lexer lex;
         auto scope = std::make_shared<Scope>();
         auto path = options["path"].as<std::string>();
-        Image image(1000, 1000);
         if (!options.count("nostdlib")) {
             lex.appendExp("(load \"" + path + "/Base.scm\")");
         }

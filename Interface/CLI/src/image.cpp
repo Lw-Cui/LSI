@@ -1,4 +1,7 @@
 #define cimg_display 0
+
+// Attention: if some thing goes wrong within CImg, change this to 3: high debug messages
+#define cimg_verbosity 0
 #include <CImg.h>
 #include <image.h>
 
@@ -6,7 +9,8 @@ using namespace std;
 
 class ImageImpl {
 public:
-    ImageImpl(int length, int width) : image(length, width, 1, 3, 255) {}
+    ImageImpl(int length, int width) : image(length, width, 1, 3, 255) {
+    }
 
     void save(const char *const filename) {
         image.save(filename);
@@ -15,6 +19,7 @@ public:
     void set(int x, int y, float value) {
         image(x, y, 0) = image(x, y, 1) = image(x, y, 2) = value;
     }
+
 private:
     cimg_library::CImg<float> image;
 
