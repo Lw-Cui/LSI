@@ -1,7 +1,7 @@
 #define cimg_display 0
 
-// Attention: if some thing goes wrong within CImg, change this to 3: high debug messages
-#define cimg_verbosity 0
+// Attention: "3" means high debug messages
+#define cimg_verbosity 3
 #include <CImg.h>
 #include <image.h>
 
