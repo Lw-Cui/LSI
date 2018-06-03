@@ -1,0 +1,1 @@
+(sierpinskiTriangle-time (cons 0 0) (cons 500 866) (cons 1000 0) 5)
