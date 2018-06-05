@@ -2,19 +2,30 @@
 
 [![Coverage Status](https://scan.coverity.com/projects/11270/badge.svg?flat=1)](https://scan.coverity.com/projects/p-ainters-drawing-board-alpha)   [![Build Status](https://travis-ci.org/Lw-Cui/LSI.svg?branch=v0.1-rc1)](https://travis-ci.org/Lw-Cui/LSI)
 
-**L**iwei's **S**cheme **I**nterpreter.
+**L**iwei's **S**cheme **I**nterpreter — A Scheme interpreter with geometric figure generation.
+
+View [demo video](https://www.dropbox.com/s/fche4xurlhohbcf/LSI.mp4?dl=0) & [presentation(In Chinese)](https://www.dropbox.com/s/84d3bo0gav6qthv/%E6%AF%95%E4%B8%9A%E8%AE%BE%E8%AE%A1%E7%AD%94%E8%BE%A9.pptx?dl=0) now!
+
+## Feature
+
+1.  Implemented a closure support interpreter with tail call optimization
+2. Enabled user-defined Scheme libraries including Y-combinator,  geometric figure drawing and  coordinate transformation
+3.  Added logger, unit test, continuous integration, coverage test and static analysis
 
 ## Build from scratch
-
-Use LSI for painting!
 
 ```
 git submodule update --init
 mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release
 make LSI_CLI
-../build/Interface/CLI/src/LSI_CLI -o res.bmp cli_test/CLITest.scm -p stdlib
+./Interface/CLI/src/LSI_CLI ../Scheme/demo/painter3.scm -p ../Scheme/stdlib
 ```
 
+(Wait about 20s…)
+
+And find picture in `Scheme/demo`!
+
+![painter3.png](./Doc/IMG/painter3.bmp)
 
 ## License
 
