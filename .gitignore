@@ -6,3 +6,5 @@ cmake-build-debug
 cmake-build-release
 cmake-build-default
 external
+out
+coverage.info
