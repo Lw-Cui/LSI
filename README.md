@@ -9,9 +9,8 @@ View [demo video](https://www.dropbox.com/s/fche4xurlhohbcf/LSI.mp4?dl=0) & [pre
 ## Feature
 
 1.  Implemented a closure support interpreter with tail call optimization
-2. Enabled user-defined Scheme libraries to draw geometric figure and transform coordinate
-3.  Added logger, mock test, unit test, coverage test and CI for different build chain
-4. Used GitHub issue tracking system to track progress
+2. Enabled user-defined Scheme libraries including Y-combinator,  geometric figure drawing and  coordinate transformation
+3.  Added logger, unit test, continuous integration, coverage test and static analysis
 
 ## Build from scratch
 
