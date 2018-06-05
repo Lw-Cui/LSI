@@ -22,20 +22,6 @@ using namespace exception;
 
 INITIALIZE_EASYLOGGINGPP
 
-void setStack(rlim_t stackSize) {
-    struct rlimit rl;
-    if (getrlimit(RLIMIT_STACK, &rl) == 0) {
-        if (rl.rlim_cur < stackSize) {
-            rl.rlim_cur = stackSize;
-            if (setrlimit(RLIMIT_STACK, &rl) != 0) {
-                throw std::logic_error("Cannot set resource info.");
-            }
-        }
-    } else {
-        throw std::logic_error("Cannot get resource info.");
-    }
-}
-
 int main(int argc, char *argv[]) {
     START_EASYLOGGINGPP(argc, argv);
     el::Logger *parserLogger = el::Loggers::getLogger("parser");
@@ -51,7 +37,7 @@ int main(int argc, char *argv[]) {
         // set stack up to 48MB: We don't need it anymore!
         //setStack(48 * 1024 * 1024);
         Options options(argv[0], " - Scheme Interpreter/painter command line options");
-        options.add_options()("o,output", "output image", value<std::string>()->default_value("output.bmp"))
+        options.add_options()("o,output", "output image", value<std::string>())
             ("src", "src filename", cxxopts::value<std::vector<std::string>>())
             ("p,path", "stdlib path", cxxopts::value<std::string>())
             ("nostdlib", "Do not use stdlib")
@@ -96,7 +82,9 @@ int main(int argc, char *argv[]) {
             }
         }
         if (!options.count("nopainter") && !options.count("nostdlib")) {
-            image.save(options["output"].as<string>().c_str());
+            std::string::size_type const p(v.back().find_last_of('.'));
+            auto basename = v.back().substr(0, p) + ".bmp";
+            image.save(basename.c_str());
         }
         //} catch (RuntimeError &e) {
         //cout << e.what() << endl;
