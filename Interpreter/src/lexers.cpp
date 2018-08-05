@@ -3,8 +3,9 @@
 using namespace lexers;
 
 Lexer &Lexer::appendExp(const std::string &exp) {
-    expressionBuf.clear();
-    expressionBuf << processExp(exp);
+    // Clear EOF, if stream has
+    if (getTokType() == TokEOF) expressionBuf.clear();
+    expressionBuf << "\n" << processExp(exp);
     if (getTokType() == TokEOF) stepForward();
     return *this;
 }
@@ -29,6 +30,10 @@ std::string Lexer::getIdentifier() {
         CLOG(DEBUG, "exception");
         throw std::logic_error("Token isn't identifier.");
     }
+}
+
+Lexer::TokenType Lexer::getTokType() const {
+    return currentType;
 }
 
 Lexer::TokenType Lexer::stepForward() {
@@ -59,6 +64,12 @@ Lexer::TokenType Lexer::stepForward() {
             goto Number;
         }
         currentType = (keyWord.count(strToken) ? keyWord[strToken] : TokIdentifier);
+        if (strToken == "#") {
+            do {
+                type = expressionBuf.get();
+            } while (type != EOF && type != '\n');
+            return stepForward();
+        }
     }
     return currentType;
 }
@@ -76,6 +87,12 @@ std::string Lexer::processExp(const std::string exp) const {
         }
     });
     return std::move(tmp);
+}
+
+void Lexer::clear() {
+    expressionBuf.str("");
+    if (currentType == TokEOF) expressionBuf.clear();
+    currentType = TokEOF;
 }
 
 

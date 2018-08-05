@@ -29,7 +29,9 @@ namespace lexers {
         };
 
 
-        Lexer &appendExp(const std::string &exp);
+        virtual Lexer &appendExp(const std::string &exp);
+
+        void clear();
 
         Lexer() {}
 
@@ -37,11 +39,11 @@ namespace lexers {
             appendExp(exp);
         }
 
-        TokenType getTokType() const { return currentType; }
+        virtual TokenType getTokType() const;
 
-        double getNum();
+        virtual double getNum();
 
-        std::string getIdentifier();
+        virtual std::string getIdentifier();
 
         TokenType stepForward();
 

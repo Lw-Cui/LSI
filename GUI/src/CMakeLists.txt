@@ -1,14 +1,12 @@
-set(TEXT_LIB TextWindow CACHE INTERNAL "text windows")
-set(TEXT_SOURCE_FILES
-        ../include/formatString.h formatString.cpp)
-add_library(${TEXT_LIB} STATIC ${TEXT_SOURCE_FILES})
+set(CONTROL_LIB Contorller CACHE INTERNAL "text windows")
+set(CONTROL_SOURCE_FILES
+        ../include/formatString.h formatString.cpp
+        ../include/Controller.h Controller.cpp
+        ../include/GUIbuiltinDrawAST.h GUIbuiltinDrawAST.cpp)
+add_library(${CONTROL_LIB} ${CONTROL_SOURCE_FILES})
 
-if (NOT DEFINED ENV{DO_NOT_BUILD_GUI})
-    set(GUI_SOURCE_FILES
-            ../include/Controller.h Controller.cpp
-            ../include/GUIbuiltinAST.h GUIbuiltinAST.cpp
-            main.cpp)
-    add_executable(${PROJECT_NAME} ${GUI_SOURCE_FILES})
-    include_directories(${SFML_INCLUDE_DIR})
-    target_link_libraries(${PROJECT_NAME} ${INTERPRETER_LIB} ${TEXT_LIB} sfml-system sfml-window sfml-graphics)
-endif ()
+set(GUI_SOURCE_FILES
+        ../../external/easylogging/src/easylogging++.cc
+        main.cpp)
+add_executable(${PROJECT_NAME} ${GUI_SOURCE_FILES})
+target_link_libraries(${PROJECT_NAME} ${CONTROL_LIB} ${INTERPRETER_LIB} ${SFML_LIB})

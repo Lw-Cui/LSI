@@ -6,24 +6,19 @@
 #include <Controller.h>
 
 namespace ast {
-    class GUIBuiltinAST : public ExprAST {
-    protected:
+    class GUIBuiltinDrawAST : public BuiltinDrawAST {
+    private:
         sf::Vector2f toVec2f(const std::shared_ptr<ExprAST> &) const;
 
         std::shared_ptr<ExprAST> toPairAST(const sf::Vector2f &) const;
-    };
 
-    class BuiltinDrawAST : public GUIBuiltinAST {
+        con::Controller &controller;
     public:
-        BuiltinDrawAST(con::Controller &);
+        GUIBuiltinDrawAST(con::Controller &);
 
         std::string display() const override;
 
         std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &) override;
-
-    private:
-
-        con::Controller &controller;
     };
 }
 

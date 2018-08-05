@@ -37,10 +37,10 @@ int main(int argc, char *argv[]) {
 
     setStack(16 * 1024 * 1024);   // 16MB
 
-    sf::RenderWindow drawingBoard(sf::VideoMode(1300, 1300), "Drawing Board"),
-            textWindow(sf::VideoMode(1100, 800), "Shell");
+    Window drawingBoard(sf::VideoMode(1000, 1000), "Drawing Board"),
+            textWindow(sf::VideoMode(1000, 1000), "Shell");
 
-    drawingBoard.setPosition(sf::Vector2i{1100, 0});
+    drawingBoard.setPosition(sf::Vector2i{1000, 0});
     textWindow.setPosition(sf::Vector2i{0, 0});
 
     drawingBoard.setVerticalSyncEnabled(true);

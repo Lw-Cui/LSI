@@ -95,3 +95,27 @@ TEST(LexersTest, AppendTest) {
     ASSERT_EQ(Lexer::TokEOF, lex.stepForward());
 }
 
+TEST(LexersTest, CommentTest) {
+    lexers::Lexer lex{"(let n 5) # hello world"};
+    ASSERT_EQ(Lexer::TokOpeningBracket, lex.getTokType());
+    ASSERT_EQ(Lexer::TokLet, lex.stepForward());
+    ASSERT_EQ(Lexer::TokIdentifier, lex.stepForward());
+    ASSERT_STREQ("n", lex.getIdentifier().c_str());
+    ASSERT_EQ(Lexer::TokNumber, lex.getTokType());
+    ASSERT_EQ(5, lex.getNum());
+    ASSERT_EQ(Lexer::TokClosingBracket, lex.getTokType());
+    ASSERT_EQ(Lexer::TokEOF, lex.stepForward());
+
+    lex.appendExp("# hello");
+    ASSERT_EQ(Lexer::TokEOF, lex.stepForward());
+
+    lex.appendExp("# world\n"
+                          "5\n"
+                          "# hello\n"
+                          "6");
+    ASSERT_EQ(Lexer::TokNumber, lex.getTokType());
+    ASSERT_EQ(5, lex.getNum());
+    ASSERT_EQ(Lexer::TokNumber, lex.getTokType());
+    ASSERT_EQ(6, lex.getNum());
+    ASSERT_EQ(Lexer::TokEOF, lex.stepForward());
+}

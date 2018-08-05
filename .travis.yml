@@ -1,7 +1,6 @@
 # Based on https://github.com/ldionne/hana/blob/master/.travis.yml
 
 language: cpp
-sudo: true
 
 cache:
   directories:
@@ -16,14 +15,18 @@ matrix:
   include:
     - env: BUILD_TYPE=Debug
       os: osx
+      sudo: true
       osx_image: xcode8
       compiler: clang
     - env: BUILD_TYPE=Release
       os: osx
+      sudo: true
       osx_image: xcode8
       compiler: clang
     - env: CLANG_VERSION=3.6 BUILD_TYPE=Debug
       os: linux
+      dist: trusty
+      sudo: required
       addons: &clang36
         apt:
           packages:
@@ -34,9 +37,13 @@ matrix:
             - llvm-toolchain-precise-3.6
     - env: CLANG_VERSION=3.6 BUILD_TYPE=Release
       os: linux
+      dist: trusty
+      sudo: required
       addons: *clang36
     - env: CLANG_VERSION=3.7 BUILD_TYPE=Debug
       os: linux
+      dist: trusty
+      sudo: required
       addons: &clang37
         apt:
           packages:
@@ -47,9 +54,13 @@ matrix:
             - llvm-toolchain-precise-3.7
     - env: CLANG_VERSION=3.7 BUILD_TYPE=Release
       os: linux
+      dist: trusty
+      sudo: required
       addons: *clang37
     - env: CLANG_VERSION=3.8 BUILD_TYPE=Debug
       os: linux
+      dist: trusty
+      sudo: required
       addons: &clang38
         apt:
           packages:
@@ -60,28 +71,37 @@ matrix:
             - llvm-toolchain-precise-3.8
     - env: CLANG_VERSION=3.8 BUILD_TYPE=Release
       os: linux
+      dist: trusty
+      sudo: required
       addons: *clang38
     - env: GCC_VERSION=5 BUILD_TYPE=Debug
       os: linux
+      dist: trusty
+      sudo: required
       addons: &gcc5
         apt:
           packages: g++-5
           sources: *sources
     - env: GCC_VERSION=5 BUILD_TYPE=Release
       os: linux
+      dist: trusty
+      sudo: required
       addons: *gcc5
     - env: GCC_VERSION=6 BUILD_TYPE=Debug
       os: linux
+      dist: trusty
+      sudo: required
       addons: &gcc6
         apt:
           packages: g++-6
           sources: *sources
     - env: GCC_VERSION=6 BUILD_TYPE=Release
       os: linux
+      dist: trusty
+      sudo: required
       addons: *gcc6
 
 install:
-  - export DO_NOT_BUILD_GUI=true
   - if [[ -n "$CLANG_VERSION" ]]; then export CXX=clang++-$CLANG_VERSION CC=clang-$CLANG_VERSION; fi
   - if [[ -n "$GCC_VERSION" ]]; then export CXX=g++-$GCC_VERSION CC=gcc-$GCC_VERSION; fi
   - JOBS=2
@@ -119,15 +139,23 @@ install:
       if [[ -z "$(ls -A ${LLVM_ROOT}/install/include)" ]]; then
         mkdir -p "${LLVM_ROOT}" "${LLVM_ROOT}/build" "${LLVM_ROOT}/projects/libcxx" "${LLVM_ROOT}/projects/libcxxabi"
         travis_retry wget --quiet -O - "${LLVM_URL}" | tar --strip-components=1 -xJ -C "${LLVM_ROOT}"
-        travis_retry wget --quiet -O - "${LIBCXX_URL}" | tar --strip-components=1 -xJ -C "${LLVM_ROOT}/projects/libcxx"
-        travis_retry wget --quiet -O - "${LIBCXXABI_URL}" | tar --strip-components=1 -xJ -C "${LLVM_ROOT}/projects/libcxxabi"
         (cd "${LLVM_ROOT}/build" && cmake .. -DCMAKE_CXX_COMPILER="$CXX" -DCMAKE_C_COMPILER="$CC" -DCMAKE_INSTALL_PREFIX="${LLVM_ROOT}/install" -DCMAKE_BUILD_TYPE=$BUILD_TYPE)
-        (cd "${LLVM_ROOT}/build/projects/libcxx" && make install -j$JOBS)
-        (cd "${LLVM_ROOT}/build/projects/libcxxabi" && make install -j$JOBS)
       fi
-      export CXXFLAGS="-I ${LLVM_ROOT}/install/include/c++/v1"
-      export LDFLAGS="-L ${LLVM_ROOT}/install/lib -lc++ -lc++abi"
-      export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${LLVM_ROOT}/install/lib"
+    fi
+
+  ############################################################################
+  # Install a recent SFML
+  ############################################################################
+  - |
+    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+      wget http://www.sfml-dev.org/files/SFML-2.4.1-linux-gcc-64-bit.tar.gz
+      tar -xzvf SFML-2.4.1-linux-gcc-64-bit.tar.gz
+      bash "${TRAVIS_BUILD_DIR}"/DependencyInstall.sh
+      sudo cp -r SFML-2.4.1/lib/* /usr/lib/x86_64-linux-gnu/
+      sudo cp -r SFML-2.4.1/include/* /usr/include/x86_64-linux-gnu/
+      sudo ldconfig
+    else
+      brew install sfml
     fi
 
 before_script:
@@ -137,9 +165,17 @@ before_script:
 
 script:
   - cd Scheme
-  - ./../build/Interpreter/test/lexersTest
-  - ./../build/Interpreter/test/parserTest
-  - ./../build/GUI/test/TextTest
+  - ./../build/Interpreter/test/lexer/lexersTest
+  - ./../build/Interpreter/test/parser/parserTest
+  - ./../build/Interpreter/test/lisplib/lispLibTest
+  - |
+    if [[ $BUILD_TYPE == "Release" ]]; then
+    bash ../CLI/test/test.sh
+    fi
+  - |
+    if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
+      ./../build/GUI/test/GUITest
+    fi
 
 notifications:
   email: cui@hellolw.com

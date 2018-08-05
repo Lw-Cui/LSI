@@ -171,9 +171,8 @@ namespace ast {
     class LambdaAST : public ExprAST {
     public:
         LambdaAST(const std::vector<std::string> &v,
-                  std::shared_ptr<ExprAST> expr,
-                  const std::vector<std::shared_ptr<ExprAST>> &nested)
-                : formalArgs{v}, expression{expr}, nestedFunc{nested} {}
+                  std::vector<std::shared_ptr<ExprAST>> expr)
+                : formalArgs{v}, expression{expr} {}
 
         std::shared_ptr<ExprAST> apply(const std::vector<std::shared_ptr<ExprAST>> &actualArgs, Scope &) override;
 
@@ -185,8 +184,7 @@ namespace ast {
 
     private:
         std::vector<std::string> formalArgs;
-        std::shared_ptr<ExprAST> expression;
-        std::vector<std::shared_ptr<ExprAST>> nestedFunc;
+        std::vector<std::shared_ptr<ExprAST>> expression;
         mutable Scope context;
     };
 
@@ -244,9 +242,8 @@ namespace ast {
     public:
         LambdaBindingAST(const std::string &id,
                          const std::vector<std::string> &v,
-                         std::shared_ptr<ExprAST> expr,
-                         const std::vector<std::shared_ptr<ExprAST>> &nested) :
-                BindingAST(id), lambda{std::make_shared<LambdaAST>(v, expr, nested)} {}
+                         const std::vector<std::shared_ptr<ExprAST>> expr) :
+                BindingAST(id), lambda{std::make_shared<LambdaAST>(v, expr)} {}
 
         std::shared_ptr<ExprAST> eval(Scope &ss) const override;
 
@@ -265,6 +262,11 @@ namespace ast {
     private:
         std::shared_ptr<ExprAST> lambdaOrIdentifier;
         std::vector<std::shared_ptr<ExprAST>> actualArgs;
+    };
+
+    class BuiltinDrawAST : public ExprAST {
+    public:
+        BuiltinDrawAST() {}
     };
 
 }

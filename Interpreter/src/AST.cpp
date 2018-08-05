@@ -1,33 +1,32 @@
 #include <fstream>
 #include <sstream>
 #include <parser.h>
-#include <lexers.h>
-#include <AST.h>
+#include <exception.h>
 
 using namespace parser;
+using namespace exception;
 using namespace ast;
 
 std::shared_ptr<ExprAST> ExprAST::eval(Scope &) const {
     CLOG(DEBUG, "exception");
-    throw std::logic_error("Expression cannot be evaluated.");
+    throw RuntimeError("Expression cannot be evaluated.");
 };
 
 std::shared_ptr<ExprAST> ExprAST::apply(const std::vector<std::shared_ptr<ExprAST>> &, Scope &) {
     CLOG(DEBUG, "exception");
-    throw std::logic_error("Expression cannot be applied.");
+    throw RuntimeError("Expression cannot be applied.");
 }
 
 std::string ExprAST::display() const {
     CLOG(DEBUG, "exception");
-    throw std::logic_error("Expression cannot be displayed.");
+    throw RuntimeError("Expression cannot be displayed.");
 }
 
 std::shared_ptr<ExprAST> LoadingFileAST::eval(Scope &s) const {
     std::ifstream fin{filename};
     std::string str{std::istreambuf_iterator<char>(fin), std::istreambuf_iterator<char>()};
     lexers::Lexer lex{str};
-    parseAllExpr(lex)->eval(s);
-    return nullptr;
+    return parseAllExpr(lex)->eval(s);
 }
 
 std::shared_ptr<ExprAST> IfStatementAST::eval(Scope &ss) const {
@@ -50,7 +49,7 @@ std::shared_ptr<ExprAST> BuiltinLessThanAST::apply(const std::vector<std::shared
                     return np1->getValue() <= np2->getValue();
                 } else {
                     CLOG(DEBUG, "exception");
-                    throw std::logic_error("The operands in less than operator cannot be converted to number");
+                    throw NotNumber("The operands in less than operator cannot be converted to number");
                 }
             });
     if (res) return std::make_shared<BooleansTrueAST>();
@@ -71,8 +70,7 @@ std::shared_ptr<ExprAST> IdentifierAST::eval(Scope &ss) const {
     if (ss.count(getId())) {
         return ss[getId()];
     } else {
-        CLOG(DEBUG, "exception");
-        throw std::logic_error("Unbound identifier: " + getId());
+        throw UnboundIdentifier("Unbound identifier: " + getId());
     }
 }
 
@@ -97,13 +95,22 @@ std::shared_ptr<ExprAST> LambdaAST::apply(const std::vector<std::shared_ptr<Expr
     }
     if (actualArgs.size() == 1 && formalArgs.size() > 1 && formalArgs[1] == ".")
         tmp[formalArgs[2]] = std::make_shared<NilAST>()->eval(ss);
-    return expression->eval(tmp);
+
+    for (int i = 0; i < expression.size() - 1; i++)
+        // Don't eval sub-routine
+        if (!std::dynamic_pointer_cast<LambdaBindingAST>(expression[i])) expression[i]->eval(tmp);
+    return expression.back()->eval(tmp);
 }
 
 std::shared_ptr<ExprAST> LambdaAST::eval(Scope &ss) const {
     // Set closure.
     context = ss;
-    for (auto expr : nestedFunc) expr->eval(context);
+    // Set sub-routine closure.
+    for (auto expr: expression)
+        if (std::shared_ptr<LambdaBindingAST> ptr = std::dynamic_pointer_cast<LambdaBindingAST>(expr)) {
+            expr->eval(context);
+            LOG(DEBUG) << "Set closure of sub-routine: " << ptr->getIdentifier();
+        }
     return std::make_shared<LambdaAST>(*this);
 }
 
@@ -116,7 +123,7 @@ std::shared_ptr<ExprAST> BuiltinOppositeAST::apply(const std::vector<std::shared
         return std::make_shared<NumberAST>(-p->getValue());
     } else {
         CLOG(DEBUG, "exception");
-        throw std::logic_error("The operands cannot be converted to number");
+        throw NotNumber("The operands cannot be converted to number");
     }
 }
 
@@ -199,7 +206,7 @@ std::shared_ptr<ExprAST> BuiltinCarAST::apply(const std::vector<std::shared_ptr<
         return p->data.first;
     } else {
         CLOG(DEBUG, "exception");
-        throw std::logic_error("Cannot convert to pair");
+        throw NotPair("Cannot convert to pair");
     }
 }
 
@@ -208,7 +215,7 @@ std::shared_ptr<ExprAST> BuiltinCdrAST::apply(const std::vector<std::shared_ptr<
         return p->data.second;
     } else {
         CLOG(DEBUG, "exception");
-        throw std::logic_error("Cannot convert to pair");
+        throw NotPair("Cannot convert to pair");
     }
 }
 
@@ -217,7 +224,7 @@ std::shared_ptr<ExprAST> BuiltinConsAST::apply(const std::vector<std::shared_ptr
         return std::make_shared<PairAST>(actualArgs[0]->eval(s), actualArgs[1]->eval(s));
     } else {
         CLOG(DEBUG, "exception");
-        throw std::logic_error("Builtin cons error.");
+        throw NotPair("Builtin cons error.");
     }
 }
 
@@ -229,7 +236,7 @@ std::shared_ptr<ExprAST> BuiltinAddAST::apply(const std::vector<std::shared_ptr<
             num += p->getValue();
         } else {
             CLOG(DEBUG, "exception");
-            throw std::logic_error("The operands cannot be converted to number");
+            throw NotNumber("The operands cannot be converted to number");
         }
     }
     return std::make_shared<NumberAST>(num);
@@ -243,7 +250,7 @@ std::shared_ptr<ExprAST> BuiltinMultiplyAST::apply(const std::vector<std::shared
             num *= p->getValue();
         } else {
             CLOG(DEBUG, "exception");
-            throw std::logic_error("The operands cannot be converted to number");
+            throw NotNumber("The operands cannot be converted to number");
         }
     }
     return std::make_shared<NumberAST>(num);
@@ -255,7 +262,7 @@ BuiltinReciprocalAST::apply(const std::vector<std::shared_ptr<ExprAST>> &actualA
         return std::make_shared<NumberAST>(1 / p->getValue());
     } else {
         CLOG(DEBUG, "exception");
-        throw std::logic_error("The operands cannot be converted to number");
+        throw NotNumber("The operands cannot be converted to number");
     }
 }
 
@@ -274,7 +281,7 @@ std::shared_ptr<ExprAST> LetStatementAST::eval(Scope &s) const {
     Scope tmp = s;
     for (auto index = 0; index < identifier.size(); index++) {
         auto id = std::dynamic_pointer_cast<IdentifierAST>(identifier[index])->getId();
-        tmp[id] = value[index]->eval(tmp);
+        tmp[id] = value[index]->eval(s);
     }
     return expr->eval(tmp);
 }

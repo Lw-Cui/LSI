@@ -1,9 +1,11 @@
 #include <memory>
 #include <gtest/gtest.h>
+#include <exception.h>
 #include <parser.h>
 
 using namespace lexers;
 using namespace parser;
+using namespace exception;
 
 TEST(KeywordParsingTest, IdentifierDefinitionTest) {
     Scope ss;
@@ -20,7 +22,6 @@ TEST(KeywordParsingTest, IdentifierDefinitionTest) {
 
     lex.appendExp("(define a n)");
     exprPtr = parseExpr(lex)->eval(ss);
-
     ASSERT_TRUE(ss.count("a"));
 
     exprPtr = ss["a"]->eval(ss);
@@ -30,11 +31,10 @@ TEST(KeywordParsingTest, IdentifierDefinitionTest) {
     ASSERT_EQ(Lexer::TokEOF, lex.getTokType());
 }
 
-
 TEST(KeywordParsingTest, IfStatementTest) {
     Scope ss;
     lexers::Lexer lex;
-    lex.appendExp("(load \"Base.scm\")").appendExp("(if (+ 5 6) 5 6)");
+    lex.appendExp("(load \"setup.scm\")").appendExp("(if (+ 5 6) 5 6)");
     auto exprPtr = parseAllExpr(lex)->eval(ss);
     ASSERT_TRUE(std::dynamic_pointer_cast<NumberAST>(exprPtr));
     auto numPtr = std::dynamic_pointer_cast<NumberAST>(exprPtr);
@@ -58,7 +58,7 @@ TEST(KeywordParsingTest, IfStatementTest) {
 TEST(KeywordParsingTest, CondStatementTest) {
     Scope ss;
     lexers::Lexer lex;
-    lex.appendExp("(load \"Base.scm\")")
+    lex.appendExp("(load \"setup.scm\")")
             .appendExp("(cond ((= (+ 5 6) 0) 1)"
                                "       ((= (+ 5 (- 4)) 0) 2)"
                                "       (else 3))");
@@ -80,7 +80,7 @@ TEST(KeywordParsingTest, CondStatementTest) {
 TEST(KeywordParsingTest, LetStatementTest) {
     Scope ss;
     lexers::Lexer lex;
-    lex.appendExp("(load \"Base.scm\")")
+    lex.appendExp("(load \"setup.scm\")")
             .appendExp("(let((x 5)"
                                "      (y 6)"
                                "      (foo (lambda (x y) (+ x y))))"

@@ -1,3 +1,5 @@
+# Basic function set
+
 (define (and expr . args)
     (define (list-and l)
         (cond ((null? l) #t)
@@ -49,19 +51,27 @@
   (if (< a b) a (remainder (- a b) b)))
 
 (define (reverse l)
-    (define (reverse-iter l1 res)
-        (if (null? l1) res (reverse-iter (cdr l1) (cons (car l1) res))))
+    (define (reverse-iter li res)
+        (if (null? li) res (reverse-iter (cdr li) (cons (car li) res))))
     (reverse-iter l nil))
 
-(define (append l1 l2)
+(define (append l1 . more)
     (define (append-iter l1 l2)
         (if (null? l1) l2 (append-iter (cdr l1) (cons (car l1) l2))))
-    (append-iter (reverse l1) l2))
+  (define (append-list l1 more)
+    (if (null? more) l1
+        (append-list (append-iter (reverse l1) (car more)) (cdr more))))
+  (if (null? more) l1 (append-list l1 more)))
 
 (define (map seq op)
     (define (map-iter seq res)
-        (if (null? seq) res  (map-iter (cdr seq) (cons (op (car seq)) res))))
+        (if (null? seq) res (map-iter (cdr seq) (cons (op (car seq)) res))))
     (map-iter (reverse seq) nil))
+
+(define (length seq)
+    (define (length-iter seq n)
+        (if (null? seq) n (length-iter (cdr seq) (+ n 1))))
+    (length-iter seq 0))
 
 (define (abs x) ((if (< 0 x) + -) x))
 
@@ -69,6 +79,8 @@
     (define (reduce-iter seq res)
         (if (null? seq) res (reduce-iter (cdr seq) (op res (car seq)))))
     (reduce-iter seq init))
+
+(define (half x) (/ x 2))
 
 (define (square x) (* x x))
 
@@ -79,9 +91,11 @@
     (define (sqrt-iter guess) (if (close-enough? guess) guess (sqrt-iter (improve guess))))
     (sqrt-iter 1.0))
 
+# Y-combinator
 (define Y
     (lambda (fn)
     ((lambda (f)
         (f f)) (lambda (f)
             (fn (lambda (s) ((f f) s)))))))
 
+# end basic function set

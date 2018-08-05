@@ -1,9 +1,11 @@
 #include <memory>
 #include <fstream>
 #include <lexers.h>
+#include <exception.h>
 #include <parser.h>
 
 using namespace lexers;
+using namespace exception;
 using namespace parser;
 using namespace std;
 
@@ -29,8 +31,8 @@ shared_ptr<ExprAST> parser::parseLambdaApplicationExpr(lexers::Lexer &lex) {
 std::shared_ptr<ExprAST> parser::parseLambdaDefinitionExpr(lexers::Lexer &lex) {
     CLOG(DEBUG, "parser") << "Parse lambda Definition";
     if (lex.stepForward() != Lexer::TokOpeningBracket || lex.stepForward() != Lexer::TokIdentifier) {
-        CLOG(DEBUG, "exception") << lex.getTokType();
-        throw logic_error("Lambda definition error.");
+        CLOG(DEBUG, "exception");
+        throw UnsupportedSyntax("Lambda definition needs argument(s)");
     }
     vector<string> args;
     while (lex.getTokType() == Lexer::TokIdentifier) {
@@ -39,26 +41,22 @@ std::shared_ptr<ExprAST> parser::parseLambdaDefinitionExpr(lexers::Lexer &lex) {
 
     if (lex.getTokType() != Lexer::TokClosingBracket) {
         CLOG(DEBUG, "exception");
-        throw logic_error("Token cannot end lambda arguments parsing.");
+        throw MissBracket("Lambda definition need ) to end argument declaration");
     } else {
         lex.stepForward();
     }
 
-    std::vector<std::shared_ptr<ExprAST>> nestedFunc;
-    std::shared_ptr<ExprAST> expr;
-
-    while (true) {
-        expr = parseExpr(lex);
-        if (lex.getTokType() != Lexer::TokClosingBracket) nestedFunc.push_back(expr);
-        else break;
+    std::vector<std::shared_ptr<ExprAST>> expression;
+    while (lex.getTokType() != Lexer::TokClosingBracket) {
+        expression.push_back(parseExpr(lex));
     }
-    return make_shared<LambdaAST>(args, expr, nestedFunc);
+    return make_shared<LambdaAST>(args, expression);
 }
 
 shared_ptr<ExprAST> parser::parseFunctionDefinitionExpr(lexers::Lexer &lex) {
     if (lex.stepForward() != Lexer::TokIdentifier) {
         CLOG(DEBUG, "exception");
-        throw logic_error("Token isn't open brace during parsing function definition.");
+        throw UnsupportedSyntax("Function definition needs argument(s)");
     }
 
     auto identifier = lex.getIdentifier();
@@ -69,20 +67,15 @@ shared_ptr<ExprAST> parser::parseFunctionDefinitionExpr(lexers::Lexer &lex) {
 
     if (lex.getTokType() != Lexer::TokClosingBracket) {
         CLOG(DEBUG, "exception");
-        throw logic_error("Token cannot end arguments parsing.");
+        throw MissBracket("Function definition need ) to end argument declaration");
     } else {
         lex.stepForward();
     }
 
-    std::vector<std::shared_ptr<ExprAST>> nestedFunc;
-    std::shared_ptr<ExprAST> expr;
-
-    while (true) {
-        expr = parseExpr(lex);
-        if (lex.getTokType() != Lexer::TokClosingBracket) nestedFunc.push_back(expr);
-        else break;
+    std::vector<std::shared_ptr<ExprAST>> expression;
+    while (lex.getTokType() != Lexer::TokClosingBracket) {
+        expression.push_back(parseExpr(lex));
     }
-
-    return make_shared<LambdaBindingAST>(identifier, args, expr, nestedFunc);
+    return make_shared<LambdaBindingAST>(identifier, args, expression);
 }
 

@@ -1,13 +1,15 @@
 #include <stack>
 #include <string>
 #include <Controller.h>
-#include <GUIbuiltinAST.h>
+#include <GUIbuiltinDrawAST.h>
+#include <exception.h>
 
 using namespace std;
 using namespace sf;
 using namespace con;
 using namespace context;
 using namespace parser;
+using namespace exception;
 
 void Controller::appendChar(char c) {
     if (!toType.count(c))
@@ -72,6 +74,8 @@ con::Text Controller::evaluation() {
         }
     } catch (std::logic_error &e) {
         pushString(resultText.formatString, e.what());
+    } catch (RuntimeError &e) {
+        pushString(resultText.formatString, e.what());
     }
 
     return resultText;
@@ -86,7 +90,7 @@ void Controller::drawToWindows() {
     for (auto text: history) textWindow.draw(text);
 }
 
-void Controller::appendShape(const sf::VertexArray &va) {
+void Controller::appendShape(const con::VertexArray &va) {
     shapes.push_back(va);
 }
 
@@ -105,11 +109,11 @@ void con::Text::clearStr() {
     formatString.clearStr();
 }
 
-con::Controller::Controller(sf::RenderTarget &text, sf::RenderTarget &board)
+con::Controller::Controller(Window &text, Window &board)
         : textWindow{text}, drawingBoard{board} {
     lexers::Lexer lex;
-    scope.addBuiltinFunc("draw", std::make_shared<ast::BuiltinDrawAST>(*this));
-    lex.appendExp("(load \"Base.scm\")").appendExp("(load \"GUI.scm\")");
+    scope.addBuiltinFunc("#painter", std::make_shared<ast::GUIBuiltinDrawAST>(*this));
+    lex.appendExp("(load \"setup.scm\")");
     parser::parseAllExpr(lex)->eval(scope);
     pushString(currentText.formatString, "]=> ");
 }

@@ -2,9 +2,11 @@
 #include <fstream>
 #include <lexers.h>
 #include <parser.h>
+#include <exception.h>
 
 using namespace lexers;
 using namespace parser;
+using namespace exception;
 using namespace std;
 
 
@@ -16,17 +18,22 @@ shared_ptr<ExprAST> parser::parseDefinitionExpr(lexers::Lexer &lex) {
             return parseFunctionDefinitionExpr(lex);
         default:
             CLOG(DEBUG, "exception");
-            throw logic_error("Cannot parse definition.");
+            throw UnsupportedSyntax("Cannot parse definition: lexer return invalid type");
     }
 }
 
 std::shared_ptr<ExprAST> parser::parseIfStatementExpr(lexers::Lexer &lex) {
     CLOG(DEBUG, "parser") << "Parse If statement";
     lex.stepForward();
-    auto condition = parseExpr(lex);
-    auto trueClause = parseExpr(lex);
-    auto falseClause = parseExpr(lex);
-    return make_shared<IfStatementAST>(condition, trueClause, falseClause);
+    try {
+        auto condition = parseExpr(lex);
+        auto trueClause = parseExpr(lex);
+        auto falseClause = parseExpr(lex);
+        return make_shared<IfStatementAST>(condition, trueClause, falseClause);
+    } catch (RuntimeError &e) {
+        e.appendInfo("@ if statement");
+        throw;
+    }
 }
 
 std::shared_ptr<ExprAST> parser::parseTrueExpr(lexers::Lexer &lex) {

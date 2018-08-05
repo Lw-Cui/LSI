@@ -12,6 +12,14 @@ namespace context {
     class ScopeImpl {
     public:
         ScopeImpl() {
+            addAllBuiltinFunc();
+        }
+
+        void addBuiltinFunc(const std::string &name, const std::shared_ptr<ast::ExprAST> &expr) {
+            impl[name] = expr;
+        }
+
+        void addAllBuiltinFunc() {
             addBuiltinFunc("cons", make_shared<BuiltinConsAST>());
             addBuiltinFunc("car", make_shared<BuiltinCarAST>());
             addBuiltinFunc("cdr", make_shared<BuiltinCdrAST>());
@@ -25,16 +33,13 @@ namespace context {
             addBuiltinFunc("else", make_shared<BooleansTrueAST>());
         }
 
-        void addBuiltinFunc(const std::string &name, const std::shared_ptr<ast::ExprAST> &expr) {
-            impl[name] = expr;
-        }
-
         shared_ptr<parser::ExprAST> &operator[](const std::string &str) {
             return impl[str];
         }
 
         void clear() {
             impl.clear();
+            addAllBuiltinFunc();
         }
 
         size_t count(const std::string &str) const {

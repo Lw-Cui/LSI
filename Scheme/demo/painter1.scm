@@ -1,0 +1,5 @@
+(define flip-painter (flip-vert st-painter))
+((shrink-to-upper-right (shrink-to-upper-right flip-painter)) default)
+((shrink-to-upper-right (shrink-to-upper-left flip-painter)) default)
+((shrink-to-upper-left (shrink-to-upper-right flip-painter)) default)
+((shrink-to-upper-left (shrink-to-upper-left flip-painter)) default)
