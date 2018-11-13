@@ -4,7 +4,7 @@
 
 **L**iwei's **S**cheme **I**nterpreter — A Scheme interpreter with geometric figure generation.
 
-View [demo video](https://www.dropbox.com/s/fche4xurlhohbcf/LSI.mp4?dl=0) & [presentation(In Chinese)](https://www.dropbox.com/s/84d3bo0gav6qthv/%E6%AF%95%E4%B8%9A%E8%AE%BE%E8%AE%A1%E7%AD%94%E8%BE%A9.pptx?dl=0) now!
+View [demo video](https://www.dropbox.com/s/fche4xurlhohbcf/LSI.mp4?dl=0) & [presentation(In Chinese)](https://www.dropbox.com/s/2umy1elpohjria9/%E6%AF%95%E4%B8%9A%E8%AE%BE%E8%AE%A1%E7%AD%94%E8%BE%A9.pptx?dl=0) now!
 
 ## Feature
 
